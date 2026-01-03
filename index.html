@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>WilliamBot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="dark light" />
+  <title>WilliamBot</title>
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#0b0a08" />
+  <meta name="theme-color" content="#0B0A08" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WilliamBot" />
@@ -16,1222 +15,944 @@
   <style>
     :root{
       --bg:#0b0a08;
-      --panel:#14110d;
-      --panel2:#181510;
+      --bg2:#0f0d0a;
       --cream:#f3efe6;
-      --ink:#1b1813;
-      --muted:#8b8276;
-      --border:rgba(243,239,230,.12);
-      --border2:rgba(0,0,0,.10);
-      --accent:#7a1114;
-      --accent2:#b01c22;
-      --ok:#1c7a3d;
-      --warn:#b86a00;
-      --radius:18px;
-      --radius2:14px;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --font:-apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial;
-      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --ink:#15120d;
+      --muted:rgba(243,239,230,.68);
+      --border:rgba(243,239,230,.14);
+      --glass:rgba(15,13,10,.55);
+      --glass2:rgba(15,13,10,.40);
+      --red:#7a1114;
+      --green:#15803d;
+      --amber:#b45309;
+
+      --r:18px;
+      --r2:14px;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --shadow2:0 10px 30px rgba(0,0,0,.28);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
+      margin:0;
       font-family:var(--font);
-      background:linear-gradient(180deg,#0b0a08,#12100c);
+      background:
+        radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
+        radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
       color:var(--cream);
-      overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
 
-    /* Layout */
-    .app{
+    .wrap{
       height:100%;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+      display:flex;
+      justify-content:center;
+    }
+    .app{
+      width:100%;
+      max-width: 1280px;
+      height: 100%;
       display:grid;
-      grid-template-columns:300px 1fr 360px;
-      grid-template-rows:auto auto 1fr auto;
-      gap:12px;
-      padding:12px;
+      grid-template-columns: 300px 1fr 360px;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      min-width: 0;
     }
 
     header{
-      grid-column:1 / -1;
-      background:var(--panel);
-      border-radius:var(--radius);
-      padding:12px 14px;
-      border:1px solid var(--border);
+      grid-column: 1 / -1;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: var(--r);
+      box-shadow: var(--shadow2);
+      padding: 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      box-shadow:var(--shadow);
+      gap: 12px;
+      min-width: 0;
     }
 
-    .brand{display:flex;align-items:center;gap:10px;min-width:200px}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
     .logo{
-      width:38px;height:38px;border-radius:12px;background:var(--accent);
-      display:grid;place-items:center;font-weight:900;letter-spacing:.5px;
-      box-shadow:0 8px 18px rgba(122,17,20,.35);
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
       user-select:none;
-    }
-    .brand strong{font-size:16px}
-    .brand .sub{font-size:12px;opacity:.7;margin-top:2px}
-
-    .hdrRight{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;
-    }
-
-    .pill{
-      font-size:12px;
-      padding:7px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--border);
-      display:flex;align-items:center;gap:8px;
-      user-select:none;
-      max-width:100%;
-    }
-    .dot{width:8px;height:8px;border-radius:99px;background:var(--warn)}
-    .dot.ok{background:var(--ok)}
-    .pill code{
-      font-family:var(--mono);
-      font-size:11px;
-      opacity:.9;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width:220px;
-      display:inline-block;
-      vertical-align:middle;
-    }
-
-    .btn{
-      border-radius:14px;
-      padding:10px 12px;
-      font-weight:800;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.06);
-      color:var(--cream);
-      cursor:pointer;
-      user-select:none;
-    }
-    .btn.primary{
-      background:var(--accent);
-      border-color:rgba(255,255,255,.12);
-    }
-    .btn:active{transform:translateY(1px)}
-
-    /* Tabs row */
-    .tabs{
-      grid-column:1 / -1;
-      display:flex;
-      gap:10px;
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:8px;
-      align-items:center;
-      box-shadow:var(--shadow);
-    }
-    .tab{
-      flex:0 0 auto;
-      border-radius:14px;
-      padding:10px 12px;
       font-weight:900;
-      font-size:13px;
-      border:1px solid transparent;
-      background:transparent;
-      color:rgba(243,239,230,.85);
-      cursor:pointer;
+      letter-spacing:.4px;
+      color: var(--cream);
+      border: 1px solid rgba(243,239,230,.16);
+      background:
+        radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
+        linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
+      box-shadow: 0 10px 22px rgba(122,17,20,.18);
     }
-    .tab.active{
-      background:rgba(122,17,20,.22);
-      border-color:rgba(122,17,20,.45);
-      color:var(--cream);
-    }
-    .tabs .spacer{flex:1}
-    .select{
-      height:40px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.04);
-      color:var(--cream);
-      padding:0 12px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    /* Left panel */
-    aside{
-      background:var(--panel);
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-      padding:12px;
-      overflow:auto;
-      box-shadow:var(--shadow);
-    }
-
-    .panelTitle{
-      font-size:12px;
-      opacity:.75;
-      margin-bottom:10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .session{
-      padding:11px 10px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      margin-bottom:10px;
-      cursor:pointer;
-      user-select:none;
-      transition:background .15s ease, border-color .15s ease, transform .05s ease;
-    }
-    .session:hover{background:rgba(255,255,255,.055)}
-    .session:active{transform:translateY(1px)}
-    .session.active{
-      background:rgba(122,17,20,.22);
-      border-color:rgba(122,17,20,.55);
-    }
-    .session .title{font-weight:900;font-size:13px;margin-bottom:4px}
-    .session .desc{font-size:12px;opacity:.75;line-height:1.3}
-
-    .smallRow{
-      display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0;
-    }
-
-    /* Center panel (chat) */
-    main{
-      background:linear-gradient(180deg,#f5f1e9,#efe9dd);
-      color:var(--ink);
-      border-radius:var(--radius);
+    .brandText{
       display:flex;
       flex-direction:column;
-      overflow:hidden;
-      border:1px solid var(--border2);
-      box-shadow:var(--shadow);
-      min-width:0;
+      line-height: 1.06;
+      min-width: 0;
+    }
+    .brandText strong{
+      font-size: 15.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brandText span{
+      font-size: 12px;
+      color: rgba(243,239,230,.68);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .feed{
-      flex:1;
-      padding:16px;
-      overflow:auto;
-    }
-
-    .msg{
-      max-width:78%;
-      margin-bottom:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      font-size:14.5px;
-      line-height:1.45;
-      word-break:break-word;
-      white-space:pre-wrap;
-    }
-    .msg.bot{
-      background:white;
-      border:1px solid rgba(0,0,0,.08);
-    }
-    .msg.you{
-      background:rgba(122,17,20,.08);
-      border-left:4px solid var(--accent);
-      margin-left:auto;
-    }
-
-    .meta{
-      font-size:11px;
-      opacity:.6;
-      margin-top:6px;
+    .statusRow{
       display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .badge{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--glass2);
+      color: rgba(243,239,230,.80);
+      font-size: 12px;
+      user-select:none;
+      cursor: default;
+      white-space: nowrap;
+      max-width: 420px;
+    }
+    .badge .label{
+      color: rgba(243,239,230,.62);
+      font-weight: 650;
+    }
+    .dot{
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 0 4px rgba(180,83,9,.14);
+      flex: 0 0 auto;
+    }
+    .dot.ok{ background: var(--green); box-shadow: 0 0 0 4px rgba(21,128,61,.14); }
+    .dot.bad{ background: #b91c1c; box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
+
+    .ghostBtn{
+      border: 1px solid var(--border);
+      background: rgba(15,13,10,.40);
+      color: rgba(243,239,230,.88);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 740;
+      font-size: 13px;
+      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .ghostBtn:active{ transform: translateY(1px); }
+    .ghostBtn:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(15,13,10,.55);
+    }
+
+    .panel{
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+      min-width: 0;
+    }
+    .panelHeader{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .panelHeader strong{
+      font-size: 13px;
+      letter-spacing: .2px;
+      color: rgba(243,239,230,.92);
+    }
+    .panelHeader span{
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
+    }
+    .panelBody{
+      padding: 10px;
+      overflow:auto;
+      min-height: 0;
+    }
+
+    /* Sessions list */
+    .groupTitle{
+      font-size: 11px;
+      color: rgba(243,239,230,.65);
+      letter-spacing: .18px;
+      margin: 8px 0 6px;
+      text-transform: uppercase;
+    }
+    .sessionItem{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      border-radius: 14px;
+      padding: 10px;
+      cursor:pointer;
+      transition: border-color .12s ease, background .12s ease;
+      margin-bottom: 8px;
+    }
+    .sessionItem:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(15,13,10,.48);
+    }
+    .sessionItem.active{
+      border-color: rgba(122,17,20,.35);
+      background: rgba(122,17,20,.14);
+    }
+    .sessionTop{
+      display:flex;
+      justify-content:space-between;
       gap:10px;
-      flex-wrap:wrap;
       align-items:center;
     }
-    .tag{
-      padding:4px 8px;
-      border-radius:999px;
-      background:rgba(0,0,0,.06);
-      border:1px solid rgba(0,0,0,.08);
-      font-size:11px;
+    .sessionName{
+      font-weight: 820;
+      font-size: 13px;
+      color: rgba(243,239,230,.92);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width:0;
+    }
+    .pill{
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      color: rgba(243,239,230,.74);
+      background: rgba(15,13,10,.35);
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .sessionNote{
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
+      line-height: 1.25;
+    }
+
+    /* Chat */
+    .chat{
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+      background:
+        radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+      min-width: 0;
+    }
+    .feed{
+      flex:1;
+      overflow:auto;
+      padding: 14px 12px;
+      background:
+        radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
+      min-height: 0;
+    }
+    .row{ display:flex; margin: 10px 0; gap: 10px; }
+    .row.you{ justify-content:flex-end; }
+    .row.bot{ justify-content:flex-start; }
+
+    .bubbleWrap{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      max-width: min(92ch, 96%);
+      min-width: 0;
+    }
+    .bubble{
+      padding: 12px 12px;
+      border-radius: var(--r2);
+      border: 1px solid rgba(21,18,13,.14);
+      background: rgba(243,239,230,.92);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.42;
+      font-size: 14.6px;
+      position: relative;
+      min-width: 0;
+    }
+    .you .bubble{
+      border-color: rgba(122,17,20,.25);
+      box-shadow:
+        0 10px 24px rgba(122,17,20,.10),
+        0 0 0 1px rgba(122,17,20,.08) inset;
+      padding-left: 14px;
+    }
+    .you .bubble:before{
+      content:"";
+      position:absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
+      opacity:.9;
+    }
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 11px;
+      color: rgba(21,18,13,.62);
+      padding: 0 2px;
+      align-items:center;
     }
 
     .composer{
+      padding: 12px;
+      border-top: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.45);
       display:flex;
-      gap:10px;
-      padding:12px;
-      border-top:1px solid rgba(0,0,0,.08);
-      background:rgba(255,255,255,.62);
+      gap: 10px;
       align-items:flex-end;
     }
-
     textarea{
       flex:1;
       resize:none;
-      border-radius:14px;
-      border:1px solid rgba(0,0,0,.12);
-      padding:12px;
-      font-size:14px;
-      font-family:inherit;
-      min-height:44px;
-      max-height:140px;
+      min-height: 48px;
+      max-height: 180px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(243,239,230,.16);
+      background: rgba(11,10,8,.55);
+      color: rgba(243,239,230,.92);
+      font-size: 14.6px;
       outline:none;
     }
-
-    .sendBtn{
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:900;
-      background:var(--accent);
-      color:white;
-      border:none;
-      cursor:pointer;
-      height:44px;
+    textarea::placeholder{ color: rgba(243,239,230,.55); }
+    textarea:focus{
+      border-color: rgba(122,17,20,.40);
+      box-shadow: 0 0 0 5px rgba(122,17,20,.16);
+    }
+    .send{
+      min-width: 96px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(122,17,20,.45);
+      background: linear-gradient(180deg, rgba(122,17,20,.32), rgba(122,17,20,.18));
+      color: rgba(243,239,230,.95);
+      font-weight: 820;
+      cursor: pointer;
+      box-shadow: 0 10px 26px rgba(122,17,20,.16);
+      transition: transform .06s ease, filter .12s ease;
+    }
+    .send:hover{ filter: brightness(1.06); }
+    .send:active{ transform: translateY(1px); }
+    .send:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
-    /* Right panel (context) */
-    .contextPanel{background:var(--panel)}
-    .context{
-      font-size:13px;
-      line-height:1.4;
+    /* Context */
+    .section{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 10px;
     }
-    .contextBlock{
-      background:rgba(255,255,255,.04);
-      border-radius:14px;
-      padding:12px;
-      margin-bottom:10px;
-      border:1px solid rgba(255,255,255,.06);
-    }
-    .contextBlock strong{display:block;margin-bottom:6px}
-    .contextBlock ul{margin:8px 0 0 18px;padding:0}
-    .contextBlock li{margin:6px 0}
-    .contextBlock code{font-family:var(--mono);font-size:12px}
-
-    /* Modal */
-    .modalWrap{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;
+    .sectionTitle{
+      display:flex;
       align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:9999;
-    }
-    .modal{
-      width:min(720px,100%);
-      background:var(--panel2);
-      border:1px solid var(--border);
-      border-radius:22px;
-      box-shadow:0 20px 60px rgba(0,0,0,.6);
-      overflow:hidden;
-    }
-    .modalHead{
-      padding:14px 16px;
-      border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .modalHead strong{font-size:14px}
-    .modalBody{padding:14px 16px}
-    .row{
-      display:grid;
-      grid-template-columns:160px 1fr;
+      justify-content:space-between;
       gap:10px;
-      align-items:center;
-      margin-bottom:10px;
+      margin-bottom: 8px;
     }
-    .row label{font-size:12px;opacity:.8}
-    .input{
-      width:100%;
-      height:40px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:var(--cream);
-      padding:0 12px;
-      font-weight:800;
-      outline:none;
-      font-family:inherit;
+    .sectionTitle strong{
+      font-size: 12.5px;
+      color: rgba(243,239,230,.90);
+      letter-spacing: .2px;
     }
-    .toggle{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    .sectionTitle span{
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
     }
-    .toggle input{transform:scale(1.15)}
-    .modalFoot{
-      padding:14px 16px;
-      border-top:1px solid var(--border);
-      display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;
+    .kv{
+      font-size: 12px;
+      color: rgba(243,239,230,.82);
+      line-height: 1.45;
     }
-    .hint{
-      font-size:12px;
-      opacity:.8;
-      line-height:1.35;
-      margin:8px 0 0;
-    }
+    .kv .muted{ color: rgba(243,239,230,.62); }
 
-    /* Error overlay (prevents white screen mystery) */
-    .fatal{
-      position:fixed;inset:0;
-      background:radial-gradient(800px 500px at 20% 10%, rgba(176,28,34,.25), transparent 65%),
-                 rgba(0,0,0,.85);
-      color:var(--cream);
-      z-index:10000;
+    /* Mobile drawers */
+    .drawerBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
       display:none;
-      padding:18px;
-      overflow:auto;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      z-index: 998;
     }
-    .fatalCard{
-      max-width:980px;
-      margin:0 auto;
-      background:rgba(20,17,13,.92);
-      border:1px solid rgba(243,239,230,.18);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:0 25px 70px rgba(0,0,0,.7);
+    .drawer{
+      width: min(820px, 100%);
+      max-height: 86vh;
+      border-radius: 22px;
+      border: 1px solid rgba(243,239,230,.18);
+      background: rgba(15,13,10,.86);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
     }
-    .fatal h2{margin:0 0 10px;font-size:18px}
-    .fatal pre{
-      margin:12px 0 0;
-      background:rgba(0,0,0,.35);
-      border:1px solid rgba(243,239,230,.12);
-      border-radius:14px;
-      padding:12px;
-      font-family:var(--mono);
-      font-size:12px;
+    .drawerGrip{
+      height: 20px;
+      display:grid;
+      place-items:center;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+    }
+    .gripBar{
+      width: 56px; height: 6px;
+      border-radius: 999px;
+      background: rgba(243,239,230,.18);
+    }
+    .drawerHdr{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .drawerHdr strong{ font-size: 13px; color: rgba(243,239,230,.92); }
+    .drawerHdr span{ font-size: 12px; color: rgba(243,239,230,.62); }
+    .drawerBody{
+      padding: 12px;
       overflow:auto;
-      white-space:pre-wrap;
+      min-height: 0;
     }
 
-    /* Responsive */
-    @media (max-width:1200px){
-      .app{grid-template-columns:280px 1fr}
-      .contextPanel{display:none}
+    @media (max-width: 1080px){
+      .app{ grid-template-columns: 300px 1fr; }
+      #contextPanel{ display:none; }
     }
-    @media (max-width:820px){
-      .app{grid-template-columns:1fr}
-      aside{display:none}
-      .tabs{position:sticky;top:12px;z-index:10}
-      body{overflow:auto}
-      .app{height:auto;min-height:100%}
-      main{min-height:70vh}
+    @media (max-width: 760px){
+      .app{ grid-template-columns: 1fr; }
+      #leftPanel{ display:none; }
     }
   </style>
 </head>
 
 <body>
-  <div class="fatal" id="fatal">
-    <div class="fatalCard">
-      <h2>WilliamBot hit a front-end error (no silent white screen).</h2>
-      <div style="opacity:.85;font-size:13px;line-height:1.45">
-        Screenshot this and send it to me. This is the exact reason it failed.
-      </div>
-      <pre id="fatalText"></pre>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
-        <button class="btn" id="fatalReload">Reload</button>
-      </div>
+  <div class="wrap">
+    <div class="app">
+
+      <header>
+        <div class="brand">
+          <div class="logo">W</div>
+          <div class="brandText">
+            <strong>WilliamBot</strong>
+            <span id="topSub">Session: —</span>
+          </div>
+        </div>
+
+        <div class="statusRow">
+          <div class="badge" title="Backend status">
+            <span id="backendDot" class="dot bad"></span>
+            <span class="label">Engine</span>
+            <span id="backendText">UI-only</span>
+          </div>
+
+          <div class="badge" title="Storage is local (per session)">
+            <span class="dot ok"></span>
+            <span class="label">State</span>
+            <span>Saved per session</span>
+          </div>
+
+          <button class="ghostBtn" id="sessionsBtn">Sessions</button>
+          <button class="ghostBtn" id="contextBtn">Context</button>
+        </div>
+      </header>
+
+      <!-- LEFT: Sessions (desktop/tablet) -->
+      <aside class="panel" id="leftPanel">
+        <div class="panelHeader">
+          <div>
+            <strong>Sessions</strong>
+            <div><span id="sessionCount">0</span><span> total</span></div>
+          </div>
+          <span id="activeSessionLabel">Active: —</span>
+        </div>
+        <div class="panelBody" id="sessionList"></div>
+      </aside>
+
+      <!-- CENTER: Chat -->
+      <main class="chat">
+        <div class="feed" id="feed"></div>
+        <div class="composer">
+          <textarea id="input" placeholder="Send a message… (Enter to send, Shift+Enter new line)"></textarea>
+          <button class="send" id="sendBtn" disabled>Send</button>
+        </div>
+      </main>
+
+      <!-- RIGHT: Context (desktop only) -->
+      <aside class="panel" id="contextPanel">
+        <div class="panelHeader">
+          <div>
+            <strong>Context</strong>
+            <div><span>Session-scoped</span></div>
+          </div>
+          <span id="ctxHint">—</span>
+        </div>
+        <div class="panelBody" id="contextContentDesktop"></div>
+      </aside>
+
     </div>
   </div>
 
-  <div class="modalWrap" id="settingsWrap" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
-      <div class="modalHead">
-        <strong>Settings</strong>
-        <button class="btn" id="closeSettings">Close</button>
-      </div>
-      <div class="modalBody">
-        <div class="row">
-          <label for="backendUrl">Backend Base URL</label>
-          <input class="input" id="backendUrl" placeholder="http://127.0.0.1:8000" />
-        </div>
-        <div class="row">
-          <label for="modelSelect">Default Model</label>
-          <select class="input" id="modelSelect">
-            <option value="32B">32B (default workhorse)</option>
-            <option value="70B">70B (higher quality)</option>
-            <option value="120B">120B (max quality)</option>
-          </select>
-        </div>
-        <div class="row">
-          <label>Use Backend</label>
-          <div class="toggle">
-            <input type="checkbox" id="useBackend" />
-            <span style="font-size:12px;opacity:.85">If off, UI-only simulation replies.</span>
-          </div>
-        </div>
-        <div class="row">
-          <label>Data</label>
-          <div class="toggle">
-            <button class="btn" id="exportData">Export chats</button>
-            <button class="btn" id="clearData">Clear all</button>
-          </div>
-        </div>
-        <div class="hint">
-          Backend will eventually expose endpoints like <code>/health</code>, <code>/chat</code>, <code>/rag/upload</code>.
-          Until then, this UI will never crash silently.
-        </div>
-      </div>
-      <div class="modalFoot">
-        <button class="btn primary" id="saveSettings">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="app" id="appRoot">
-    <header>
-      <div class="brand">
-        <div class="logo">W</div>
+  <!-- MOBILE: Sessions Drawer -->
+  <div class="drawerBack" id="sessionsDrawerBack" aria-hidden="true">
+    <div class="drawer">
+      <div class="drawerGrip"><div class="gripBar"></div></div>
+      <div class="drawerHdr">
         <div>
-          <strong>WilliamBot</strong>
-          <div class="sub" id="hdrSub">Business • Pricing & Margins</div>
+          <strong>Sessions</strong><br/>
+          <span>Tap a session to switch (old ones stay here).</span>
         </div>
+        <button class="ghostBtn" id="sessionsDrawerClose">Close</button>
       </div>
-
-      <div class="hdrRight">
-        <div class="pill" title="Backend status">
-          <span class="dot" id="statusDot"></span>
-          <span id="statusText">UI-only</span>
-          <span style="opacity:.7">•</span>
-          <code id="statusUrl">no backend</code>
-        </div>
-        <div class="pill" title="Active model">
-          <span style="opacity:.85">Model</span>
-          <code id="hdrModel">32B</code>
-        </div>
-        <button class="btn" id="openSettings">Settings</button>
-      </div>
-    </header>
-
-    <div class="tabs">
-      <button class="tab active" id="tabBusiness">Business</button>
-      <button class="tab" id="tabSchool">School</button>
-      <div class="spacer"></div>
-      <select class="select" id="modeSelect" title="Response mode">
-        <option value="ask">Ask</option>
-        <option value="calculate">Calculate</option>
-        <option value="draft">Draft</option>
-        <option value="plan">Plan</option>
-      </select>
-      <button class="btn" id="newSession">New session</button>
+      <div class="drawerBody" id="sessionListMobile"></div>
     </div>
+  </div>
 
-    <aside id="leftPanel">
-      <div class="panelTitle">
-        <span id="sessionsTitle">Sessions</span>
-        <span style="opacity:.6;font-size:11px" id="sessionsCount">0</span>
-      </div>
-      <div id="sessionsList"></div>
-
-      <div class="panelTitle" style="margin-top:10px">Quick actions</div>
-      <div class="smallRow">
-        <button class="btn" id="pinSyllabus">Pin syllabus facts</button>
-        <button class="btn" id="pinBusiness">Pin business assumptions</button>
-        <button class="btn" id="downloadJson">Download state</button>
-      </div>
-
-      <div class="panelTitle" style="margin-top:12px">Docs (UI-only placeholder)</div>
-      <div class="contextBlock">
-        <div style="font-size:12px;opacity:.8;margin-bottom:8px">
-          Later this becomes RAG upload. For now it just tracks filenames in your browser.
+  <!-- MOBILE: Context Drawer -->
+  <div class="drawerBack" id="contextDrawerBack" aria-hidden="true">
+    <div class="drawer">
+      <div class="drawerGrip"><div class="gripBar"></div></div>
+      <div class="drawerHdr">
+        <div>
+          <strong>Context</strong><br/>
+          <span>Session-scoped working state.</span>
         </div>
-        <input type="file" id="docPicker" multiple />
-        <div id="docList" style="margin-top:10px;font-size:12px;opacity:.85"></div>
+        <button class="ghostBtn" id="contextDrawerClose">Close</button>
       </div>
-    </aside>
-
-    <main>
-      <div class="feed" id="feed"></div>
-
-      <div class="composer">
-        <textarea id="input" placeholder="Ask, calculate, draft, plan…"></textarea>
-        <button class="sendBtn" id="send">Send</button>
-      </div>
-    </main>
-
-    <aside class="contextPanel" id="rightPanel">
-      <div class="panelTitle">Context</div>
-      <div class="context" id="contextArea"></div>
-    </aside>
+      <div class="drawerBody" id="contextContentMobile"></div>
+    </div>
   </div>
 
   <script>
-    (function () {
-      "use strict";
+    // ====== STORAGE KEYS ======
+    const STORE = {
+      sessions: "wb_sessions_v3",
+      activeSession: "wb_active_session_v3",
+      historyPrefix: "wb_history_v3_"
+    };
 
-      // --- Crash guard (kills silent white screens) ---
-      const fatal = document.getElementById("fatal");
-      const fatalText = document.getElementById("fatalText");
-      const fatalReload = document.getElementById("fatalReload");
+    const $ = (id) => document.getElementById(id);
 
-      function showFatal(errLike) {
-        try {
-          const msg = (errLike && (errLike.stack || errLike.message)) ? (errLike.stack || errLike.message) : String(errLike);
-          fatalText.textContent = msg;
-          fatal.style.display = "block";
-        } catch (e) {
-          // last resort
-          alert("Fatal error. Check console.");
-        }
+    const feed = $("feed");
+    const input = $("input");
+    const sendBtn = $("sendBtn");
+
+    const sessionsBtn = $("sessionsBtn");
+    const contextBtn = $("contextBtn");
+
+    const sessionList = $("sessionList");
+    const sessionListMobile = $("sessionListMobile");
+    const sessionCount = $("sessionCount");
+    const activeSessionLabel = $("activeSessionLabel");
+
+    const topSub = $("topSub");
+    const ctxHint = $("ctxHint");
+
+    const contextPanel = $("contextPanel");
+    const contextContentDesktop = $("contextContentDesktop");
+    const contextContentMobile = $("contextContentMobile");
+
+    const sessionsDrawerBack = $("sessionsDrawerBack");
+    const sessionsDrawerClose = $("sessionsDrawerClose");
+    const contextDrawerBack = $("contextDrawerBack");
+    const contextDrawerClose = $("contextDrawerClose");
+
+    // ====== UTILS ======
+    function nowTime(){
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    }
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+    }
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+    }
+    function historyKey(sessionId){ return STORE.historyPrefix + sessionId; }
+    function isMobileLayout(){ return window.matchMedia("(max-width: 760px)").matches; }
+
+    // ====== SESSIONS MODEL ======
+    const DEFAULT_SESSIONS = [
+      // Business
+      { id:"biz_pricing", group:"Business", title:"Pricing & Margins", note:"MSRP, fees, profit targets" },
+      { id:"biz_formulation", group:"Business", title:"Formulation", note:"Constraints, batches, stability" },
+      { id:"biz_amazon", group:"Business", title:"Amazon Ops", note:"Listings, compliance, reviews" },
+
+      // School
+      { id:"school_math107", group:"School", title:"MATH 107 — College Algebra", note:"UMGC • Spring 2026" },
+      { id:"school_hist125", group:"School", title:"HIST 125 — Technological Transformations", note:"UMGC • Spring 2026" }
+    ];
+
+    function loadSessions(){
+      try{
+        const raw = localStorage.getItem(STORE.sessions);
+        const data = raw ? JSON.parse(raw) : null;
+        if(Array.isArray(data) && data.length) return data;
+      } catch {}
+      // first run
+      const seeded = DEFAULT_SESSIONS.map(s => ({...s, updated: nowStamp()}));
+      localStorage.setItem(STORE.sessions, JSON.stringify(seeded));
+      return seeded;
+    }
+    function saveSessions(list){
+      localStorage.setItem(STORE.sessions, JSON.stringify(list));
+    }
+
+    function getActiveSessionId(){
+      const v = localStorage.getItem(STORE.activeSession);
+      return v || "biz_pricing";
+    }
+    function setActiveSessionId(id){
+      localStorage.setItem(STORE.activeSession, id);
+    }
+
+    function loadHistory(sessionId){
+      try{
+        const raw = localStorage.getItem(historyKey(sessionId));
+        if(!raw) return [];
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data : [];
+      } catch { return []; }
+    }
+    function saveHistory(sessionId, hist){
+      localStorage.setItem(historyKey(sessionId), JSON.stringify(hist.slice(-400)));
+    }
+
+    let sessions = loadSessions();
+    let activeSessionId = getActiveSessionId();
+    let history = loadHistory(activeSessionId);
+
+    // ====== RENDER: SESSIONS LIST ======
+    function renderSessions(targetEl){
+      const groups = {};
+      for(const s of sessions){
+        groups[s.group] = groups[s.group] || [];
+        groups[s.group].push(s);
       }
 
-      window.addEventListener("error", (e) => showFatal(e.error || e.message || e));
-      window.addEventListener("unhandledrejection", (e) => showFatal(e.reason || e));
+      targetEl.innerHTML = "";
+      const order = ["Business","School"];
+      const keys = order.filter(k => groups[k]).concat(Object.keys(groups).filter(k => !order.includes(k)));
 
-      fatalReload.addEventListener("click", () => location.reload());
+      for(const g of keys){
+        const gt = document.createElement("div");
+        gt.className = "groupTitle";
+        gt.textContent = g;
+        targetEl.appendChild(gt);
 
-      // --- Utilities ---
-      const $ = (id) => document.getElementById(id);
-
-      function nowIso() { return new Date().toISOString(); }
-      function safeJsonParse(s, fallback) {
-        try { return JSON.parse(s); } catch { return fallback; }
-      }
-
-      // --- State (localStorage) ---
-      const LS_KEY = "williambot_state_v2";
-
-      const DEFAULT_STATE = {
-        activeTab: "business",                 // business | school
-        activeSessionId: null,
-        settings: {
-          backendUrl: "",
-          useBackend: false,
-          model: "32B",
-        },
-        docs: [],                               // {name, size, type, addedAt}
-        sessions: [
-          // Business
-          { id: "biz_pricing", tab: "business", title: "Pricing & Margins", desc: "Margins, pricing, bundles, channel math", createdAt: nowIso(), messages: [] },
-          { id: "biz_formulation", tab: "business", title: "Formulation", desc: "Batches, specs, ingredients, stability", createdAt: nowIso(), messages: [] },
-          { id: "biz_amazon", tab: "business", title: "Amazon Ops", desc: "Listings, compliance, reviews, logistics", createdAt: nowIso(), messages: [] },
-
-          // School
-          { id: "sch_math107", tab: "school", title: "MATH 107", desc: "College Algebra (01/07/2026–03/03/2026)", createdAt: nowIso(), messages: [] },
-          { id: "sch_hist125", tab: "school", title: "HIST 125", desc: "Technological Transformations (01/07/2026–03/03/2026)", createdAt: nowIso(), messages: [] },
-          { id: "sch_hub", tab: "school", title: "Study Hub", desc: "Notes, planning, reading summaries, drafts", createdAt: nowIso(), messages: [] },
-
-          // Shared
-          { id: "shared_inbox", tab: "business", title: "Inbox", desc: "Quick dumps (auto-routed later)", createdAt: nowIso(), messages: [] },
-        ]
-      };
-
-      function loadState() {
-        const raw = localStorage.getItem(LS_KEY);
-        const s = raw ? safeJsonParse(raw, null) : null;
-        const merged = s ? s : DEFAULT_STATE;
-
-        // minimal forward-compat safety
-        merged.settings = Object.assign({}, DEFAULT_STATE.settings, merged.settings || {});
-        merged.docs = Array.isArray(merged.docs) ? merged.docs : [];
-        merged.sessions = Array.isArray(merged.sessions) ? merged.sessions : DEFAULT_STATE.sessions.slice();
-
-        if (!merged.activeSessionId) {
-          const first = merged.sessions.find(x => x.tab === merged.activeTab) || merged.sessions[0];
-          merged.activeSessionId = first ? first.id : null;
-        }
-        return merged;
-      }
-
-      function saveState() {
-        localStorage.setItem(LS_KEY, JSON.stringify(state));
-      }
-
-      let state = loadState();
-
-      // --- Syllabus facts (hard-coded into context panel) ---
-      const SCHOOL_FACTS = {
-        math107: {
-          title: "MATH 107 (6392) • College Algebra",
-          dates: "01/07/2026 → 03/03/2026",
-          grading: [
-            "Starting Strong quiz: 5 pts",
-            "LEO Discussions: 195 pts",
-            "MML Quizzes: 300 pts",
-            "MML Homework: 350 pts",
-            "MML Final Exam: 150 pts",
-            "TOTAL: 1000 pts"
-          ],
-          rules: [
-            "Assignments due 11:59pm ET on listed dates",
-            "Late work only for documented emergency",
-            "AI allowed for learning support if aligned + attributed"
-          ],
-          week1: [
-            "Week 1 is overview of MyMathLab + LEO",
-            "Week 1 due date shown in schedule: Jan 13"
-          ]
-        },
-        hist125: {
-          title: "HIST 125 (6386) • Technological Transformations",
-          dates: "01/07/2026 → 03/03/2026",
-          instructor: "Brendan Harris • brendan.harris@faculty.umgc.edu",
-          grading: [
-            "Syllabus Quiz: 50",
-            "Discussion Participation Quiz: 50",
-            "Week 1–8 Discussions: 50 each (400 total)",
-            "Source Evaluation Step 1: 30",
-            "Step 2: 30",
-            "Step 3: 40",
-            "Step 4: 60",
-            "Step 5: 60",
-            "Step 6: 100",
-            "Step 7: 180",
-            "TOTAL: 1000 pts"
-          ],
-          rules: [
-            "No late work accepted",
-            "Initial post due Saturday 11:59pm ET",
-            "Peer replies due Tuesday 11:59pm ET",
-            "Chicago Style expected (per syllabus guidance)"
-          ],
-          weeks: [
-            "Week 1: quizzes + discussion + Source Eval Step 1 due 01/13",
-            "Week 2: Step 2 due 01/20",
-            "Week 3: Step 3 due 01/27",
-            "Week 4: Step 4 due 02/03",
-            "Week 5: Step 5 due 02/10",
-            "Week 6: Step 6 due 02/17",
-            "Week 7: Step 7 due 02/24",
-            "Week 8: final week discussion"
-          ]
-        }
-      };
-
-      // --- DOM refs ---
-      const hdrSub = $("hdrSub");
-      const statusDot = $("statusDot");
-      const statusText = $("statusText");
-      const statusUrl = $("statusUrl");
-      const hdrModel = $("hdrModel");
-
-      const tabBusiness = $("tabBusiness");
-      const tabSchool = $("tabSchool");
-
-      const sessionsTitle = $("sessionsTitle");
-      const sessionsCount = $("sessionsCount");
-      const sessionsList = $("sessionsList");
-
-      const feed = $("feed");
-      const contextArea = $("contextArea");
-
-      const input = $("input");
-      const send = $("send");
-      const modeSelect = $("modeSelect");
-
-      const settingsWrap = $("settingsWrap");
-      const openSettings = $("openSettings");
-      const closeSettings = $("closeSettings");
-      const backendUrl = $("backendUrl");
-      const useBackend = $("useBackend");
-      const modelSelect = $("modelSelect");
-      const saveSettingsBtn = $("saveSettings");
-
-      const exportDataBtn = $("exportData");
-      const clearDataBtn = $("clearData");
-
-      const newSessionBtn = $("newSession");
-      const pinSyllabusBtn = $("pinSyllabus");
-      const pinBusinessBtn = $("pinBusiness");
-      const downloadJsonBtn = $("downloadJson");
-
-      const docPicker = $("docPicker");
-      const docList = $("docList");
-
-      // --- Render helpers ---
-      function setBackendPill() {
-        const ok = state.settings.useBackend && state.settings.backendUrl.trim().length > 0;
-        statusDot.className = "dot" + (ok ? " ok" : "");
-        statusText.textContent = ok ? "Backend ON" : "UI-only";
-        statusUrl.textContent = ok ? state.settings.backendUrl.trim() : "no backend";
-        hdrModel.textContent = state.settings.model || "32B";
-      }
-
-      function setActiveTab(tab) {
-        state.activeTab = tab;
-        tabBusiness.classList.toggle("active", tab === "business");
-        tabSchool.classList.toggle("active", tab === "school");
-
-        // ensure session in that tab is selected
-        const current = state.sessions.find(s => s.id === state.activeSessionId);
-        if (!current || current.tab !== tab) {
-          const first = state.sessions.find(s => s.tab === tab);
-          state.activeSessionId = first ? first.id : null;
-        }
-
-        saveState();
-        renderAll();
-      }
-
-      function setActiveSession(id) {
-        state.activeSessionId = id;
-        saveState();
-        renderAll();
-      }
-
-      function renderSessions() {
-        const tab = state.activeTab;
-        const items = state.sessions.filter(s => s.tab === tab);
-        sessionsTitle.textContent = tab === "business" ? "Business Sessions" : "School Sessions";
-        sessionsCount.textContent = String(items.length);
-
-        sessionsList.innerHTML = "";
-        items.forEach(s => {
+        for(const s of groups[g]){
           const div = document.createElement("div");
-          div.className = "session" + (s.id === state.activeSessionId ? " active" : "");
+          div.className = "sessionItem" + (s.id === activeSessionId ? " active" : "");
           div.innerHTML = `
-            <div class="title">${escapeHtml(s.title)}</div>
-            <div class="desc">${escapeHtml(s.desc || "")}</div>
+            <div class="sessionTop">
+              <div class="sessionName">${escapeHtml(s.title)}</div>
+              <span class="pill">${s.id === activeSessionId ? "Active" : "Open"}</span>
+            </div>
+            <div class="sessionNote">
+              ${escapeHtml(s.note || "")}<br/>
+              <span style="opacity:.75;">Updated: ${escapeHtml(s.updated || "—")}</span>
+            </div>
           `;
-          div.addEventListener("click", () => setActiveSession(s.id));
-          sessionsList.appendChild(div);
-        });
-      }
-
-      function renderHeaderSub() {
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        const tabLabel = state.activeTab === "business" ? "Business" : "School";
-        hdrSub.textContent = `${tabLabel} • ${sess ? sess.title : "—"}`;
-      }
-
-      function renderFeed() {
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        feed.innerHTML = "";
-
-        const seed = getSeedMessages(sess);
-        const msgs = (sess && Array.isArray(sess.messages) ? sess.messages : []);
-
-        [...seed, ...msgs].forEach(m => addMessageToDOM(m.text, m.role, m.meta));
-        feed.scrollTop = feed.scrollHeight;
-      }
-
-      function renderContext() {
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        const tab = state.activeTab;
-
-        contextArea.innerHTML = "";
-
-        if (tab === "business") {
-          contextArea.appendChild(ctxBlock("Working assumptions", [
-            "Target contribution margin ≥ 70%",
-            "Primary channels: Amazon + Shopify",
-            "Default model: " + (state.settings.model || "32B"),
-            "Backend: " + (state.settings.useBackend ? "ON" : "OFF"),
-          ]));
-
-          contextArea.appendChild(ctxBlock("Ledger (placeholder)", [
-            "Last decision: 8oz butter → $66 (example)",
-            "Next: confirm COGS + packaging + shipping ranges",
-            "Rule: never expose margins/COGS to customer-facing outputs"
-          ]));
-
-          contextArea.appendChild(ctxBlock("RAG (later)", [
-            "Upload: ingredient sheets, batch logs, ad metrics",
-            "Retrieve: formulas, policies, pricing rules",
-            "Cite: doc name + section"
-          ]));
-
-        } else {
-          // School
-          const isMath = sess && sess.id === "sch_math107";
-          const isHist = sess && sess.id === "sch_hist125";
-
-          if (isMath) {
-            const f = SCHOOL_FACTS.math107;
-            contextArea.appendChild(ctxBlock(f.title, [
-              "Dates: " + f.dates,
-              ...f.rules
-            ]));
-            contextArea.appendChild(ctxBlock("Grading (1000 pts)", f.grading));
-            contextArea.appendChild(ctxBlock("Week 1", f.week1));
-          } else if (isHist) {
-            const f = SCHOOL_FACTS.hist125;
-            contextArea.appendChild(ctxBlock(f.title, [
-              "Dates: " + f.dates,
-              f.instructor,
-              ...f.rules
-            ]));
-            contextArea.appendChild(ctxBlock("Grading (1000 pts)", f.grading));
-            contextArea.appendChild(ctxBlock("Timeline anchors", f.weeks));
-          } else {
-            contextArea.appendChild(ctxBlock("Pinned course facts", [
-              "MATH 107 and HIST 125 are loaded into this UI context",
-              "Use this tab for planning + drafts + studying",
-              "Upload PDFs later -> RAG for quoting exact instructions"
-            ]));
-            contextArea.appendChild(ctxBlock("Study workflow (simple)", [
-              "1) Paste prompt + rubric",
-              "2) Ask for outline + thesis + sources",
-              "3) Draft in sections (intro/body/conclusion)",
-              "4) Self-check against rubric + citations"
-            ]));
-          }
+          div.addEventListener("click", () => switchSession(s.id));
+          targetEl.appendChild(div);
         }
       }
+    }
 
-      function renderDocs() {
-        if (!state.docs.length) {
-          docList.textContent = "No docs added yet.";
-          return;
-        }
-        docList.innerHTML = state.docs.map(d => {
-          const sizeMb = (d.size / (1024 * 1024)).toFixed(2);
-          return `<div>• ${escapeHtml(d.name)} <span style="opacity:.6">(${sizeMb} MB)</span></div>`;
-        }).join("");
-      }
+    function renderAllSessions(){
+      sessionCount.textContent = String(sessions.length);
+      const active = sessions.find(s => s.id === activeSessionId);
+      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
+      renderSessions(sessionList);
+      renderSessions(sessionListMobile);
 
-      function renderAll() {
-        setBackendPill();
-        renderHeaderSub();
-        renderSessions();
-        renderFeed();
-        renderContext();
-        renderDocs();
-      }
+      topSub.textContent = "Session: " + (active ? active.title : activeSessionId);
+      ctxHint.textContent = active ? active.group : "—";
+    }
 
-      // --- UI components ---
-      function ctxBlock(title, lines) {
-        const div = document.createElement("div");
-        div.className = "contextBlock";
-        const ul = document.createElement("ul");
-        lines.forEach(x => {
-          const li = document.createElement("li");
-          li.textContent = x;
-          ul.appendChild(li);
-        });
-        const strong = document.createElement("strong");
-        strong.textContent = title;
-        div.appendChild(strong);
-        div.appendChild(ul);
-        return div;
-      }
+    // ====== RENDER: CHAT ======
+    function renderMessage(m){
+      const row = document.createElement("div");
+      row.className = "row " + (m.role === "you" ? "you" : "bot");
 
-      function addMessageToDOM(text, role, meta) {
-        const wrap = document.createElement("div");
-        wrap.className = "msg " + role;
-        wrap.textContent = text;
+      const wrap = document.createElement("div");
+      wrap.className = "bubbleWrap";
 
-        if (meta) {
-          const m = document.createElement("div");
-          m.className = "meta";
-          if (meta.mode) m.appendChild(tagEl("mode: " + meta.mode));
-          if (meta.model) m.appendChild(tagEl("model: " + meta.model));
-          if (meta.ts) m.appendChild(tagEl(new Date(meta.ts).toLocaleString()));
-          wrap.appendChild(m);
-        }
-        feed.appendChild(wrap);
-      }
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = m.content || "";
 
-      function tagEl(t) {
-        const s = document.createElement("span");
-        s.className = "tag";
-        s.textContent = t;
-        return s;
-      }
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `<span>${m.role === "you" ? "You" : "WilliamBot"}</span><span>${escapeHtml(m.ts || nowTime())}</span>`;
 
-      function escapeHtml(str) {
-        return String(str)
-          .replaceAll("&","&amp;")
-          .replaceAll("<","&lt;")
-          .replaceAll(">","&gt;")
-          .replaceAll('"',"&quot;")
-          .replaceAll("'","&#039;");
-      }
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+      row.appendChild(wrap);
+      feed.appendChild(row);
+      feed.scrollTop = feed.scrollHeight;
+    }
 
-      // --- Seed messages (per session) ---
-      function getSeedMessages(sess) {
-        if (!sess) return [];
-        if (sess.messages && sess.messages.length) return []; // only show seeds when empty
+    function hydrateThread(){
+      feed.innerHTML = "";
+      if(history.length === 0){
+        const active = sessions.find(s => s.id === activeSessionId);
+        const intro = {
+          role:"bot",
+          ts: nowTime(),
+          content:
+`UI is live.
 
-        if (sess.id === "sch_math107") {
-          return [{
-            role: "bot",
-            text:
-`MATH 107 is loaded.\n\nFast rules:\n• Due 11:59pm ET\n• Late only documented emergency\n• Total: 1000 pts\n\nAsk me for: weekly plan, practice sets, or a step-by-step explanation (no shortcuts).`,
-            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
-          }];
-        }
+You are in: ${active ? active.title : activeSessionId}
 
-        if (sess.id === "sch_hist125") {
-          return [{
-            role: "bot",
-            text:
-`HIST 125 is loaded.\n\nFast rules:\n• No late work accepted\n• Initial post due Saturday, peer replies Tuesday\n• Total: 1000 pts\n\nAsk me for: discussion post structure, source evaluation steps, Chicago citations, or week-by-week pacing.`,
-            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
-          }];
-        }
+Sessions are the main switch now.
+Old sessions never disappear — they stay in the Sessions list.
 
-        if (sess.tab === "school") {
-          return [{
-            role: "bot",
-            text:
-`School hub ready.\n\nDrop any prompt/rubric/reading and tell me what you need:\n• outline\n• study plan\n• explanation\n• draft sections`,
-            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
-          }];
-        }
-
-        // business default seed
-        return [{
-          role: "bot",
-          text:
-`UI is live.\n\nThis is your personal AI workspace.\nBackend will connect later (Tailscale + local server).\n\nRight now: clean sessions + no-crash UI + model selector.`,
-          meta: { mode: "info", model: state.settings.model, ts: nowIso() }
-        }];
-      }
-
-      // --- Message persistence ---
-      function pushMessage(sessionId, role, text, meta) {
-        const sess = state.sessions.find(s => s.id === sessionId);
-        if (!sess) return;
-        if (!Array.isArray(sess.messages)) sess.messages = [];
-        sess.messages.push({ role, text, meta: meta || { ts: nowIso() } });
-        saveState();
-      }
-
-      // --- Backend call (optional) ---
-      async function backendChat(promptText) {
-        const base = state.settings.backendUrl.trim();
-        const url = base.replace(/\/+$/,"") + "/chat";
-        const payload = {
-          sessionId: state.activeSessionId,
-          tab: state.activeTab,
-          mode: modeSelect.value,
-          model: state.settings.model,
-          message: promptText
+Backend will connect later (Tailscale + local server).`
         };
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const t = await res.text().catch(() => "");
-          throw new Error("Backend /chat failed: " + res.status + " " + t);
-        }
-
-        const data = await res.json();
-        // expected: { reply: "..." }
-        if (!data || typeof data.reply !== "string") {
-          throw new Error("Backend /chat returned invalid JSON (missing reply).");
-        }
-        return data.reply;
+        history.push(intro);
+        saveHistory(activeSessionId, history);
       }
+      history.forEach(renderMessage);
+    }
 
-      function uiOnlyReply(promptText) {
-        // Minimal, predictable, and safe. No fancy “fake intelligence” here.
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        const mode = modeSelect.value;
-
-        if (sess && sess.tab === "school") {
-          if (sess.id === "sch_hist125") {
-            return `UI-only mode.\n\nHIST 125 reminder:\n• No late work\n• Initial post Sat, peer replies Tue\n\nWhen backend is connected, I’ll answer with retrieval from your uploaded docs.`;
-          }
-          if (sess.id === "sch_math107") {
-            return `UI-only mode.\n\nMATH 107 reminder:\n• Due 11:59pm ET\n• Late only documented emergency\n\nWhen backend is connected, I’ll solve/explain step-by-step with your preferred format.`;
-          }
-          return `UI-only mode.\n\nPaste the assignment prompt + rubric and I’ll structure a plan once backend is connected.\nFor now I can help you outline what to ask.`;
-        }
-
-        // business
-        if (mode === "calculate") {
-          return `UI-only mode.\n\nWhen backend is connected, /chat can run math + pricing logic.\nFor now: paste numbers and I’ll give you the calc format to use.`;
-        }
-        return `Backend not connected yet. UI-only mode.\n\nNext step is wiring /chat + /health on your PC, then this becomes live.`;
+    // ====== CONTEXT (SESSION-SCOPED) ======
+    function contextForSession(sessionId){
+      // Calm + minimal. Replace later with real RAG + syllabus parsing.
+      if(sessionId.startsWith("biz_")){
+        return {
+          title:"Business context",
+          blocks:[
+            { k:"Focus", v:"Pricing, ops, formulation, Amazon/Shopify" },
+            { k:"Rule", v:"Don’t commit pricing without fresh COGS + fees + ship cost." },
+            { k:"Backend", v:"UI-only until PC arrives." }
+          ]
+        };
       }
-
-      async function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
-
-        input.value = "";
-        autoSizeTextarea();
-
-        // user message
-        addMessageToDOM(text, "you", { mode: modeSelect.value, model: state.settings.model, ts: nowIso() });
-        pushMessage(state.activeSessionId, "you", text, { mode: modeSelect.value, model: state.settings.model, ts: nowIso() });
-        feed.scrollTop = feed.scrollHeight;
-
-        // bot reply
-        let reply = "";
-        const meta = { mode: modeSelect.value, model: state.settings.model, ts: nowIso() };
-
-        if (state.settings.useBackend && state.settings.backendUrl.trim()) {
-          try {
-            reply = await backendChat(text);
-          } catch (e) {
-            reply = "Backend call failed, falling back to UI-only.\n\n" + (e && e.message ? e.message : String(e));
-          }
-        } else {
-          reply = uiOnlyReply(text);
-        }
-
-        addMessageToDOM(reply, "bot", meta);
-        pushMessage(state.activeSessionId, "bot", reply, meta);
-        feed.scrollTop = feed.scrollHeight;
+      if(sessionId === "school_math107"){
+        return {
+          title:"MATH 107 context",
+          blocks:[
+            { k:"Course", v:"College Algebra (UMGC)" },
+            { k:"Use", v:"Upload worksheets/notes; I’ll explain steps and check work." },
+            { k:"Next", v:"Later: add syllabus as a local RAG source." }
+          ]
+        };
       }
-
-      // --- Autosize textarea ---
-      function autoSizeTextarea() {
-        input.style.height = "auto";
-        input.style.height = Math.min(input.scrollHeight, 140) + "px";
+      if(sessionId === "school_hist125"){
+        return {
+          title:"HIST 125 context",
+          blocks:[
+            { k:"Course", v:"Technological Transformations (UMGC)" },
+            { k:"Use", v:"Summaries, outlines, discussion post structure, citations help." },
+            { k:"Next", v:"Later: add syllabus as a local RAG source." }
+          ]
+        };
       }
-      input.addEventListener("input", autoSizeTextarea);
+      return { title:"Context", blocks:[{k:"—",v:"—"}] };
+    }
 
-      // --- Settings modal ---
-      function openModal() {
-        backendUrl.value = state.settings.backendUrl || "";
-        useBackend.checked = !!state.settings.useBackend;
-        modelSelect.value = state.settings.model || "32B";
-        settingsWrap.style.display = "flex";
-        settingsWrap.setAttribute("aria-hidden", "false");
+    function renderContext(){
+      const data = contextForSession(activeSessionId);
+      const stamp = nowStamp();
+
+      const html = `
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>${escapeHtml(data.title)}</strong>
+            <span>${escapeHtml(stamp)}</span>
+          </div>
+          <div class="kv">
+            ${data.blocks.map(b => `
+              <div style="margin-bottom:8px;">
+                <div><strong style="color:rgba(243,239,230,.92)">${escapeHtml(b.k)}:</strong></div>
+                <div class="muted">${escapeHtml(b.v)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Session storage</strong>
+            <span>${escapeHtml(stamp)}</span>
+          </div>
+          <div class="kv">
+            <div class="muted">Each session has its own saved chat history (localStorage).</div>
+            <div style="margin-top:8px;" class="muted">Switch sessions using the Sessions button.</div>
+          </div>
+        </div>
+      `;
+
+      contextContentDesktop.innerHTML = html;
+      contextContentMobile.innerHTML = html;
+    }
+
+    // ====== SWITCH SESSION ======
+    function switchSession(newId){
+      if(newId === activeSessionId) return;
+
+      activeSessionId = newId;
+      setActiveSessionId(newId);
+
+      history = loadHistory(activeSessionId);
+
+      // update updated stamp
+      sessions = sessions.map(s => s.id === newId ? {...s, updated: nowStamp()} : s);
+      saveSessions(sessions);
+
+      renderAllSessions();
+      hydrateThread();
+      renderContext();
+
+      if(isMobileLayout()){
+        closeSessionsDrawer();
       }
-      function closeModal() {
-        settingsWrap.style.display = "none";
-        settingsWrap.setAttribute("aria-hidden", "true");
+    }
+
+    // ====== SEND ======
+    function syncSend(){ sendBtn.disabled = input.value.trim().length === 0; }
+
+    function addToHistory(m){
+      history.push(m);
+      saveHistory(activeSessionId, history);
+    }
+
+    function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+
+      input.value = "";
+      syncSend();
+
+      const you = { role:"you", ts: nowTime(), content:text };
+      renderMessage(you);
+      addToHistory(you);
+
+      const bot = {
+        role:"bot",
+        ts: nowTime(),
+        content:"Backend not connected yet (UI-only). When your PC arrives, we’ll wire /health + /chat over Tailscale."
+      };
+      renderMessage(bot);
+      addToHistory(bot);
+
+      renderContext();
+    }
+
+    // ====== DRAWERS ======
+    function openSessionsDrawer(){
+      sessionsDrawerBack.style.display = "flex";
+      sessionsDrawerBack.setAttribute("aria-hidden","false");
+    }
+    function closeSessionsDrawer(){
+      sessionsDrawerBack.style.display = "none";
+      sessionsDrawerBack.setAttribute("aria-hidden","true");
+    }
+    function openContextDrawer(){
+      contextDrawerBack.style.display = "flex";
+      contextDrawerBack.setAttribute("aria-hidden","false");
+    }
+    function closeContextDrawer(){
+      contextDrawerBack.style.display = "none";
+      contextDrawerBack.setAttribute("aria-hidden","true");
+    }
+
+    // ====== EVENTS ======
+    input.addEventListener("input", syncSend);
+    input.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
       }
+    });
+    sendBtn.addEventListener("click", sendMessage);
 
-      openSettings.addEventListener("click", openModal);
-      closeSettings.addEventListener("click", closeModal);
-      settingsWrap.addEventListener("click", (e) => {
-        if (e.target === settingsWrap) closeModal();
-      });
+    sessionsBtn.addEventListener("click", () => {
+      if(isMobileLayout()) openSessionsDrawer();
+      else $("leftPanel").classList.toggle("hidden");
+    });
 
-      saveSettingsBtn.addEventListener("click", () => {
-        state.settings.backendUrl = backendUrl.value.trim();
-        state.settings.useBackend = useBackend.checked;
-        state.settings.model = modelSelect.value;
-        saveState();
-        closeModal();
-        renderAll();
-      });
+    contextBtn.addEventListener("click", () => {
+      if(window.matchMedia("(max-width: 1080px)").matches) openContextDrawer();
+      else contextPanel.classList.toggle("hidden");
+    });
 
-      exportDataBtn.addEventListener("click", () => {
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "williambot_state.json";
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
+    sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
+    sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
 
-      clearDataBtn.addEventListener("click", () => {
-        if (!confirm("Clear ALL chats, sessions, and settings?")) return;
-        localStorage.removeItem(LS_KEY);
-        state = loadState(); // resets
-        closeModal();
-        renderAll();
-      });
+    contextDrawerClose.addEventListener("click", closeContextDrawer);
+    contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
 
-      // --- Tabs ---
-      tabBusiness.addEventListener("click", () => setActiveTab("business"));
-      tabSchool.addEventListener("click", () => setActiveTab("school"));
+    // ====== INIT ======
+    // ensure active session exists
+    if(!sessions.some(s => s.id === activeSessionId)){
+      activeSessionId = "biz_pricing";
+      setActiveSessionId(activeSessionId);
+    }
 
-      // --- Send controls ---
-      send.addEventListener("click", () => sendMessage().catch(showFatal));
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          send.click();
-        }
-      });
-
-      // --- New session ---
-      newSessionBtn.addEventListener("click", () => {
-        const tab = state.activeTab;
-        const name = prompt("Session name?");
-        if (!name) return;
-        const id = (tab === "business" ? "biz_" : "sch_") + "custom_" + Math.random().toString(16).slice(2);
-        state.sessions.unshift({
-          id,
-          tab,
-          title: name.trim(),
-          desc: tab === "business" ? "Custom business session" : "Custom school session",
-          createdAt: nowIso(),
-          messages: []
-        });
-        state.activeSessionId = id;
-        saveState();
-        renderAll();
-      });
-
-      // --- Pins ---
-      pinSyllabusBtn.addEventListener("click", () => {
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        if (!sess || sess.tab !== "school") {
-          alert("Switch to School tab first (MATH 107, HIST 125, or Study Hub).");
-          return;
-        }
-
-        let text = "Pinned syllabus facts:\n\n";
-        text += "MATH 107:\n";
-        text += "• Dates: " + SCHOOL_FACTS.math107.dates + "\n";
-        text += "• Total: 1000 pts\n";
-        text += "• Due 11:59pm ET\n";
-        text += "• Late only documented emergency\n\n";
-        text += "HIST 125:\n";
-        text += "• Dates: " + SCHOOL_FACTS.hist125.dates + "\n";
-        text += "• No late work\n";
-        text += "• Initial post Sat, peers Tue\n";
-
-        addMessageToDOM(text, "bot", { mode: "pin", model: state.settings.model, ts: nowIso() });
-        pushMessage(state.activeSessionId, "bot", text, { mode: "pin", model: state.settings.model, ts: nowIso() });
-      });
-
-      pinBusinessBtn.addEventListener("click", () => {
-        const sess = state.sessions.find(s => s.id === state.activeSessionId);
-        if (!sess || sess.tab !== "business") {
-          alert("Switch to Business tab first.");
-          return;
-        }
-        const text =
-`Pinned business assumptions:\n\n• Target contribution margin ≥ 70%\n• Channels: Amazon + Shopify\n• Rule: customer-facing agents must never disclose profit margins/COGS/internal costs\n• Backend later: /chat + /rag/upload + /rag/query`;
-        addMessageToDOM(text, "bot", { mode: "pin", model: state.settings.model, ts: nowIso() });
-        pushMessage(state.activeSessionId, "bot", text, { mode: "pin", model: state.settings.model, ts: nowIso() });
-      });
-
-      downloadJsonBtn.addEventListener("click", () => {
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "williambot_state.json";
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
-
-      // --- Docs picker (UI-only placeholder) ---
-      docPicker.addEventListener("change", () => {
-        const files = Array.from(docPicker.files || []);
-        if (!files.length) return;
-        files.forEach(f => {
-          state.docs.unshift({
-            name: f.name,
-            size: f.size || 0,
-            type: f.type || "application/octet-stream",
-            addedAt: nowIso()
-          });
-        });
-        // keep only last 40 entries
-        state.docs = state.docs.slice(0, 40);
-        saveState();
-        renderDocs();
-        docPicker.value = "";
-      });
-
-      // --- Basic service worker registration (safe) ---
-      try {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("/sw.js").catch(() => { /* no-op */ });
-        }
-      } catch (_) { /* no-op */ }
-
-      // --- Initial render ---
-      renderAll();
-
-      // --- Make textarea height sane on load ---
-      autoSizeTextarea();
-
-    })();
+    renderAllSessions();
+    hydrateThread();
+    renderContext();
+    syncSend();
   </script>
 </body>
 </html>
