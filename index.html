@@ -15,18 +15,19 @@
   <style>
     /* ====== THEME: warm neutral base + restrained deep red accents ====== */
     :root{
-      --bg:#0b0a08;          /* espresso */
+      --bg:#0b0a08;
       --bg2:#0f0d0a;
-      --cream:#f3efe6;       /* warm cream */
+      --cream:#f3efe6;
       --cream2:#ebe4d8;
-      --ink:#15120d;         /* warm charcoal */
+      --ink:#15120d;
       --muted:#5a5147;
       --line: rgba(21,18,13,.14);
 
-      --red:#7a1114;         /* oxblood */
+      --red:#7a1114;
       --red2:#a0141a;
       --amber:#b45309;
       --green:#15803d;
+      --blue:#1d4ed8;
 
       --glass: rgba(15,13,10,.55);
       --glass2: rgba(15,13,10,.40);
@@ -69,6 +70,7 @@
       grid-template-columns: 280px 1fr 360px;
       grid-template-rows: auto 1fr;
       gap: 12px;
+      min-width: 0;
     }
 
     /* ====== TOP BAR ====== */
@@ -148,8 +150,9 @@
       color: rgba(243,239,230,.80);
       font-size: 12px;
       user-select:none;
-      max-width: 340px;
+      max-width: 360px;
       cursor: default;
+      white-space: nowrap;
     }
     .badge.clickable{ cursor:pointer; }
     .badge .label{
@@ -177,6 +180,7 @@
       font-weight: 740;
       font-size: 13px;
       transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
     }
     .ghostBtn:active{ transform: translateY(1px); }
     .ghostBtn:hover{
@@ -184,7 +188,7 @@
       background: rgba(15,13,10,.55);
     }
 
-    /* ====== PANELS (SIDEBAR / CONTEXT) ====== */
+    /* ====== PANELS ====== */
     .panel{
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -195,8 +199,8 @@
       display:flex;
       flex-direction:column;
       min-height: 0;
+      min-width: 0;
     }
-
     .panelHeader{
       padding: 12px 12px;
       border-bottom: 1px solid rgba(243,239,230,.14);
@@ -214,18 +218,14 @@
       font-size: 12px;
       color: rgba(243,239,230,.62);
     }
-
     .panelBody{
       padding: 10px;
       overflow:auto;
       min-height: 0;
     }
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-    }
+    /* ====== LEFT SIDEBAR: Sessions + Branches ====== */
+    .list{ display:flex; flex-direction:column; gap: 8px; }
 
     .item{
       border: 1px solid rgba(243,239,230,.14);
@@ -253,12 +253,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .itemMeta{
-      font-size: 12px;
-      color: rgba(243,239,230,.62);
-      margin-top: 6px;
-      line-height: 1.25;
-    }
     .pillMini{
       font-size: 11px;
       padding: 4px 8px;
@@ -267,9 +261,57 @@
       color: rgba(243,239,230,.70);
       background: rgba(15,13,10,.35);
       flex: 0 0 auto;
+      user-select:none;
+    }
+    .itemMeta{
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
+      margin-top: 6px;
+      line-height: 1.25;
     }
 
-    /* ====== MAIN CHAT SURFACE ====== */
+    .branchWrap{
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(243,239,230,.12);
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .branchRow{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .branchChip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.30);
+      font-size: 11px;
+      color: rgba(243,239,230,.76);
+      cursor:pointer;
+      user-select:none;
+      transition: border-color .12s ease, background .12s ease;
+      max-width: 100%;
+    }
+    .branchChip:hover{ border-color: rgba(243,239,230,.22); background: rgba(15,13,10,.42); }
+    .branchChip.active{ border-color: rgba(122,17,20,.35); background: rgba(122,17,20,.14); }
+
+    .branchDot{
+      width: 8px; height: 8px; border-radius:50%;
+      background: #9ca3af;
+      box-shadow: 0 0 0 3px rgba(156,163,175,.16);
+      flex: 0 0 auto;
+    }
+    .branchDot.main{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
+    .branchDot.fork{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
+
+    /* ====== MAIN CHAT ====== */
     .chat{
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -281,8 +323,8 @@
       background:
         radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+      min-width: 0;
     }
-
     .feed{
       flex:1;
       overflow:auto;
@@ -293,11 +335,7 @@
       min-height: 0;
     }
 
-    .row{
-      display:flex;
-      margin: 10px 0;
-      gap: 10px;
-    }
+    .row{ display:flex; margin: 10px 0; gap: 10px; }
     .row.you{ justify-content:flex-end; }
     .row.bot{ justify-content:flex-start; }
 
@@ -305,10 +343,10 @@
       display:flex;
       flex-direction:column;
       gap: 6px;
-      max-width: min(86ch, 96%);
+      max-width: min(92ch, 96%);
+      min-width: 0;
     }
 
-    /* Base bubble */
     .bubble{
       padding: 12px 12px;
       border-radius: var(--r2);
@@ -318,12 +356,11 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.10);
       white-space: pre-wrap;
       word-wrap: break-word;
-      line-height: 1.38;
+      line-height: 1.42;
       font-size: 14.6px;
       position: relative;
+      min-width: 0;
     }
-
-    /* You bubble: subtle red spine */
     .you .bubble{
       border-color: rgba(122,17,20,.25);
       box-shadow:
@@ -344,15 +381,8 @@
     }
 
     /* Message Types */
-    .bubble.table{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 13.5px;
-      overflow:auto;
-      max-width: 100%;
-    }
     .bubble.warning{
       border-color: rgba(122,17,20,.35);
-      background: rgba(243,239,230,.92);
       box-shadow:
         0 0 0 4px rgba(122,17,20,.10) inset,
         0 10px 22px rgba(122,17,20,.10);
@@ -361,6 +391,7 @@
       border-color: rgba(21,18,13,.18);
       background: rgba(243,239,230,.96);
     }
+
     .decisionHdr{
       display:flex;
       align-items:center;
@@ -370,10 +401,7 @@
       padding-bottom: 8px;
       border-bottom: 1px solid rgba(21,18,13,.10);
     }
-    .decisionHdr strong{
-      font-size: 13px;
-      letter-spacing: .2px;
-    }
+    .decisionHdr strong{ font-size: 13px; letter-spacing: .2px; }
     .decisionTag{
       font-size: 11px;
       padding: 4px 8px;
@@ -382,34 +410,130 @@
       background: rgba(122,17,20,.10);
       color: rgba(21,18,13,.78);
       font-weight: 750;
+      user-select:none;
     }
 
+    /* Table renderer */
+    .tblWrap{
+      overflow:auto;
+      border: 1px solid rgba(21,18,13,.10);
+      border-radius: 12px;
+      background: rgba(243,239,230,.88);
+    }
+    table.tbl{
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 520px;
+      color: var(--ink);
+      font-size: 13.5px;
+    }
+    .tbl thead th{
+      position: sticky;
+      top: 0;
+      background: rgba(243,239,230,.96);
+      border-bottom: 1px solid rgba(21,18,13,.12);
+      text-align:left;
+      padding: 10px;
+      font-weight: 850;
+      letter-spacing: .2px;
+      white-space: nowrap;
+    }
+    .tbl tbody td{
+      border-bottom: 1px solid rgba(21,18,13,.08);
+      padding: 10px;
+      vertical-align: top;
+    }
+    .tbl tbody tr:last-child td{ border-bottom:none; }
+
+    /* Collapsible long blocks (for big outputs) */
+    .clamp{
+      position: relative;
+      max-height: 220px;
+      overflow: hidden;
+    }
+    .clamp:after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 72px;
+      background: linear-gradient(180deg, rgba(243,239,230,0), rgba(243,239,230,.94));
+      pointer-events:none;
+    }
+    .moreRow{
+      display:flex;
+      justify-content:flex-end;
+      margin-top: 8px;
+    }
+    .moreBtn{
+      border: 1px solid rgba(21,18,13,.14);
+      background: rgba(243,239,230,.92);
+      color: rgba(21,18,13,.72);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 820;
+      cursor:pointer;
+      user-select:none;
+      font-size: 12px;
+    }
+    .moreBtn:hover{ border-color: rgba(21,18,13,.22); }
+
+    /* Message meta row + subtle menu */
     .meta{
       display:flex;
       justify-content:space-between;
       gap:10px;
       font-size: 11px;
-      color: rgba(21,18,13,.65);
+      color: rgba(21,18,13,.62);
       padding: 0 2px;
       align-items:center;
     }
-
-    .confidence{
-      display:flex;
-      align-items:center;
-      gap: 6px;
-      user-select:none;
-    }
+    .confidence{ display:flex; align-items:center; gap: 6px; user-select:none; }
     .confDot{
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
       background: #9ca3af;
       box-shadow: 0 0 0 3px rgba(156,163,175,.18);
     }
     .confDot.g{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
     .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
     .confDot.r{ background: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
+
+    .menuBtn{
+      border: 1px solid rgba(21,18,13,.12);
+      background: rgba(243,239,230,.90);
+      color: rgba(21,18,13,.70);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+      line-height: 1;
+    }
+
+    .menu{
+      position: absolute;
+      right: 8px;
+      top: calc(100% + 6px);
+      border-radius: 14px;
+      border: 1px solid rgba(21,18,13,.14);
+      background: rgba(243,239,230,.98);
+      box-shadow: 0 12px 34px rgba(0,0,0,.16);
+      overflow:hidden;
+      min-width: 170px;
+      display:none;
+      z-index: 50;
+    }
+    .menuItem{
+      padding: 10px 10px;
+      font-size: 12px;
+      color: rgba(21,18,13,.82);
+      cursor:pointer;
+      user-select:none;
+      border-bottom: 1px solid rgba(21,18,13,.08);
+      font-weight: 750;
+    }
+    .menuItem:last-child{ border-bottom:none; }
+    .menuItem:hover{ background: rgba(21,18,13,.05); }
 
     /* Composer */
     .composer{
@@ -420,12 +544,11 @@
       gap: 10px;
       align-items:flex-end;
     }
-
     textarea{
       flex:1;
       resize:none;
       min-height: 48px;
-      max-height: 160px;
+      max-height: 180px;
       padding: 12px 12px;
       border-radius: 16px;
       border: 1px solid rgba(243,239,230,.16);
@@ -439,7 +562,6 @@
       border-color: rgba(122,17,20,.40);
       box-shadow: 0 0 0 5px rgba(122,17,20,.16);
     }
-
     .send{
       min-width: 96px;
       padding: 12px 14px;
@@ -460,7 +582,7 @@
       box-shadow: none;
     }
 
-    /* ====== CONTEXT PANEL SECTIONS ====== */
+    /* ====== CONTEXT PANEL CONTENT ====== */
     .section{
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(15,13,10,.35);
@@ -486,11 +608,7 @@
       color: rgba(243,239,230,.62);
     }
 
-    .kv{
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-    }
+    .kv{ display:flex; flex-direction:column; gap: 8px; }
     .kvRow{
       display:flex;
       align-items:flex-start;
@@ -531,12 +649,11 @@
       color: rgba(243,239,230,.70);
       margin: 4px 6px 0 0;
     }
-    .chipDot{
-      width: 7px; height: 7px; border-radius:50%;
-      background: #9ca3af;
-    }
+    .chipDot{ width: 7px; height: 7px; border-radius:50%; background: #9ca3af; }
 
-    /* ====== MODAL (HIGH-STAKES DECISION REVIEW) ====== */
+    /* ====== MODALS / DRAWERS ====== */
+
+    /* High-stakes modal */
     .modalBack{
       position: fixed;
       inset: 0;
@@ -622,19 +739,70 @@
       color: rgba(243,239,230,.88);
       font-weight: 780;
       cursor:pointer;
+      user-select:none;
     }
     .modalBtn.primary{
       border-color: rgba(122,17,20,.40);
       background: rgba(122,17,20,.24);
     }
 
-    /* ====== COLLAPSE RIGHT PANEL ====== */
+    /* Mobile drawer */
+    .drawerBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      z-index: 998;
+    }
+    .drawer{
+      width: min(760px, 100%);
+      max-height: 86vh;
+      border-radius: 22px;
+      border: 1px solid rgba(243,239,230,.18);
+      background: rgba(15,13,10,.86);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+    }
+    .drawerGrip{
+      height: 20px;
+      display:grid;
+      place-items:center;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+    }
+    .gripBar{
+      width: 56px; height: 6px;
+      border-radius: 999px;
+      background: rgba(243,239,230,.18);
+    }
+    .drawerHdr{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .drawerHdr strong{ font-size: 13px; color: rgba(243,239,230,.92); }
+    .drawerHdr span{ font-size: 12px; color: rgba(243,239,230,.62); }
+    .drawerBody{
+      padding: 12px;
+      overflow:auto;
+      min-height: 0;
+    }
+
+    /* ====== HIDES ====== */
     .hidden{ display:none !important; }
 
     /* ====== RESPONSIVE ====== */
     @media (max-width: 1080px){
       .app{ grid-template-columns: 260px 1fr; grid-template-rows: auto 1fr; }
-      #contextPanel{ display:none; }
+      #contextPanel{ display:none; } /* on tablet/mobile use drawer instead */
     }
     @media (max-width: 760px){
       .app{ grid-template-columns: 1fr; }
@@ -654,19 +822,19 @@
           <div class="logo">W</div>
           <div class="brandText">
             <strong>WilliamBot</strong>
-            <span>Private business infrastructure • Chat-first • Local engine</span>
+            <span id="topSub">Session: — • Branch: —</span>
           </div>
         </div>
 
         <div class="statusRow">
           <!-- MODE -->
-          <div class="badge clickable" id="modeBadge" title="Inference profile (UI-only today)">
+          <div class="badge clickable" id="modeBadge" title="Inference profile (UI now; backend later)">
             <span class="label">Mode</span>
             <span id="modeText">Financial</span>
           </div>
 
           <!-- SYNC -->
-          <div class="badge clickable" id="syncBadge" title="Data freshness (hook to Notion later)">
+          <div class="badge clickable" id="syncBadge" title="Data freshness (hook later)">
             <span id="syncDot" class="dot"></span>
             <span class="label">Notion</span>
             <span id="syncText">Not connected</span>
@@ -679,7 +847,8 @@
             <span id="backendText">UI only</span>
           </div>
 
-          <button class="ghostBtn" id="toggleContextBtn">Context</button>
+          <button class="ghostBtn" id="sessionsBtn">Sessions</button>
+          <button class="ghostBtn" id="contextBtn">Context</button>
         </div>
       </header>
 
@@ -708,7 +877,7 @@
         </div>
       </main>
 
-      <!-- RIGHT: CONTEXT PANEL -->
+      <!-- RIGHT: CONTEXT PANEL (desktop only) -->
       <aside class="panel" id="contextPanel">
         <div class="panelHeader">
           <div>
@@ -718,49 +887,56 @@
           <span id="ctxHint">Session-bound</span>
         </div>
 
-        <div class="panelBody">
-          <!-- Working Assumptions -->
-          <div class="section">
-            <div class="sectionTitle">
-              <strong>Working assumptions</strong>
-              <span id="assumpStamp">—</span>
-            </div>
-            <div class="kv" id="assumpList"></div>
-          </div>
-
-          <!-- Active Sources -->
-          <div class="section">
-            <div class="sectionTitle">
-              <strong>Active sources</strong>
-              <span id="sourcesStamp">—</span>
-            </div>
-            <div id="sourcesList"></div>
-          </div>
-
-          <!-- Decision Ledger -->
-          <div class="section">
-            <div class="sectionTitle">
-              <strong>Decision ledger (preview)</strong>
-              <span id="ledgerStamp">—</span>
-            </div>
-            <div class="kv" id="ledgerList"></div>
-          </div>
+        <div class="panelBody" id="contextContentDesktop">
+          <!-- injected -->
         </div>
       </aside>
 
     </div>
   </div>
 
-  <!-- HIGH-STAKES DECISION MODAL (stubbed UI component) -->
+  <!-- MOBILE: Sessions Drawer -->
+  <div class="drawerBack" id="sessionsDrawerBack" aria-hidden="true">
+    <div class="drawer">
+      <div class="drawerGrip"><div class="gripBar"></div></div>
+      <div class="drawerHdr">
+        <div>
+          <strong>Sessions</strong><br/>
+          <span id="sessionsDrawerMeta">Tap to switch • Branches below</span>
+        </div>
+        <button class="modalBtn" id="sessionsDrawerClose">Close</button>
+      </div>
+      <div class="drawerBody">
+        <div class="list" id="sessionListMobile"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE: Context Drawer -->
+  <div class="drawerBack" id="contextDrawerBack" aria-hidden="true">
+    <div class="drawer">
+      <div class="drawerGrip"><div class="gripBar"></div></div>
+      <div class="drawerHdr">
+        <div>
+          <strong>Context</strong><br/>
+          <span id="contextDrawerMeta">Working state (local-only)</span>
+        </div>
+        <button class="modalBtn" id="contextDrawerClose">Close</button>
+      </div>
+      <div class="drawerBody" id="contextContentMobile">
+        <!-- injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- HIGH-STAKES DECISION MODAL (stubbed component) -->
   <div class="modalBack" id="hsModalBack" role="dialog" aria-modal="true" aria-label="High-stakes decision review">
     <div class="modal">
       <div class="modalHdr">
         <strong><span class="warnMark">!</span> HIGH-STAKES DECISION</strong>
         <button class="modalBtn" id="hsClose">Close</button>
       </div>
-      <div class="modalBody" id="hsBody">
-        <!-- injected -->
-      </div>
+      <div class="modalBody" id="hsBody"></div>
       <div class="modalFtr">
         <button class="modalBtn" id="hsDiscuss">Discuss further</button>
         <button class="modalBtn primary" id="hsCommit">Commit to ledger</button>
@@ -783,27 +959,36 @@
     const input = $("input");
     const sendBtn = $("sendBtn");
 
+    const topSub = $("topSub");
+
     const modeBadge = $("modeBadge");
     const modeText = $("modeText");
     const syncDot = $("syncDot");
     const syncText = $("syncText");
     const backendDot = $("backendDot");
     const backendText = $("backendText");
-    const toggleContextBtn = $("toggleContextBtn");
-    const contextPanel = $("contextPanel");
 
+    const sessionsBtn = $("sessionsBtn");
+    const contextBtn = $("contextBtn");
+
+    const leftPanel = $("leftPanel");
     const sessionList = $("sessionList");
+    const sessionListMobile = $("sessionListMobile");
     const sessionCount = $("sessionCount");
     const activeSessionLabel = $("activeSessionLabel");
 
-    const assumpList = $("assumpList");
-    const assumpStamp = $("assumpStamp");
-    const sourcesList = $("sourcesList");
-    const sourcesStamp = $("sourcesStamp");
-    const ledgerList = $("ledgerList");
-    const ledgerStamp = $("ledgerStamp");
+    const ctxHint = $("ctxHint");
+    const contextPanel = $("contextPanel");
+    const contextContentDesktop = $("contextContentDesktop");
+    const contextContentMobile = $("contextContentMobile");
 
-    // Modal
+    // Drawers
+    const sessionsDrawerBack = $("sessionsDrawerBack");
+    const sessionsDrawerClose = $("sessionsDrawerClose");
+    const contextDrawerBack = $("contextDrawerBack");
+    const contextDrawerClose = $("contextDrawerClose");
+
+    // High-stakes modal
     const hsModalBack = $("hsModalBack");
     const hsBody = $("hsBody");
     const hsClose = $("hsClose");
@@ -812,9 +997,11 @@
 
     // ====== STORAGE ======
     const STORE = {
-      sessions: "wb_sessions_v1",
-      activeSession: "wb_active_session_v1",
-      historyPrefix: "wb_history_"
+      sessions: "wb_sessions_v2",
+      activeSession: "wb_active_session_v2",
+      activeBranch: "wb_active_branch_v2",
+      branchesPrefix: "wb_branches_",
+      historyPrefix: "wb_history_v2_"
     };
 
     // ====== UTILS ======
@@ -827,163 +1014,258 @@
       return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
     }
     function escapeHtml(s){
-      return s.replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+      return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
     }
     function setDot(dotEl, state){
       dotEl.classList.remove("ok","bad");
       if(state === "ok") dotEl.classList.add("ok");
       if(state === "bad") dotEl.classList.add("bad");
     }
+    function isMobileLayout(){
+      return window.matchMedia("(max-width: 1080px)").matches;
+    }
 
-    // ====== MODE (UI contract now; backend can auto-suggest later) ======
+    // ====== MODE ======
     const MODES = ["Financial","Formulation","Compliance","Strategy"];
     let modeIdx = 0;
-
     function cycleMode(){
       modeIdx = (modeIdx + 1) % MODES.length;
       modeText.textContent = MODES[modeIdx];
-      // In the future: tell backend inference profile to switch
-      // fetch(API_BASE + "/mode", {method:"POST", ...})
     }
 
-    // ====== SESSIONS ======
+    // ====== SESSIONS + BRANCHES ======
+    function branchesKey(sessionId){ return STORE.branchesPrefix + sessionId; }
+    function historyKey(sessionId, branchId){ return STORE.historyPrefix + sessionId + "_" + branchId; }
+
     function loadSessions(){
       try{
         const raw = localStorage.getItem(STORE.sessions);
         const data = raw ? JSON.parse(raw) : null;
         if(Array.isArray(data) && data.length) return data;
       } catch {}
-      // seed
       return [
         { id: "pricing", title: "Pricing & Margin Review", note: "Retail, wholesale, Amazon fees", updated: nowStamp(), lastDecision: "8 oz butter → $66" },
         { id: "formulation", title: "Formulation Iteration", note: "Leave-in + shampoo constraints", updated: nowStamp(), lastDecision: "Fragrance load 4%" },
-        { id: "amazon", title: "Amazon Ops", note: "Listing + compliance + reviews", updated: nowStamp(), lastDecision: "Draft bullet points v2" }
+        { id: "amazon", title: "Amazon Ops", note: "Listings + compliance + reviews", updated: nowStamp(), lastDecision: "Draft bullets v2" }
       ];
     }
-    function saveSessions(list){
-      localStorage.setItem(STORE.sessions, JSON.stringify(list));
+    function saveSessions(list){ localStorage.setItem(STORE.sessions, JSON.stringify(list)); }
+
+    function loadBranches(sessionId){
+      try{
+        const raw = localStorage.getItem(branchesKey(sessionId));
+        const data = raw ? JSON.parse(raw) : null;
+        if(Array.isArray(data) && data.length) return data;
+      } catch {}
+      // default
+      return [{ id:"main", name:"Main", kind:"main", created: nowStamp() }];
     }
-    function getActiveSessionId(){
-      return localStorage.getItem(STORE.activeSession) || "pricing";
+    function saveBranches(sessionId, branches){
+      localStorage.setItem(branchesKey(sessionId), JSON.stringify(branches));
     }
-    function setActiveSessionId(id){
-      localStorage.setItem(STORE.activeSession, id);
-    }
+
+    function getActiveSessionId(){ return localStorage.getItem(STORE.activeSession) || "pricing"; }
+    function setActiveSessionId(id){ localStorage.setItem(STORE.activeSession, id); }
+    function getActiveBranchId(){ return localStorage.getItem(STORE.activeBranch) || "main"; }
+    function setActiveBranchId(id){ localStorage.setItem(STORE.activeBranch, id); }
 
     let sessions = loadSessions();
     saveSessions(sessions);
 
-    function renderSessions(){
-      sessionList.innerHTML = "";
-      sessionCount.textContent = String(sessions.length);
-      const activeId = getActiveSessionId();
-      const active = sessions.find(s => s.id === activeId) || sessions[0];
-      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
-
-      for(const s of sessions){
-        const div = document.createElement("div");
-        div.className = "item";
-        div.setAttribute("data-id", s.id);
-        div.innerHTML = `
-          <div class="itemTop">
-            <div class="itemTitle">${escapeHtml(s.title)}</div>
-            <span class="pillMini">${s.id === activeId ? "Active" : "Open"}</span>
-          </div>
-          <div class="itemMeta">
-            ${escapeHtml(s.note || "")}<br/>
-            <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
-            <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
-          </div>
-        `;
-        div.addEventListener("click", () => {
-          setActiveSessionId(s.id);
-          feed.innerHTML = "";
-          history = loadHistory(s.id);
-          hydrate();
-          renderSessions();
-          hydrateContextForSession(s.id);
-        });
-        sessionList.appendChild(div);
-      }
-    }
-
-    // ====== HISTORY (per-session) ======
-    function historyKey(sessionId){ return STORE.historyPrefix + sessionId; }
-
-    function loadHistory(sessionId){
+    function loadHistory(sessionId, branchId){
       try{
-        const raw = localStorage.getItem(historyKey(sessionId));
+        const raw = localStorage.getItem(historyKey(sessionId, branchId));
         if(!raw) return [];
         const data = JSON.parse(raw);
         return Array.isArray(data) ? data : [];
       } catch { return []; }
     }
-    function saveHistory(sessionId, hist){
-      localStorage.setItem(historyKey(sessionId), JSON.stringify(hist.slice(-200)));
+    function saveHistory(sessionId, branchId, hist){
+      localStorage.setItem(historyKey(sessionId, branchId), JSON.stringify(hist.slice(-400)));
     }
 
-    // ====== MESSAGE RENDERING (types + confidence) ======
-    // message schema:
-    // { role:"you"|"bot", content:"...", ts:"", type:"text"|"table"|"decision"|"warning", confidence:"g"|"y"|"r", meta:{...} }
-    function renderMessage(m){
-      const row = document.createElement("div");
-      row.className = "row " + (m.role === "you" ? "you" : "bot");
+    function setTopSub(){
+      const sid = getActiveSessionId();
+      const bid = getActiveBranchId();
+      const s = sessions.find(x => x.id === sid);
+      const branches = loadBranches(sid);
+      const b = branches.find(x => x.id === bid);
+      topSub.textContent = `Session: ${s ? s.title : sid} • Branch: ${b ? b.name : bid}`;
+      ctxHint.textContent = `Session: ${sid} • Branch: ${bid}`;
+    }
 
-      const bubbleWrap = document.createElement("div");
-      bubbleWrap.className = "bubbleWrap";
+    function renderSessionLists(){
+      const activeSid = getActiveSessionId();
+      const activeBid = getActiveBranchId();
+      const active = sessions.find(s => s.id === activeSid) || sessions[0];
 
-      const bubble = document.createElement("div");
-      const t = m.type || "text";
-      bubble.className = "bubble " + (t === "text" ? "" : t);
+      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
+      sessionCount.textContent = String(sessions.length);
 
-      if(t === "decision"){
-        const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
-        const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
-        bubble.innerHTML = `
-          <div class="decisionHdr">
-            <strong>${escapeHtml(title)}</strong>
-            <span class="decisionTag">${escapeHtml(tag)}</span>
-          </div>
-          <div>${escapeHtml(m.content)}</div>
-        `;
-      } else {
-        bubble.textContent = m.content;
+      function buildList(targetEl, isMobile){
+        targetEl.innerHTML = "";
+        for(const s of sessions){
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <div class="itemTop">
+              <div class="itemTitle">${escapeHtml(s.title)}</div>
+              <span class="pillMini">${s.id === activeSid ? "Active" : "Open"}</span>
+            </div>
+            <div class="itemMeta">
+              ${escapeHtml(s.note || "")}<br/>
+              <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
+              <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
+            </div>
+          `;
+
+          div.addEventListener("click", () => {
+            setActiveSessionId(s.id);
+            // ensure branches exist
+            const branches = loadBranches(s.id);
+            saveBranches(s.id, branches);
+            // if old branch not present, reset to main
+            const currBid = getActiveBranchId();
+            const exists = branches.some(b => b.id === currBid);
+            setActiveBranchId(exists ? currBid : "main");
+            // reload
+            loadActiveThread();
+            renderSessionLists();
+            hydrateContextForThread();
+            if(isMobile) closeSessionsDrawer();
+          });
+
+          // Branch area (only show expanded for active session)
+          if(s.id === activeSid){
+            const branches = loadBranches(activeSid);
+            const wrap = document.createElement("div");
+            wrap.className = "branchWrap";
+
+            const row = document.createElement("div");
+            row.className = "branchRow";
+
+            for(const b of branches){
+              const chip = document.createElement("div");
+              chip.className = "branchChip" + (b.id === activeBid ? " active" : "");
+              chip.innerHTML = `
+                <span class="branchDot ${b.kind === "main" ? "main" : "fork"}"></span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:${isMobile ? "240px" : "160px"};">${escapeHtml(b.name)}</span>
+              `;
+              chip.addEventListener("click", (e) => {
+                e.stopPropagation();
+                setActiveBranchId(b.id);
+                loadActiveThread();
+                renderSessionLists();
+                hydrateContextForThread();
+                if(isMobile) closeSessionsDrawer();
+              });
+              row.appendChild(chip);
+            }
+
+            const hint = document.createElement("div");
+            hint.style.color = "rgba(243,239,230,.58)";
+            hint.style.fontSize = "11px";
+            hint.textContent = "Fork from any message via ⋯ menu (keeps assumptions + history).";
+
+            wrap.appendChild(row);
+            wrap.appendChild(hint);
+            div.appendChild(wrap);
+          }
+
+          targetEl.appendChild(div);
+        }
       }
 
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      const name = m.role === "you" ? "You" : "WilliamBot";
-
-      const conf = m.confidence || ""; // g/y/r
-      const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
-      const confDotClass = conf ? conf : "";
-
-      meta.innerHTML = `
-        <span>${name}</span>
-        <span class="confidence" title="Confidence (UI now; backend will set later)">
-          <span class="confDot ${confDotClass}"></span>
-          <span>${confLabel}</span>
-          <span style="opacity:.65">•</span>
-          <span>${escapeHtml(m.ts || nowTime())}</span>
-        </span>
-      `;
-
-      bubbleWrap.appendChild(bubble);
-      bubbleWrap.appendChild(meta);
-      row.appendChild(bubbleWrap);
-      feed.appendChild(row);
-      feed.scrollTop = feed.scrollHeight;
+      buildList(sessionList, false);
+      buildList(sessionListMobile, true);
+      setTopSub();
     }
 
-    // ====== CONTEXT PANEL (UI contract now; real state later) ======
-    function hydrateContextForSession(sessionId){
-      // These are stubs — you’ll replace with real state once backend + files exist.
+    // ====== CONTEXT PANEL (render once, inject both desktop + mobile) ======
+    function renderContextHtml(data){
+      // data: { assumptions:[], sources:[], ledger:[] }
+      const assRows = data.assumptions.map(a => {
+        const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
+        return `
+          <div class="kvRow">
+            <div>
+              <div class="kvKey">
+                <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+                ${escapeHtml(a.k)}
+              </div>
+              <div class="kvSub">${escapeHtml(a.sub || "")}</div>
+            </div>
+            <div class="kvVal">${escapeHtml(a.v)}</div>
+          </div>
+        `;
+      }).join("");
+
+      const srcChips = data.sources.map(s => {
+        const bg = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
+        return `
+          <div class="chip">
+            <span class="chipDot" style="background:${bg}"></span>
+            ${escapeHtml(s.name)} • ${escapeHtml(s.state)}
+          </div>
+        `;
+      }).join("");
+
+      const ledRows = data.ledger.map(l => {
+        const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
+        return `
+          <div class="kvRow">
+            <div>
+              <div class="kvKey">
+                <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+                ${escapeHtml(l.k)}
+              </div>
+              <div class="kvSub">${escapeHtml(l.sub || "")}</div>
+            </div>
+            <div class="kvVal">${escapeHtml(l.v)}</div>
+          </div>
+        `;
+      }).join("");
+
+      const stamp = nowStamp();
+
+      return `
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Working assumptions</strong>
+            <span>${stamp}</span>
+          </div>
+          <div class="kv">${assRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No assumptions yet.</div>`}</div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Active sources</strong>
+            <span>${stamp}</span>
+          </div>
+          <div>${srcChips || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No sources mounted.</div>`}</div>
+        </div>
+
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Decision ledger (preview)</strong>
+            <span>${stamp}</span>
+          </div>
+          <div class="kv">${ledRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No decisions committed.</div>`}</div>
+        </div>
+      `;
+    }
+
+    function hydrateContextForThread(){
+      const sid = getActiveSessionId();
+      const bid = getActiveBranchId();
+
+      // Stub state (replace later with backend real state + Notion sync)
       const stub = {
         pricing: {
           assumptions: [
-            { k:"Channel focus", v:"Amazon + Shopify", sub:"Session scope", c:"g" },
+            { k:"Channel focus", v:"Amazon + Shopify", sub:"Thread scope", c:"g" },
             { k:"Target margin", v:"≥ 70%", sub:"Guardrail", c:"g" },
-            { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify per category", c:"y" },
+            { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify category", c:"y" },
             { k:"COGS source", v:"Local sheet v1", sub:"Notion not connected", c:"r" }
           ],
           sources: [
@@ -992,7 +1274,7 @@
           ],
           ledger: [
             { k:"Last committed", v:"8 oz butter MSRP $66", sub:"Pricing session", c:"g" },
-            { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh cost data", c:"y" }
+            { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh costs", c:"y" }
           ]
         },
         formulation: {
@@ -1023,66 +1305,22 @@
         }
       };
 
-      const data = stub[sessionId] || stub.pricing;
+      const base = stub[sid] || stub.pricing;
 
-      assumpList.innerHTML = "";
-      sourcesList.innerHTML = "";
-      ledgerList.innerHTML = "";
-
-      assumpStamp.textContent = nowStamp();
-      sourcesStamp.textContent = nowStamp();
-      ledgerStamp.textContent = nowStamp();
-
-      // Assumptions list
-      for(const a of data.assumptions){
-        const row = document.createElement("div");
-        row.className = "kvRow";
-        const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
-        row.innerHTML = `
-          <div>
-            <div class="kvKey">
-              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-              ${escapeHtml(a.k)}
-            </div>
-            <div class="kvSub">${escapeHtml(a.sub || "")}</div>
-          </div>
-          <div class="kvVal">${escapeHtml(a.v)}</div>
-        `;
-        assumpList.appendChild(row);
+      // Make fork slightly more “uncertain” by default (visual cue)
+      const data = JSON.parse(JSON.stringify(base));
+      if(bid !== "main"){
+        data.assumptions = data.assumptions.map(a => a.c === "g" ? {...a, c:"y"} : a);
+        data.ledger = data.ledger.map(l => l.c === "g" ? {...l, c:"y"} : l);
       }
 
-      // Sources chips
-      for(const s of data.sources){
-        const chip = document.createElement("div");
-        chip.className = "chip";
-        const d = document.createElement("span");
-        d.className = "chipDot";
-        d.style.background = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
-        chip.appendChild(d);
-        chip.appendChild(document.createTextNode(`${s.name} • ${s.state}`));
-        sourcesList.appendChild(chip);
-      }
-
-      // Ledger
-      for(const l of data.ledger){
-        const row = document.createElement("div");
-        row.className = "kvRow";
-        const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
-        row.innerHTML = `
-          <div>
-            <div class="kvKey">
-              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-              ${escapeHtml(l.k)}
-            </div>
-            <div class="kvSub">${escapeHtml(l.sub || "")}</div>
-          </div>
-          <div class="kvVal">${escapeHtml(l.v)}</div>
-        `;
-        ledgerList.appendChild(row);
-      }
+      const html = renderContextHtml(data);
+      contextContentDesktop.innerHTML = html;
+      contextContentMobile.innerHTML = html;
+      setTopSub();
     }
 
-    // ====== BACKEND STATUS (ping only; real wiring later) ======
+    // ====== BACKEND STATUS ======
     async function pingBackend(){
       if(!API_BASE){
         setDot(backendDot, "bad");
@@ -1102,56 +1340,285 @@
       }
     }
 
-    // ====== SYNC STATUS (UI-only now) ======
+    // ====== SYNC STATUS (UI-only demo for now) ======
     function setSync(state, text){
       setDot(syncDot, state);
       syncText.textContent = text;
     }
 
-    // ====== CHAT FLOW ======
-    let activeSession = getActiveSessionId();
-    let history = loadHistory(activeSession);
+    // ====== MESSAGE RENDERING (table + clamp + menu + fork) ======
 
+    function parseTable(text){
+      // Accept either:
+      // 1) pipe table (markdown-ish)
+      // 2) whitespace column table (2+ spaces)
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      if(lines.length < 2) return null;
+
+      // pipe format
+      if(lines[0].includes("|")){
+        const rows = lines
+          .filter(l => !/^\|?\s*[-:| ]+\s*\|?$/.test(l))
+          .map(l => l.replace(/^\|/,"").replace(/\|$/,"").split("|").map(x => x.trim()));
+        if(rows.length < 2) return null;
+        return rows;
+      }
+
+      // whitespace format (2+ spaces)
+      const rows = lines.map(l => l.split(/\s{2,}/g).map(x => x.trim()));
+      const maxCols = Math.max(...rows.map(r => r.length));
+      if(maxCols < 2) return null;
+      // pad
+      return rows.map(r => {
+        const rr = r.slice();
+        while(rr.length < maxCols) rr.push("");
+        return rr;
+      });
+    }
+
+    function shouldClamp(content){
+      // clamp long text blobs (not tables/decision)
+      return content && content.length > 700;
+    }
+
+    function closeAllMenus(){
+      document.querySelectorAll(".menu").forEach(m => m.style.display = "none");
+    }
+
+    function renderMessage(m, indexInHistory){
+      const row = document.createElement("div");
+      row.className = "row " + (m.role === "you" ? "you" : "bot");
+
+      const bubbleWrap = document.createElement("div");
+      bubbleWrap.className = "bubbleWrap";
+
+      const bubble = document.createElement("div");
+      const t = m.type || "text";
+      bubble.className = "bubble " + (t === "text" ? "" : t);
+
+      // content area (clampable)
+      const contentBox = document.createElement("div");
+      contentBox.style.position = "relative";
+
+      if(t === "decision"){
+        const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
+        const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
+        bubble.innerHTML = `
+          <div class="decisionHdr">
+            <strong>${escapeHtml(title)}</strong>
+            <span class="decisionTag">${escapeHtml(tag)}</span>
+          </div>
+          <div>${escapeHtml(m.content)}</div>
+        `;
+      } else if(t === "table"){
+        const parsed = parseTable(m.content || "");
+        if(parsed){
+          const [head, ...body] = parsed;
+          const tblWrap = document.createElement("div");
+          tblWrap.className = "tblWrap";
+          const table = document.createElement("table");
+          table.className = "tbl";
+          table.innerHTML = `
+            <thead>
+              <tr>${head.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr>
+            </thead>
+            <tbody>
+              ${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          `;
+          tblWrap.appendChild(table);
+          bubble.appendChild(tblWrap);
+        } else {
+          // fallback
+          bubble.textContent = m.content;
+        }
+      } else {
+        const textDiv = document.createElement("div");
+        textDiv.textContent = m.content || "";
+        if(shouldClamp(m.content || "")){
+          textDiv.classList.add("clamp");
+          const moreRow = document.createElement("div");
+          moreRow.className = "moreRow";
+          const btn = document.createElement("button");
+          btn.className = "moreBtn";
+          btn.textContent = "Show more";
+          btn.addEventListener("click", () => {
+            const isClamped = textDiv.classList.toggle("clamp");
+            btn.textContent = isClamped ? "Show more" : "Show less";
+          });
+          moreRow.appendChild(btn);
+          bubble.appendChild(textDiv);
+          bubble.appendChild(moreRow);
+        } else {
+          bubble.appendChild(textDiv);
+        }
+      }
+
+      // meta row + menu
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const name = m.role === "you" ? "You" : "WilliamBot";
+
+      const conf = m.confidence || "";
+      const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
+      const confDotClass = conf ? conf : "";
+
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.alignItems = "center";
+      right.style.gap = "8px";
+      right.style.position = "relative";
+
+      const confEl = document.createElement("span");
+      confEl.className = "confidence";
+      confEl.title = "Confidence (UI now; backend later)";
+      confEl.innerHTML = `
+        <span class="confDot ${confDotClass}"></span>
+        <span>${confLabel}</span>
+        <span style="opacity:.65">•</span>
+        <span>${escapeHtml(m.ts || nowTime())}</span>
+      `;
+
+      const menuBtn = document.createElement("button");
+      menuBtn.className = "menuBtn";
+      menuBtn.textContent = "⋯";
+      menuBtn.title = "Message actions";
+
+      const menu = document.createElement("div");
+      menu.className = "menu";
+      menu.innerHTML = `
+        <div class="menuItem" data-act="copy">Copy</div>
+        <div class="menuItem" data-act="fork">Fork from here</div>
+      `;
+      // only show fork for bot messages or any? (allow either)
+      // keep it simple: allow fork from any message index
+
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.style.display === "block";
+        closeAllMenus();
+        menu.style.display = isOpen ? "none" : "block";
+      });
+
+      menu.addEventListener("click", async (e) => {
+        const act = e.target && e.target.getAttribute && e.target.getAttribute("data-act");
+        if(!act) return;
+        closeAllMenus();
+
+        if(act === "copy"){
+          try{
+            await navigator.clipboard.writeText(m.content || "");
+          } catch {
+            // fallback: ignore
+          }
+        }
+
+        if(act === "fork"){
+          forkFromIndex(indexInHistory);
+        }
+      });
+
+      right.appendChild(confEl);
+      right.appendChild(menuBtn);
+      right.appendChild(menu);
+
+      meta.innerHTML = `<span>${escapeHtml(name)}</span>`;
+      meta.appendChild(right);
+
+      bubbleWrap.appendChild(bubble);
+      bubbleWrap.appendChild(meta);
+      row.appendChild(bubbleWrap);
+      feed.appendChild(row);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    document.addEventListener("click", () => closeAllMenus());
+
+    // ====== THREAD STATE ======
+    let activeSession = getActiveSessionId();
+    let activeBranch = getActiveBranchId();
+    let history = [];
+
+    function loadActiveThread(){
+      activeSession = getActiveSessionId();
+      activeBranch = getActiveBranchId();
+      history = loadHistory(activeSession, activeBranch);
+      feed.innerHTML = "";
+      hydrate();
+      setTopSub();
+    }
+
+    function addToHistory(m){
+      history.push(m);
+      saveHistory(activeSession, activeBranch, history);
+    }
+
+    function forkFromIndex(idx){
+      // create a new branch with history up to idx (inclusive)
+      const sid = getActiveSessionId();
+      const branches = loadBranches(sid);
+
+      const forkId = "fork_" + Date.now();
+      const forkName = "Fork " + new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+      branches.push({ id: forkId, name: forkName, kind:"fork", created: nowStamp() });
+      saveBranches(sid, branches);
+
+      const base = history.slice(0, idx + 1);
+      saveHistory(sid, forkId, base);
+
+      setActiveBranchId(forkId);
+      loadActiveThread();
+      renderSessionLists();
+      hydrateContextForThread();
+
+      // add a system note in the fork
+      const note = {
+        role:"bot",
+        type:"decision",
+        confidence:"y",
+        ts: nowTime(),
+        meta:{ title:"Fork created", tag:"Branch" },
+        content:`Forked from message #${idx + 1}. This branch preserves context up to that point. Continue with corrected assumptions here.`
+      };
+      renderMessage(note, history.length);
+      addToHistory(note);
+      hydrateContextForThread();
+    }
+
+    // ====== CHAT FLOW ======
     function hydrate(){
       if(history.length === 0){
-        renderMessage({
+        const intro = {
           role:"bot",
           type:"text",
           confidence:"y",
           content:
 `UI is live.
 
+What’s now improved:
+• Context drawer on mobile
+• Branching (fork from any message via ⋯)
+• Better tables + long output clamp
+• Decision / warning rendering
+
 Next (when PC arrives):
 1) Tailscale on PC + phone
 2) Run local backend (/health, /chat)
-3) Set API_BASE in this file
-
-This UI already supports:
-• sessions
-• context panel (assumptions/sources/ledger)
-• message types (tables/decisions/warnings)
-• confidence indicators
-• high-stakes review component (stubbed)`,
+3) Set API_BASE in this file`,
           ts: nowTime()
-        });
+        };
+        renderMessage(intro, 0);
+        addToHistory(intro);
         return;
       }
-      for(const m of history){
-        renderMessage(m);
-      }
+      history.forEach((m, i) => renderMessage(m, i));
     }
 
     function syncButtons(){
       sendBtn.disabled = input.value.trim().length === 0;
     }
 
-    function addToHistory(m){
-      history.push(m);
-      saveHistory(activeSession, history);
-    }
-
     function maybeHighStakes(text){
-      // Simple stub trigger: if user writes "change price" show high-stakes modal UI
       const t = text.toLowerCase();
       return t.includes("change price") || t.includes("raise price") || t.includes("lower price") || t.includes("reprice");
     }
@@ -1163,28 +1630,21 @@ This UI already supports:
           <div class="modalGrid">
             <div class="modalCard">
               <strong>Impact analysis</strong>
-              <ul>
-                ${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}
-              </ul>
+              <ul>${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
             </div>
             <div class="modalCard">
               <strong>Risks identified</strong>
-              <ul>
-                ${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}
-              </ul>
+              <ul>${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
             </div>
           </div>
           <div style="margin-top:10px; color: rgba(243,239,230,.70);">
-            This is a UI component today. Later, the backend will populate it from real data.
+            UI component today. Later, backend populates this from real data + assumptions.
           </div>
         </div>
       `;
       hsModalBack.style.display = "flex";
     }
-
-    function closeHighStakesModal(){
-      hsModalBack.style.display = "none";
-    }
+    function closeHighStakesModal(){ hsModalBack.style.display = "none"; }
 
     async function sendMessage(){
       const text = input.value.trim();
@@ -1193,12 +1653,10 @@ This UI already supports:
       input.value = "";
       syncButtons();
 
-      // Render user
       const youMsg = { role:"you", type:"text", confidence:"g", content:text, ts: nowTime() };
-      renderMessage(youMsg);
+      renderMessage(youMsg, history.length);
       addToHistory(youMsg);
 
-      // High-stakes UI trigger stub (no backend required)
       if(maybeHighStakes(text)){
         openHighStakesModal({
           change: "Retail price $32 → $36",
@@ -1207,26 +1665,27 @@ This UI already supports:
         });
       }
 
-      // If backend not configured, return “UI ready” behavior
       const ok = await pingBackend();
       if(!ok){
-        const reply =
-          "UI is ready. When your PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).";
-        const botMsg = { role:"bot", type:"text", confidence:"y", content:reply, ts: nowTime() };
-        renderMessage(botMsg);
+        const botMsg = {
+          role:"bot",
+          type:"text",
+          confidence:"y",
+          content:"Backend not connected yet (UI-only). When PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).",
+          ts: nowTime()
+        };
+        renderMessage(botMsg, history.length);
         addToHistory(botMsg);
 
-        // Example: show a structured table + decision block to prove UI components work
         const tbl = {
           role:"bot", type:"table", confidence:"y", ts: nowTime(),
           content:
-`Example table block (UI component):
-SKU            MSRP   Channel   Notes
-8oz Butter      66    Shopify   Luxury anchor
-8oz Shampoo     ??    Amazon    Pending COGS refresh
-8oz Conditioner ??    Amazon    Pending COGS refresh`
+`SKU  | MSRP | Channel | Notes
+8oz Butter | 66 | Shopify | Luxury anchor
+8oz Shampoo | ?? | Amazon | Pending COGS refresh
+8oz Conditioner | ?? | Amazon | Pending COGS refresh`
         };
-        renderMessage(tbl);
+        renderMessage(tbl, history.length);
         addToHistory(tbl);
 
         const decision = {
@@ -1234,20 +1693,21 @@ SKU            MSRP   Channel   Notes
           meta:{ title:"Pricing guardrail", tag:"Review" },
           content:
 `Do not finalize MSRP until:
-• Notion costs are synced (fresh COGS)
+• Costs are synced (fresh COGS)
 • Amazon fee category is confirmed
-• Unit shipping + packaging are locked`
+• Packaging + ship cost per unit are locked`
         };
-        renderMessage(decision);
+        renderMessage(decision, history.length);
         addToHistory(decision);
 
         const warn = {
           role:"bot", type:"warning", confidence:"r", ts: nowTime(),
           content:"Warning: current assumptions include stale or estimated values. Do not commit pricing decisions yet."
         };
-        renderMessage(warn);
+        renderMessage(warn, history.length);
         addToHistory(warn);
 
+        hydrateContextForThread();
         return;
       }
 
@@ -1257,7 +1717,10 @@ SKU            MSRP   Channel   Notes
           message: text,
           mode: modeText.textContent,
           session_id: activeSession,
-          history: history.map(m => ({ role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta }))
+          branch_id: activeBranch,
+          history: history.map(m => ({
+            role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta, ts: m.ts
+          }))
         };
 
         const res = await fetch(API_BASE + CHAT_ENDPOINT, {
@@ -1270,20 +1733,38 @@ SKU            MSRP   Channel   Notes
         const data = await res.json();
 
         // Expect backend to return structured messages later:
-        // { messages: [{type, content, confidence, meta...}, ...], sync_status: {...}, context: {...} }
+        // { messages:[...], sync_status:{...}, context:{...} }
         const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
         const botMsg = { role:"bot", type:"text", confidence:"y", content: reply, ts: nowTime() };
-        renderMessage(botMsg);
+        renderMessage(botMsg, history.length);
         addToHistory(botMsg);
 
       } catch {
         const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
         const botMsg = { role:"bot", type:"warning", confidence:"r", content: msg, ts: nowTime() };
-        renderMessage(botMsg);
+        renderMessage(botMsg, history.length);
         addToHistory(botMsg);
         setDot(backendDot, "bad");
         backendText.textContent = "Error";
       }
+    }
+
+    // ====== DRAWERS ======
+    function openSessionsDrawer(){
+      sessionsDrawerBack.style.display = "flex";
+      sessionsDrawerBack.setAttribute("aria-hidden", "false");
+    }
+    function closeSessionsDrawer(){
+      sessionsDrawerBack.style.display = "none";
+      sessionsDrawerBack.setAttribute("aria-hidden", "true");
+    }
+    function openContextDrawer(){
+      contextDrawerBack.style.display = "flex";
+      contextDrawerBack.setAttribute("aria-hidden", "false");
+    }
+    function closeContextDrawer(){
+      contextDrawerBack.style.display = "none";
+      contextDrawerBack.setAttribute("aria-hidden", "true");
     }
 
     // ====== EVENTS ======
@@ -1298,12 +1779,7 @@ SKU            MSRP   Channel   Notes
 
     modeBadge.addEventListener("click", cycleMode);
 
-    toggleContextBtn.addEventListener("click", () => {
-      contextPanel.classList.toggle("hidden");
-    });
-
     $("syncBadge").addEventListener("click", () => {
-      // UI-only demonstration: cycle sync states
       const cur = syncText.textContent;
       if(cur.includes("Not connected")){
         setSync("bad","Out of sync (12h)");
@@ -1314,28 +1790,78 @@ SKU            MSRP   Channel   Notes
       }
     });
 
+    // Sessions button behavior:
+    // - On desktop: toggle left panel
+    // - On mobile: open drawer
+    sessionsBtn.addEventListener("click", () => {
+      if(window.matchMedia("(max-width: 760px)").matches){
+        openSessionsDrawer();
+      } else {
+        leftPanel.classList.toggle("hidden");
+      }
+    });
+
+    // Context button behavior:
+    // - Desktop: toggle right panel (only if visible)
+    // - Tablet/mobile: open context drawer
+    contextBtn.addEventListener("click", () => {
+      if(isMobileLayout()){
+        openContextDrawer();
+      } else {
+        contextPanel.classList.toggle("hidden");
+      }
+    });
+
+    sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
+    sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
+
+    contextDrawerClose.addEventListener("click", closeContextDrawer);
+    contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
+
     hsClose.addEventListener("click", closeHighStakesModal);
+    hsModalBack.addEventListener("click", (e) => { if(e.target === hsModalBack) closeHighStakesModal(); });
+
     hsDiscuss.addEventListener("click", () => {
       closeHighStakesModal();
-      const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Ask what you want to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
-      renderMessage(msg); addToHistory(msg);
+      const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Tell me what to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
+      renderMessage(msg, history.length); addToHistory(msg);
+      hydrateContextForThread();
     });
     hsCommit.addEventListener("click", () => {
       closeHighStakesModal();
-      const msg = { role:"bot", type:"decision", confidence:"y", ts: nowTime(), meta:{title:"Ledger commit (stub)", tag:"Committed"}, content:"Committed to ledger (UI stub). Later, this will write to your local ledger store with inputs + rationale + sources." };
-      renderMessage(msg); addToHistory(msg);
+      const msg = {
+        role:"bot",
+        type:"decision",
+        confidence:"y",
+        ts: nowTime(),
+        meta:{title:"Ledger commit (stub)", tag:"Committed"},
+        content:"Committed to ledger (UI stub). Later, this writes to your local ledger store with inputs + rationale + sources."
+      };
+      renderMessage(msg, history.length); addToHistory(msg);
+      hydrateContextForThread();
     });
 
     // ====== INIT ======
-    renderSessions();
-    hydrate();
-    hydrateContextForSession(activeSession);
+    function ensureBranchesForAll(){
+      for(const s of sessions){
+        const b = loadBranches(s.id);
+        saveBranches(s.id, b);
+      }
+    }
+
+    ensureBranchesForAll();
+    renderSessionLists();
+    loadActiveThread();
+    hydrateContextForThread();
 
     syncButtons();
     pingBackend();
-
-    // Start with sync “not connected” (real Notion sync later)
     setSync("bad","Not connected");
+
+    window.addEventListener("resize", () => {
+      // keep context mirrored between desktop/drawer
+      hydrateContextForThread();
+    });
   </script>
 </body>
 </html>
