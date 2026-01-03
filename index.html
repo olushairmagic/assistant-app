@@ -16,18 +16,16 @@
     :root{
       --bg:#0b0a08;
       --bg2:#12100c;
-      --panel:#14110d;
-      --panel2:#191611;
 
       --cream:#f3efe6;
       --ink:#1b1813;
-      --muted:#8b8276;
 
       --border: rgba(243,239,230,.14);
-      --line: rgba(243,239,230,.10);
 
-      --accent:#7a1114;
+      --accent:#7a1114;     /* Business (burgundy) */
       --accent2:#a0141a;
+      --school:#1e40af;     /* School (slate-blue) */
+      --school2:#2563eb;
 
       --green:#15803d;
       --amber:#b45309;
@@ -55,13 +53,11 @@
       overflow-x:hidden;
     }
 
-    /* helpers */
     .hidden { display:none !important; }
     .srOnly{
       position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
     }
 
-    /* Layout */
     .wrap{
       height:100%;
       padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
@@ -79,7 +75,6 @@
       min-width: 0;
     }
 
-    /* Top bar */
     header{
       grid-column: 1 / -1;
       border: 1px solid var(--border);
@@ -121,6 +116,7 @@
       flex-direction:column;
       line-height: 1.06;
       min-width: 0;
+      gap: 6px;
     }
     .brandText strong{
       font-size: 15.5px;
@@ -128,12 +124,45 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .brandText span{
+
+    /* NEW: category badge that tells the truth */
+    .catRow{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .catBadge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      font-size: 12px;
+      color: rgba(243,239,230,.92);
+      background: rgba(15,13,10,.35);
+      white-space: nowrap;
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .catBadge .miniDot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.18);
+      flex: 0 0 auto;
+    }
+    .catBadge.biz .miniDot{ background: var(--accent2); box-shadow: 0 0 0 3px rgba(122,17,20,.16); }
+    .catBadge.school .miniDot{ background: var(--school2); box-shadow: 0 0 0 3px rgba(37,99,235,.16); }
+
+    #topSub{
       font-size: 12px;
       color: rgba(243,239,230,.68);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0;
     }
 
     .statusRow{
@@ -192,7 +221,6 @@
       background: rgba(20,17,13,.62);
     }
 
-    /* Panels */
     .panel{
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -230,7 +258,6 @@
       min-height: 0;
     }
 
-    /* Left: Sessions */
     .segRow{
       display:flex;
       gap:8px;
@@ -256,6 +283,12 @@
       background: rgba(122,17,20,.18);
       color: rgba(243,239,230,.92);
       box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
+    }
+    /* NEW: school tab active treatment */
+    .seg.schoolActive{
+      border-color: rgba(37,99,235,.45);
+      background: rgba(37,99,235,.16);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10) inset;
     }
 
     .list{ display:flex; flex-direction:column; gap: 8px; margin-top:10px; }
@@ -310,7 +343,6 @@
       flex-wrap: wrap;
     }
 
-    /* Center: Chat */
     .chat{
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -319,11 +351,20 @@
       display:flex;
       flex-direction:column;
       min-height: 0;
+      min-width: 0;
+    }
+    /* NEW: chat background differs by category (subtle) */
+    .chat.bizBg{
       background:
         radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
-      min-width: 0;
     }
+    .chat.schoolBg{
+      background:
+        radial-gradient(900px 600px at 30% 0%, rgba(37,99,235,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+    }
+
     .feed{
       flex:1;
       overflow:auto;
@@ -395,11 +436,15 @@
     .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
     .confDot.r{ background: var(--red); box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
 
-    /* Composer */
     .composer{
       padding: 12px;
       border-top: 1px solid rgba(243,239,230,.14);
       background: rgba(20,17,13,.52);
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .composerRow{
       display:flex;
       gap: 10px;
       align-items:flex-end;
@@ -422,6 +467,20 @@
       border-color: rgba(122,17,20,.40);
       box-shadow: 0 0 0 5px rgba(122,17,20,.16);
     }
+
+    /* NEW: context warning (non-blocking) */
+    .warn{
+      display:none;
+      border: 1px solid rgba(180,83,9,.35);
+      background: rgba(180,83,9,.10);
+      color: rgba(243,239,230,.92);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+    .warn strong{ color: rgba(243,239,230,.95); }
+
     .send{
       min-width: 96px;
       padding: 12px 14px;
@@ -442,7 +501,6 @@
       box-shadow: none;
     }
 
-    /* Right: Workspace */
     .section{
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(15,13,10,.35);
@@ -513,6 +571,7 @@
       font-size: 12px;
     }
     .fileChip small{ color: rgba(243,239,230,.60); }
+
     .miniBtn{
       border-radius: 999px;
       padding: 7px 10px;
@@ -533,7 +592,6 @@
       background: rgba(185,28,28,.12);
     }
 
-    /* Fatal overlay (prevents silent white screen) */
     .fatal{
       position: fixed;
       inset: 0;
@@ -569,7 +627,6 @@
       word-break: break-word;
     }
 
-    /* Mobile drawers */
     .drawerBackdrop{
       position: fixed;
       inset: 0;
@@ -601,7 +658,6 @@
     .drawer.open{ transform: translateX(0); }
     .drawerBackdrop.open{ display:block; }
 
-    /* Responsive */
     @media (max-width: 1080px){
       .app{ grid-template-columns: 300px 1fr; }
       #workspacePanel{ display:none; }
@@ -623,13 +679,19 @@
         <div class="brand">
           <div class="logo">W</div>
           <div class="brandText">
-            <strong>WilliamBot</strong>
+            <div class="catRow">
+              <strong>WilliamBot</strong>
+              <span class="catBadge biz" id="catBadge">
+                <span class="miniDot"></span>
+                <span id="catText">Business</span>
+              </span>
+            </div>
             <span id="topSub">Session: —</span>
           </div>
         </div>
 
         <div class="statusRow">
-          <div class="badge clickable" id="profileBadge" title="Agent profile (UI now; backend later)">
+          <div class="badge clickable" id="profileBadge" title="Profile is stored per session">
             <span class="label">Profile</span>
             <span id="profileText">Study</span>
           </div>
@@ -675,12 +737,15 @@
       </aside>
 
       <!-- CENTER: CHAT -->
-      <main class="chat">
+      <main class="chat bizBg" id="chatShell">
         <div class="feed" id="feed" aria-live="polite"></div>
 
         <div class="composer">
-          <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
-          <button class="send" id="sendBtn" disabled>Send</button>
+          <div class="warn" id="contextWarn"></div>
+          <div class="composerRow">
+            <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
+            <button class="send" id="sendBtn" disabled>Send</button>
+          </div>
         </div>
       </main>
 
@@ -782,30 +847,36 @@
         return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
       }
       function uid(){
-        // short, collision-resistant enough for sessions
         return "s_" + Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
       }
-
       function setDot(el, state){
         el.classList.remove("ok","bad");
         if(state === "ok") el.classList.add("ok");
         if(state === "bad") el.classList.add("bad");
       }
-
-      // -------------------- Storage --------------------
-      const STORE = {
-        sessions: "wb_sessions_v5",
-        activeSession: "wb_active_session_v5",
-        activeGroup: "wb_active_group_v5",  // "business" | "school"
-        historyPrefix: "wb_history_v5_"
-      };
-      const historyKey = (sid) => STORE.historyPrefix + sid;
-
       function safeParse(json, fallback){
         try { return JSON.parse(json); } catch { return fallback; }
       }
 
-      // -------------------- Default sessions (Business + 2 classes) --------------------
+      // -------------------- Storage --------------------
+      // Keep your existing sessions/history keys for continuity; add v6 keys for the fixes.
+      const STORE = {
+        sessions: "wb_sessions_v5",
+        historyPrefix: "wb_history_v5_",
+
+        activeGroup: "wb_active_group_v6",                   // "business" | "school"
+        activeBiz: "wb_active_session_business_v6",
+        activeSchool: "wb_active_session_school_v6",
+
+        // Back-compat (older single active session key)
+        legacyActiveSession: "wb_active_session_v5",
+
+        profilePrefix: "wb_profile_v6_"                      // per-session profile
+      };
+      const historyKey = (sid) => STORE.historyPrefix + sid;
+      const profileKey = (sid) => STORE.profilePrefix + sid;
+
+      // -------------------- Default sessions --------------------
       function defaultSessions(){
         return [
           {
@@ -825,9 +896,7 @@
             title: "UMGC — MATH 107 (College Algebra)",
             note: "Syllabus PDF • homework help • study plan",
             updated: stamp(),
-            files: [
-              { name: "MATH_107_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }
-            ]
+            files: [{ name: "MATH_107_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }]
           },
           {
             id: "hist125",
@@ -835,9 +904,7 @@
             title: "UMGC — HIST 125 (Technological Transformations)",
             note: "Syllabus PDF • readings • discussion prep",
             updated: stamp(),
-            files: [
-              { name: "HIST_125_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }
-            ]
+            files: [{ name: "HIST_125_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }]
           }
         ];
       }
@@ -851,23 +918,8 @@
         localStorage.setItem(STORE.sessions, JSON.stringify(s));
         return s;
       }
-
       function saveSessions(sessions){
         localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
-      }
-
-      function getActiveSessionId(){
-        return localStorage.getItem(STORE.activeSession) || "biz_main";
-      }
-      function setActiveSessionId(id){
-        localStorage.setItem(STORE.activeSession, id);
-      }
-
-      function getActiveGroup(){
-        return localStorage.getItem(STORE.activeGroup) || "business";
-      }
-      function setActiveGroup(g){
-        localStorage.setItem(STORE.activeGroup, g);
       }
 
       function loadHistory(sid){
@@ -875,32 +927,84 @@
         const parsed = safeParse(raw, []);
         return Array.isArray(parsed) ? parsed : [];
       }
-
       function saveHistory(sid, hist){
-        // keep recent messages only
         localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-500)));
       }
 
-      // -------------------- Profiles (NOT session switching) --------------------
-      // You asked specifically: sessions should be what you toggle—not plan/draft/calc.
-      // So the top badge cycles a "profile" label only. It does not change sessions.
+      // -------------------- Group + Active session (per group) --------------------
+      function getActiveGroup(){
+        return localStorage.getItem(STORE.activeGroup) || "business";
+      }
+      function setActiveGroup(g){
+        localStorage.setItem(STORE.activeGroup, g);
+      }
+
+      function getActiveSessionIdForGroup(group){
+        const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
+        return localStorage.getItem(key) || "";
+      }
+      function setActiveSessionIdForGroup(group, id){
+        const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
+        localStorage.setItem(key, id);
+      }
+
+      function sessionsByGroup(group){
+        return sessions.filter(s => s.group === group);
+      }
+      function firstSessionId(group){
+        const list = sessionsByGroup(group);
+        return list.length ? list[0].id : "";
+      }
+
+      // This app now defines "active session" as "active session for active group"
+      function getActiveSessionId(){
+        const g = getActiveGroup();
+        return getActiveSessionIdForGroup(g) || "";
+      }
+
+      // Back-compat migration: if user has legacy active session, map it to its group once.
+      function migrateLegacyActiveIfNeeded(){
+        const legacy = localStorage.getItem(STORE.legacyActiveSession);
+        if(!legacy) return;
+
+        const found = sessions.find(s => s.id === legacy);
+        if(found){
+          setActiveSessionIdForGroup(found.group, found.id);
+          setActiveGroup(found.group);
+        }
+
+        // one-way migration (keep legacy key? remove to prevent future ambiguity)
+        try{ localStorage.removeItem(STORE.legacyActiveSession); } catch {}
+      }
+
+      // -------------------- Profiles (PER SESSION) --------------------
       const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
       const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
-      let profileIdx = 0;
 
       function profileListForSession(session){
         return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
       }
-      function setProfileDefault(session){
+
+      function getProfileForSession(session){
+        const stored = localStorage.getItem(profileKey(session.id));
         const list = profileListForSession(session);
-        const preferred = (session.group === "business") ? "Financial" : "Study";
-        profileIdx = Math.max(0, list.indexOf(preferred));
-        $("profileText").textContent = list[profileIdx] || list[0];
+        if(stored && list.includes(stored)) return stored;
+
+        // default per category
+        return (session.group === "business") ? "Financial" : "Study";
       }
-      function cycleProfile(currentSession){
-        const list = profileListForSession(currentSession);
-        profileIdx = (profileIdx + 1) % list.length;
-        $("profileText").textContent = list[profileIdx];
+
+      function setProfileForSession(session, profile){
+        localStorage.setItem(profileKey(session.id), profile);
+        $("profileText").textContent = profile;
+      }
+
+      function cycleProfileForSession(session){
+        const list = profileListForSession(session);
+        const cur = getProfileForSession(session);
+        const idx = Math.max(0, list.indexOf(cur));
+        const next = list[(idx + 1) % list.length];
+        setProfileForSession(session, next);
       }
 
       // -------------------- UI elements --------------------
@@ -911,30 +1015,31 @@
       const sessionCount = $("sessionCount");
       const activeLabel = $("activeLabel");
 
-      // Desktop lists
       const sessionList = $("sessionList");
 
-      // Tabs (desktop + drawer)
       const tabBiz = $("tabBiz");
       const tabSchool = $("tabSchool");
       const drawerTabBiz = $("drawerTabBiz");
       const drawerTabSchool = $("drawerTabSchool");
 
-      // Drawer
       const backdrop = $("drawerBackdrop");
       const sessionsDrawer = $("sessionsDrawer");
       const workspaceDrawer = $("workspaceDrawer");
       const drawerSessionList = $("drawerSessionList");
       const drawerWorkspaceBody = $("drawerWorkspaceBody");
 
-      // Workspace (desktop)
       const wsHint = $("wsHint");
       const wsSubtitle = $("wsSubtitle");
       const workspaceBody = $("workspaceBody");
 
-      // Badges
       const notionDot = $("notionDot");
       const engineDot = $("engineDot");
+
+      const catBadge = $("catBadge");
+      const catText = $("catText");
+      const chatShell = $("chatShell");
+
+      const contextWarn = $("contextWarn");
 
       // -------------------- State --------------------
       let sessions = loadSessions();
@@ -944,7 +1049,18 @@
 
       function currentSession(){
         const sid = getActiveSessionId();
-        return sessions.find(s => s.id === sid) || sessions[0];
+        return sessions.find(s => s.id === sid) || null;
+      }
+
+      function setCategoryUI(group){
+        // header badge
+        catBadge.classList.toggle("biz", group === "business");
+        catBadge.classList.toggle("school", group === "school");
+        catText.textContent = (group === "business") ? "Business" : "School";
+
+        // chat background
+        chatShell.classList.toggle("bizBg", group === "business");
+        chatShell.classList.toggle("schoolBg", group === "school");
       }
 
       function setTopSubText(){
@@ -959,20 +1075,29 @@
         tabSchool.classList.toggle("active", group === "school");
         tabBiz.setAttribute("aria-selected", group === "business" ? "true" : "false");
         tabSchool.setAttribute("aria-selected", group === "school" ? "true" : "false");
+
+        // ensure school tab uses school styling when active
+        tabBiz.classList.remove("schoolActive");
+        tabSchool.classList.remove("schoolActive");
+        if(group === "school") tabSchool.classList.add("schoolActive");
+
         // drawer
         drawerTabBiz.classList.toggle("active", group === "business");
         drawerTabSchool.classList.toggle("active", group === "school");
+        drawerTabBiz.classList.remove("schoolActive");
+        drawerTabSchool.classList.remove("schoolActive");
+        if(group === "school") drawerTabSchool.classList.add("schoolActive");
       }
 
       function sessionPillText(s){
-        const active = s.id === getActiveSessionId();
+        const active = currentSession() && s.id === currentSession().id;
         if(active) return "Active";
         return (s.group === "school") ? "Class" : "Business";
       }
 
       function renderSessionListInto(el, group){
         el.innerHTML = "";
-        const filtered = sessions.filter(s => s.group === group);
+        const filtered = sessionsByGroup(group);
 
         if(filtered.length === 0){
           const empty = document.createElement("div");
@@ -1009,31 +1134,58 @@
       function renderSessions(){
         const group = getActiveGroup();
         setTabsUI(group);
+        setCategoryUI(group);
 
         sessionCount.textContent = String(sessions.length);
-        activeLabel.textContent = (currentSession() ? currentSession().title : "—");
+
+        const cs = currentSession();
+        activeLabel.textContent = cs ? cs.title : "—";
 
         renderSessionListInto(sessionList, group);
         renderSessionListInto(drawerSessionList, group);
 
         setTopSubText();
+
+        // Profile label always matches active session
+        if(cs) $("profileText").textContent = getProfileForSession(cs);
       }
 
-      function activateSession(id){
+      // -------------------- Activation + Group switching (fixes DeepSeek leak #1/#2) --------------------
+      function activateSession(id, opts){
+        opts = opts || {};
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        setActiveSessionId(id);
+        // Set group + per-group active session
         setActiveGroup(s.group);
+        setActiveSessionIdForGroup(s.group, s.id);
 
-        setProfileDefault(s);
+        // Update profile label from per-session storage
+        $("profileText").textContent = getProfileForSession(s);
 
         loadThread();
         hydrateWorkspace();
         renderSessions();
 
-        // On mobile, close sessions drawer after choosing
-        closeDrawer("sessions");
+        if(!opts.keepDrawersOpen) closeDrawer("sessions");
+      }
+
+      function activateSessionForGroup(group){
+        // Choose last used in that group, else first available
+        const last = getActiveSessionIdForGroup(group);
+        const exists = last && sessions.some(s => s.id === last && s.group === group);
+        const pick = exists ? last : firstSessionId(group);
+
+        setActiveGroup(group);
+
+        if(pick){
+          activateSession(pick, { keepDrawersOpen: true });
+        } else {
+          // no sessions in that group: explicit empty state
+          loadThreadEmpty(group);
+          hydrateWorkspaceEmpty(group);
+          renderSessions();
+        }
       }
 
       // -------------------- CRUD sessions --------------------
@@ -1042,24 +1194,16 @@
         const newId = uid();
 
         const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
-        const note  = isBiz
-          ? "Pricing • ops • planning"
-          : "Study plan • assignments • notes";
+        const note  = isBiz ? "Pricing • ops • planning" : "Study plan • assignments • notes";
 
-        const sess = {
-          id: newId,
-          group,
-          title,
-          note,
-          updated: stamp(),
-          files: []
-        };
+        const sess = { id: newId, group, title, note, updated: stamp(), files: [] };
 
         sessions = [sess, ...sessions];
         saveSessions(sessions);
 
-        // seed intro thread
+        // seed intro thread + default profile
         saveHistory(newId, [introForSession(sess)]);
+        localStorage.setItem(profileKey(newId), isBiz ? "Financial" : "Study");
 
         activateSession(newId);
       }
@@ -1076,7 +1220,6 @@
         saveSessions(sessions);
 
         renderSessions();
-        setTopSubText();
         hydrateWorkspace();
       }
 
@@ -1084,7 +1227,6 @@
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        // protect the 3 defaults if you want; comment this out if you want deletable
         const protectedIds = new Set(["biz_main","math107","hist125"]);
         if(protectedIds.has(id)){
           alert("That session is protected (default). Create new ones and delete those instead.");
@@ -1094,15 +1236,28 @@
         const ok = confirm("Delete this session? This removes its chat history from this browser.");
         if(!ok) return;
 
+        const group = s.group;
         sessions = sessions.filter(x => x.id !== id);
         saveSessions(sessions);
 
         try{ localStorage.removeItem(historyKey(id)); } catch {}
+        try{ localStorage.removeItem(profileKey(id)); } catch {}
 
-        // If deleted active, fall back to biz_main (or first session)
-        if(getActiveSessionId() === id){
-          const fallback = sessions.find(x => x.id === "biz_main") || sessions[0];
-          if(fallback) activateSession(fallback.id);
+        // If deleted active for that group, choose another in same group
+        const activeInGroup = getActiveSessionIdForGroup(group);
+        if(activeInGroup === id){
+          const fallback = firstSessionId(group);
+          if(fallback) {
+            setActiveSessionIdForGroup(group, fallback);
+            if(getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen:true });
+          } else {
+            // group now empty
+            if(getActiveGroup() === group){
+              loadThreadEmpty(group);
+              hydrateWorkspaceEmpty(group);
+              renderSessions();
+            }
+          }
         } else {
           renderSessions();
         }
@@ -1175,8 +1330,6 @@ Try prompts:
 - "Create a decision ledger template"`
           };
         }
-
-        // school
         return {
           role:"bot",
           confidence:"y",
@@ -1197,33 +1350,94 @@ Try prompts:
       }
 
       function loadThread(){
-        const sid = getActiveSessionId();
-        history = loadHistory(sid);
+        const cs = currentSession();
         feed.innerHTML = "";
+        contextWarn.style.display = "none";
+        contextWarn.textContent = "";
 
+        if(!cs){
+          loadThreadEmpty(getActiveGroup());
+          return;
+        }
+
+        history = loadHistory(cs.id);
         if(history.length === 0){
-          const s = currentSession();
-          const intro = introForSession(s);
+          const intro = introForSession(cs);
           history.push(intro);
-          saveHistory(sid, history);
+          saveHistory(cs.id, history);
         }
 
         for(const m of history) renderMessage(m);
       }
 
+      function loadThreadEmpty(group){
+        feed.innerHTML = "";
+        contextWarn.style.display = "none";
+        contextWarn.textContent = "";
+
+        const msg = {
+          role:"bot",
+          confidence:"y",
+          ts: nowTime(),
+          content:
+(group === "business")
+? "No Business sessions exist yet. Tap **New** to create one."
+: "No School sessions exist yet. Tap **New session** to create one."
+        };
+        renderMessage(msg);
+        history = [];
+      }
+
       function addToHistory(m){
-        const sid = getActiveSessionId();
+        const cs = currentSession();
+        if(!cs) return;
         history.push(m);
-        saveHistory(sid, history);
+        saveHistory(cs.id, history);
       }
 
       function syncSendButton(){
-        sendBtn.disabled = input.value.trim().length === 0;
+        sendBtn.disabled = input.value.trim().length === 0 || !currentSession();
+      }
+
+      // -------------------- Context safeguards (DeepSeek #7) --------------------
+      const SCHOOL_HINTS = ["syllabus","assignment","homework","quiz","discussion post","apa","citation","umgc","grade","module","week"];
+      const BIZ_HINTS = ["cogs","margin","msrp","sku","shopify","amazon","fba","fbm","overhead","fees","pricing","profit","inventory","supplier"];
+
+      function maybeWarnAboutContext(text){
+        const cs = currentSession();
+        if(!cs) return;
+
+        const t = String(text || "").toLowerCase();
+
+        const looksSchool = SCHOOL_HINTS.some(k => t.includes(k));
+        const looksBiz = BIZ_HINTS.some(k => t.includes(k));
+
+        // Business session but text looks school
+        if(cs.group === "business" && looksSchool && !looksBiz){
+          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like School content, but you’re in a Business session. If that’s a mistake, switch to the School tab.`;
+          contextWarn.style.display = "block";
+          return;
+        }
+
+        // School session but text looks business
+        if(cs.group === "school" && looksBiz && !looksSchool){
+          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like Business content, but you’re in a School session. If that’s a mistake, switch to the Business tab.`;
+          contextWarn.style.display = "block";
+          return;
+        }
+
+        contextWarn.style.display = "none";
+        contextWarn.textContent = "";
       }
 
       function sendMessage(){
+        const cs = currentSession();
+        if(!cs) return;
+
         const text = input.value.trim();
         if(!text) return;
+
+        maybeWarnAboutContext(text);
 
         input.value = "";
         syncSendButton();
@@ -1232,14 +1446,12 @@ Try prompts:
         renderMessage(youMsg);
         addToHistory(youMsg);
 
-        const s = currentSession();
-        s.updated = stamp();
+        cs.updated = stamp();
         saveSessions(sessions);
         renderSessions();
 
-        // UI-only reply (clean, predictable)
         let reply;
-        if(s.group === "business"){
+        if(cs.group === "business"){
           reply =
 `UI-only mode (backend not connected).
 
@@ -1273,8 +1485,26 @@ Tell me what you want next:
       }
 
       // -------------------- Workspace --------------------
+      function categoryFiles(group){
+        // Flatten: [{sessionTitle, sessionId, name, desc}]
+        const out = [];
+        for(const s of sessionsByGroup(group)){
+          const files = Array.isArray(s.files) ? s.files : [];
+          for(const f of files){
+            out.push({
+              sessionTitle: s.title,
+              sessionId: s.id,
+              name: f.name || "Untitled",
+              desc: f.desc || ""
+            });
+          }
+        }
+        return out;
+      }
+
       function workspaceTemplate(session){
         const isBiz = session.group === "business";
+        const group = session.group;
 
         wsHint.textContent = session.id.toUpperCase();
         wsSubtitle.textContent = (isBiz ? "Business state" : "Class state") + " • " + stamp();
@@ -1289,6 +1519,17 @@ Tell me what you want next:
             <button class="miniBtn" data-ws="open">Open</button>
           </div>
         `).join("");
+
+        const allFiles = categoryFiles(group);
+        const allFileRows = allFiles.length ? allFiles.map(f => `
+          <div class="fileChip">
+            <div>
+              <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
+              <small>${escapeHtml(f.sessionTitle)} • ${escapeHtml(f.desc)}</small>
+            </div>
+            <button class="miniBtn" data-ws="open">Open</button>
+          </div>
+        `).join("") : `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files in this category yet.</div>`;
 
         const assumptions = isBiz
           ? [
@@ -1364,7 +1605,7 @@ Tell me what you want next:
 
           <div class="section">
             <div class="sectionTitle">
-              <strong>Mounted files</strong>
+              <strong>Mounted files (this session)</strong>
               <span>${files.length} items</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -1374,8 +1615,18 @@ Tell me what you want next:
 
           <div class="section">
             <div class="sectionTitle">
+              <strong>All files (${escapeHtml(group)})</strong>
+              <span>${allFiles.length} total</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${allFileRows}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="sectionTitle">
               <strong>Working assumptions</strong>
-              <span>${escapeHtml($("profileText").textContent || "")}</span>
+              <span>${escapeHtml(getProfileForSession(session))}</span>
             </div>
             <div class="kv">${assRows}</div>
           </div>
@@ -1385,16 +1636,23 @@ Tell me what you want next:
       }
 
       function hydrateWorkspace(){
-        const s = currentSession();
-        const html = workspaceTemplate(s);
+        const cs = currentSession();
+        if(!cs){
+          hydrateWorkspaceEmpty(getActiveGroup());
+          return;
+        }
+
+        const html = workspaceTemplate(cs);
         workspaceBody.innerHTML = html;
         drawerWorkspaceBody.innerHTML = html;
 
-        // Workspace button actions -> add bot message (and persist)
         const handler = (e) => {
           const btn = e.target.closest("[data-ws]");
           if(!btn) return;
           const act = btn.getAttribute("data-ws");
+
+          const s = currentSession();
+          if(!s) return;
 
           const canned = (function(){
             if(s.group === "business"){
@@ -1462,6 +1720,25 @@ Backend will generate structured notes:
         drawerWorkspaceBody.onclick = handler;
       }
 
+      function hydrateWorkspaceEmpty(group){
+        wsHint.textContent = "—";
+        wsSubtitle.textContent = (group === "business" ? "Business state" : "Class state") + " • " + stamp();
+
+        const html = `
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>No active session</strong>
+              <span>${escapeHtml(group)}</span>
+            </div>
+            <div style="color: rgba(243,239,230,.78); font-size:12.5px; line-height:1.35;">
+              Create a ${group === "business" ? "Business" : "School"} session to activate the workspace.
+            </div>
+          </div>
+        `;
+        workspaceBody.innerHTML = html;
+        drawerWorkspaceBody.innerHTML = html;
+      }
+
       // -------------------- Drawers --------------------
       function openDrawer(which){
         backdrop.classList.add("open");
@@ -1487,40 +1764,42 @@ Backend will generate structured notes:
           workspaceDrawer.setAttribute("aria-hidden","true");
         }
 
-        // hide backdrop only if both are closed
         const anyOpen = sessionsDrawer.classList.contains("open") || workspaceDrawer.classList.contains("open");
         if(!anyOpen) backdrop.classList.remove("open");
       }
 
-      // -------------------- Event wiring (single, stable) --------------------
+      // -------------------- Events --------------------
       function wireEvents(){
-        // Chat
-        input.addEventListener("input", syncSendButton);
+        input.addEventListener("input", () => {
+          syncSendButton();
+          maybeWarnAboutContext(input.value);
+        });
+
         input.addEventListener("keydown", (e) => {
           if(e.key === "Enter" && !e.shiftKey){
             e.preventDefault();
             sendMessage();
           }
         });
+
         sendBtn.addEventListener("click", sendMessage);
 
-        // Tabs (desktop + drawer)
-        const setGroup = (g) => {
-          setActiveGroup(g);
-          setTabsUI(g);
-          renderSessions();
+        // Tabs now SWITCH GROUP AND ACTIVATE A SESSION (fixes DeepSeek #1/#2)
+        const switchTo = (g) => {
+          closeDrawer("all");          // reduce weirdness on mobile
+          activateSessionForGroup(g);
         };
 
-        tabBiz.addEventListener("click", () => setGroup("business"));
-        tabSchool.addEventListener("click", () => setGroup("school"));
-        drawerTabBiz.addEventListener("click", () => setGroup("business"));
-        drawerTabSchool.addEventListener("click", () => setGroup("school"));
+        tabBiz.addEventListener("click", () => switchTo("business"));
+        tabSchool.addEventListener("click", () => switchTo("school"));
+        drawerTabBiz.addEventListener("click", () => switchTo("business"));
+        drawerTabSchool.addEventListener("click", () => switchTo("school"));
 
         // New session
         $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
         $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
 
-        // Session list actions (event delegation)
+        // Session list actions
         function sessionActionHandler(e){
           const btn = e.target.closest("[data-act]");
           if(!btn) return;
@@ -1535,9 +1814,11 @@ Backend will generate structured notes:
         sessionList.addEventListener("click", sessionActionHandler);
         drawerSessionList.addEventListener("click", sessionActionHandler);
 
-        // Profile cycle (label only)
+        // Profile cycle (PER SESSION)
         $("profileBadge").addEventListener("click", () => {
-          cycleProfile(currentSession());
+          const cs = currentSession();
+          if(!cs) return;
+          cycleProfileForSession(cs);
           hydrateWorkspace();
         });
 
@@ -1572,31 +1853,31 @@ Backend will generate structured notes:
         if(didInit) return;
         didInit = true;
 
-        // ensure active session exists
-        const sid = getActiveSessionId();
-        if(!sessions.some(s => s.id === sid)){
-          const fallback = sessions.find(s => s.id === "biz_main") || sessions[0];
-          if(fallback) setActiveSessionId(fallback.id);
-        }
-
-        // set active group aligned with active session (prevents “where did it go”)
-        const cs = currentSession();
-        if(cs && cs.group) setActiveGroup(cs.group);
-
-        // Badges baseline
+        // baseline badges
         setDot(notionDot, "bad");
         $("notionText").textContent = "Not connected";
-
         setDot(engineDot, "bad");
         $("engineText").textContent = "UI only";
 
-        // Profile default for active session
-        setProfileDefault(currentSession());
+        // migrate legacy active session into per-group model
+        migrateLegacyActiveIfNeeded();
 
-        // Render
-        renderSessions();
-        loadThread();
-        hydrateWorkspace();
+        // Ensure active group exists
+        const g = getActiveGroup();
+        setActiveGroup((g === "school" || g === "business") ? g : "business");
+
+        // Ensure per-group active sessions are valid
+        for(const group of ["business","school"]){
+          const cur = getActiveSessionIdForGroup(group);
+          const ok = cur && sessions.some(s => s.id === cur && s.group === group);
+          if(!ok){
+            const pick = firstSessionId(group);
+            if(pick) setActiveSessionIdForGroup(group, pick);
+          }
+        }
+
+        // Activate current group session (this is the real fix)
+        activateSessionForGroup(getActiveGroup());
 
         // Wire events once
         wireEvents();
