@@ -1,149 +1,273 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>WilliamBot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light" />
 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0b0a08">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="WilliamBot">
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0a08" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WilliamBot" />
 
   <style>
-    :root {
+    :root{
       --bg:#0b0a08;
       --panel:#14110d;
+      --panel2:#181510;
       --cream:#f3efe6;
       --ink:#1b1813;
       --muted:#8b8276;
       --border:rgba(243,239,230,.12);
+      --border2:rgba(0,0,0,.10);
       --accent:#7a1114;
+      --accent2:#b01c22;
+      --ok:#1c7a3d;
+      --warn:#b86a00;
       --radius:18px;
+      --radius2:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
       --font:-apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
     }
 
-    * { box-sizing:border-box; }
-    html,body { height:100%; margin:0; }
-
-    body {
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
       font-family:var(--font);
       background:linear-gradient(180deg,#0b0a08,#12100c);
       color:var(--cream);
+      overflow:hidden;
     }
 
-    .app {
+    /* Layout */
+    .app{
       height:100%;
       display:grid;
-      grid-template-columns:280px 1fr 320px;
-      grid-template-rows:auto 1fr auto;
+      grid-template-columns:300px 1fr 360px;
+      grid-template-rows:auto auto 1fr auto;
       gap:12px;
       padding:12px;
     }
 
-    header {
+    header{
       grid-column:1 / -1;
       background:var(--panel);
       border-radius:var(--radius);
-      padding:14px;
+      padding:12px 14px;
+      border:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
+      box-shadow:var(--shadow);
+    }
+
+    .brand{display:flex;align-items:center;gap:10px;min-width:200px}
+    .logo{
+      width:38px;height:38px;border-radius:12px;background:var(--accent);
+      display:grid;place-items:center;font-weight:900;letter-spacing:.5px;
+      box-shadow:0 8px 18px rgba(122,17,20,.35);
+      user-select:none;
+    }
+    .brand strong{font-size:16px}
+    .brand .sub{font-size:12px;opacity:.7;margin-top:2px}
+
+    .hdrRight{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;
+    }
+
+    .pill{
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
       border:1px solid var(--border);
+      display:flex;align-items:center;gap:8px;
+      user-select:none;
+      max-width:100%;
+    }
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--warn)}
+    .dot.ok{background:var(--ok)}
+    .pill code{
+      font-family:var(--mono);
+      font-size:11px;
+      opacity:.9;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:220px;
+      display:inline-block;
+      vertical-align:middle;
     }
 
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
+    .btn{
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:800;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:var(--cream);
+      cursor:pointer;
+      user-select:none;
     }
-
-    .logo {
-      width:36px;
-      height:36px;
-      border-radius:12px;
+    .btn.primary{
       background:var(--accent);
-      display:grid;
-      place-items:center;
+      border-color:rgba(255,255,255,.12);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    /* Tabs row */
+    .tabs{
+      grid-column:1 / -1;
+      display:flex;
+      gap:10px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:8px;
+      align-items:center;
+      box-shadow:var(--shadow);
+    }
+    .tab{
+      flex:0 0 auto;
+      border-radius:14px;
+      padding:10px 12px;
       font-weight:900;
+      font-size:13px;
+      border:1px solid transparent;
+      background:transparent;
+      color:rgba(243,239,230,.85);
+      cursor:pointer;
+    }
+    .tab.active{
+      background:rgba(122,17,20,.22);
+      border-color:rgba(122,17,20,.45);
+      color:var(--cream);
+    }
+    .tabs .spacer{flex:1}
+    .select{
+      height:40px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--cream);
+      padding:0 12px;
+      font-weight:800;
+      cursor:pointer;
     }
 
-    aside {
+    /* Left panel */
+    aside{
       background:var(--panel);
       border-radius:var(--radius);
       border:1px solid var(--border);
       padding:12px;
       overflow:auto;
+      box-shadow:var(--shadow);
     }
 
-    .panelTitle {
+    .panelTitle{
       font-size:12px;
-      opacity:.7;
-      margin-bottom:8px;
+      opacity:.75;
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
 
-    .session {
-      padding:10px;
-      border-radius:12px;
+    .session{
+      padding:11px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.06);
       background:rgba(255,255,255,.04);
-      margin-bottom:8px;
-      font-size:13px;
+      margin-bottom:10px;
       cursor:pointer;
+      user-select:none;
+      transition:background .15s ease, border-color .15s ease, transform .05s ease;
+    }
+    .session:hover{background:rgba(255,255,255,.055)}
+    .session:active{transform:translateY(1px)}
+    .session.active{
+      background:rgba(122,17,20,.22);
+      border-color:rgba(122,17,20,.55);
+    }
+    .session .title{font-weight:900;font-size:13px;margin-bottom:4px}
+    .session .desc{font-size:12px;opacity:.75;line-height:1.3}
+
+    .smallRow{
+      display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0;
     }
 
-    main {
+    /* Center panel (chat) */
+    main{
       background:linear-gradient(180deg,#f5f1e9,#efe9dd);
       color:var(--ink);
       border-radius:var(--radius);
       display:flex;
       flex-direction:column;
       overflow:hidden;
-      border:1px solid rgba(0,0,0,.08);
+      border:1px solid var(--border2);
+      box-shadow:var(--shadow);
+      min-width:0;
     }
 
-    .feed {
+    .feed{
       flex:1;
       padding:16px;
       overflow:auto;
     }
 
-    .msg {
-      max-width:75%;
+    .msg{
+      max-width:78%;
       margin-bottom:14px;
       padding:12px 14px;
       border-radius:14px;
       font-size:14.5px;
       line-height:1.45;
+      word-break:break-word;
+      white-space:pre-wrap;
     }
-
-    .msg.bot {
+    .msg.bot{
       background:white;
       border:1px solid rgba(0,0,0,.08);
     }
-
-    .msg.you {
+    .msg.you{
       background:rgba(122,17,20,.08);
       border-left:4px solid var(--accent);
       margin-left:auto;
     }
 
-    .meta {
+    .meta{
       font-size:11px;
       opacity:.6;
-      margin-top:4px;
+      margin-top:6px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .tag{
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.08);
+      font-size:11px;
     }
 
-    .composer {
+    .composer{
       display:flex;
       gap:10px;
       padding:12px;
       border-top:1px solid rgba(0,0,0,.08);
-      background:rgba(255,255,255,.6);
+      background:rgba(255,255,255,.62);
+      align-items:flex-end;
     }
 
-    textarea {
+    textarea{
       flex:1;
       resize:none;
       border-radius:14px;
@@ -151,121 +275,963 @@
       padding:12px;
       font-size:14px;
       font-family:inherit;
+      min-height:44px;
+      max-height:140px;
+      outline:none;
     }
 
-    button {
+    .sendBtn{
       border-radius:14px;
       padding:12px 16px;
-      font-weight:700;
+      font-weight:900;
       background:var(--accent);
       color:white;
       border:none;
+      cursor:pointer;
+      height:44px;
     }
 
-    .context {
+    /* Right panel (context) */
+    .contextPanel{background:var(--panel)}
+    .context{
       font-size:13px;
       line-height:1.4;
     }
-
-    .contextBlock {
+    .contextBlock{
       background:rgba(255,255,255,.04);
-      border-radius:12px;
-      padding:10px;
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .contextBlock strong{display:block;margin-bottom:6px}
+    .contextBlock ul{margin:8px 0 0 18px;padding:0}
+    .contextBlock li{margin:6px 0}
+    .contextBlock code{font-family:var(--mono);font-size:12px}
+
+    /* Modal */
+    .modalWrap{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9999;
+    }
+    .modal{
+      width:min(720px,100%);
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .modalHead strong{font-size:14px}
+    .modalBody{padding:14px 16px}
+    .row{
+      display:grid;
+      grid-template-columns:160px 1fr;
+      gap:10px;
+      align-items:center;
       margin-bottom:10px;
     }
-
-    @media (max-width:1100px) {
-      .app { grid-template-columns:260px 1fr; }
-      .contextPanel { display:none; }
+    .row label{font-size:12px;opacity:.8}
+    .input{
+      width:100%;
+      height:40px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:var(--cream);
+      padding:0 12px;
+      font-weight:800;
+      outline:none;
+      font-family:inherit;
+    }
+    .toggle{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    }
+    .toggle input{transform:scale(1.15)}
+    .modalFoot{
+      padding:14px 16px;
+      border-top:1px solid var(--border);
+      display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;
+    }
+    .hint{
+      font-size:12px;
+      opacity:.8;
+      line-height:1.35;
+      margin:8px 0 0;
     }
 
-    @media (max-width:760px) {
-      .app { grid-template-columns:1fr; }
-      aside { display:none; }
+    /* Error overlay (prevents white screen mystery) */
+    .fatal{
+      position:fixed;inset:0;
+      background:radial-gradient(800px 500px at 20% 10%, rgba(176,28,34,.25), transparent 65%),
+                 rgba(0,0,0,.85);
+      color:var(--cream);
+      z-index:10000;
+      display:none;
+      padding:18px;
+      overflow:auto;
+    }
+    .fatalCard{
+      max-width:980px;
+      margin:0 auto;
+      background:rgba(20,17,13,.92);
+      border:1px solid rgba(243,239,230,.18);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:0 25px 70px rgba(0,0,0,.7);
+    }
+    .fatal h2{margin:0 0 10px;font-size:18px}
+    .fatal pre{
+      margin:12px 0 0;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(243,239,230,.12);
+      border-radius:14px;
+      padding:12px;
+      font-family:var(--mono);
+      font-size:12px;
+      overflow:auto;
+      white-space:pre-wrap;
+    }
+
+    /* Responsive */
+    @media (max-width:1200px){
+      .app{grid-template-columns:280px 1fr}
+      .contextPanel{display:none}
+    }
+    @media (max-width:820px){
+      .app{grid-template-columns:1fr}
+      aside{display:none}
+      .tabs{position:sticky;top:12px;z-index:10}
+      body{overflow:auto}
+      .app{height:auto;min-height:100%}
+      main{min-height:70vh}
     }
   </style>
 </head>
 
 <body>
-  <div class="app">
+  <div class="fatal" id="fatal">
+    <div class="fatalCard">
+      <h2>WilliamBot hit a front-end error (no silent white screen).</h2>
+      <div style="opacity:.85;font-size:13px;line-height:1.45">
+        Screenshot this and send it to me. This is the exact reason it failed.
+      </div>
+      <pre id="fatalText"></pre>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
+        <button class="btn" id="fatalReload">Reload</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modalWrap" id="settingsWrap" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="modalHead">
+        <strong>Settings</strong>
+        <button class="btn" id="closeSettings">Close</button>
+      </div>
+      <div class="modalBody">
+        <div class="row">
+          <label for="backendUrl">Backend Base URL</label>
+          <input class="input" id="backendUrl" placeholder="http://127.0.0.1:8000" />
+        </div>
+        <div class="row">
+          <label for="modelSelect">Default Model</label>
+          <select class="input" id="modelSelect">
+            <option value="32B">32B (default workhorse)</option>
+            <option value="70B">70B (higher quality)</option>
+            <option value="120B">120B (max quality)</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Use Backend</label>
+          <div class="toggle">
+            <input type="checkbox" id="useBackend" />
+            <span style="font-size:12px;opacity:.85">If off, UI-only simulation replies.</span>
+          </div>
+        </div>
+        <div class="row">
+          <label>Data</label>
+          <div class="toggle">
+            <button class="btn" id="exportData">Export chats</button>
+            <button class="btn" id="clearData">Clear all</button>
+          </div>
+        </div>
+        <div class="hint">
+          Backend will eventually expose endpoints like <code>/health</code>, <code>/chat</code>, <code>/rag/upload</code>.
+          Until then, this UI will never crash silently.
+        </div>
+      </div>
+      <div class="modalFoot">
+        <button class="btn primary" id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="appRoot">
     <header>
       <div class="brand">
         <div class="logo">W</div>
-        <strong>WilliamBot</strong>
+        <div>
+          <strong>WilliamBot</strong>
+          <div class="sub" id="hdrSub">Business • Pricing & Margins</div>
+        </div>
       </div>
-      <div style="font-size:12px;opacity:.7">
-        UI-only • Local backend later
+
+      <div class="hdrRight">
+        <div class="pill" title="Backend status">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">UI-only</span>
+          <span style="opacity:.7">•</span>
+          <code id="statusUrl">no backend</code>
+        </div>
+        <div class="pill" title="Active model">
+          <span style="opacity:.85">Model</span>
+          <code id="hdrModel">32B</code>
+        </div>
+        <button class="btn" id="openSettings">Settings</button>
       </div>
     </header>
 
-    <aside>
-      <div class="panelTitle">Sessions</div>
-      <div class="session">Pricing & Margins</div>
-      <div class="session">Formulation</div>
-      <div class="session">Amazon Ops</div>
+    <div class="tabs">
+      <button class="tab active" id="tabBusiness">Business</button>
+      <button class="tab" id="tabSchool">School</button>
+      <div class="spacer"></div>
+      <select class="select" id="modeSelect" title="Response mode">
+        <option value="ask">Ask</option>
+        <option value="calculate">Calculate</option>
+        <option value="draft">Draft</option>
+        <option value="plan">Plan</option>
+      </select>
+      <button class="btn" id="newSession">New session</button>
+    </div>
+
+    <aside id="leftPanel">
+      <div class="panelTitle">
+        <span id="sessionsTitle">Sessions</span>
+        <span style="opacity:.6;font-size:11px" id="sessionsCount">0</span>
+      </div>
+      <div id="sessionsList"></div>
+
+      <div class="panelTitle" style="margin-top:10px">Quick actions</div>
+      <div class="smallRow">
+        <button class="btn" id="pinSyllabus">Pin syllabus facts</button>
+        <button class="btn" id="pinBusiness">Pin business assumptions</button>
+        <button class="btn" id="downloadJson">Download state</button>
+      </div>
+
+      <div class="panelTitle" style="margin-top:12px">Docs (UI-only placeholder)</div>
+      <div class="contextBlock">
+        <div style="font-size:12px;opacity:.8;margin-bottom:8px">
+          Later this becomes RAG upload. For now it just tracks filenames in your browser.
+        </div>
+        <input type="file" id="docPicker" multiple />
+        <div id="docList" style="margin-top:10px;font-size:12px;opacity:.85"></div>
+      </div>
     </aside>
 
     <main>
-      <div class="feed" id="feed">
-        <div class="msg bot">
-          UI is live.<br><br>
-          This is your personal AI workspace.<br>
-          Backend will connect via Tailscale when your PC arrives.
-          <div class="meta">Confidence: Medium</div>
-        </div>
-      </div>
+      <div class="feed" id="feed"></div>
 
       <div class="composer">
-        <textarea id="input" placeholder="Ask, calculate, simulate…"></textarea>
-        <button id="send">Send</button>
+        <textarea id="input" placeholder="Ask, calculate, draft, plan…"></textarea>
+        <button class="sendBtn" id="send">Send</button>
       </div>
     </main>
 
-    <aside class="contextPanel">
+    <aside class="contextPanel" id="rightPanel">
       <div class="panelTitle">Context</div>
-      <div class="context">
-        <div class="contextBlock">
-          <strong>Working assumptions</strong><br>
-          Target margin ≥ 70%<br>
-          Channel: Amazon + Shopify
-        </div>
-        <div class="contextBlock">
-          <strong>Ledger</strong><br>
-          Last decision: 8oz butter → $66
-        </div>
-      </div>
+      <div class="context" id="contextArea"></div>
     </aside>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const feed = document.getElementById("feed");
-      const input = document.getElementById("input");
-      const send = document.getElementById("send");
+    (function () {
+      "use strict";
 
-      function addMessage(text, role) {
-        const div = document.createElement("div");
-        div.className = "msg " + role;
-        div.textContent = text;
-        feed.appendChild(div);
+      // --- Crash guard (kills silent white screens) ---
+      const fatal = document.getElementById("fatal");
+      const fatalText = document.getElementById("fatalText");
+      const fatalReload = document.getElementById("fatalReload");
+
+      function showFatal(errLike) {
+        try {
+          const msg = (errLike && (errLike.stack || errLike.message)) ? (errLike.stack || errLike.message) : String(errLike);
+          fatalText.textContent = msg;
+          fatal.style.display = "block";
+        } catch (e) {
+          // last resort
+          alert("Fatal error. Check console.");
+        }
+      }
+
+      window.addEventListener("error", (e) => showFatal(e.error || e.message || e));
+      window.addEventListener("unhandledrejection", (e) => showFatal(e.reason || e));
+
+      fatalReload.addEventListener("click", () => location.reload());
+
+      // --- Utilities ---
+      const $ = (id) => document.getElementById(id);
+
+      function nowIso() { return new Date().toISOString(); }
+      function safeJsonParse(s, fallback) {
+        try { return JSON.parse(s); } catch { return fallback; }
+      }
+
+      // --- State (localStorage) ---
+      const LS_KEY = "williambot_state_v2";
+
+      const DEFAULT_STATE = {
+        activeTab: "business",                 // business | school
+        activeSessionId: null,
+        settings: {
+          backendUrl: "",
+          useBackend: false,
+          model: "32B",
+        },
+        docs: [],                               // {name, size, type, addedAt}
+        sessions: [
+          // Business
+          { id: "biz_pricing", tab: "business", title: "Pricing & Margins", desc: "Margins, pricing, bundles, channel math", createdAt: nowIso(), messages: [] },
+          { id: "biz_formulation", tab: "business", title: "Formulation", desc: "Batches, specs, ingredients, stability", createdAt: nowIso(), messages: [] },
+          { id: "biz_amazon", tab: "business", title: "Amazon Ops", desc: "Listings, compliance, reviews, logistics", createdAt: nowIso(), messages: [] },
+
+          // School
+          { id: "sch_math107", tab: "school", title: "MATH 107", desc: "College Algebra (01/07/2026–03/03/2026)", createdAt: nowIso(), messages: [] },
+          { id: "sch_hist125", tab: "school", title: "HIST 125", desc: "Technological Transformations (01/07/2026–03/03/2026)", createdAt: nowIso(), messages: [] },
+          { id: "sch_hub", tab: "school", title: "Study Hub", desc: "Notes, planning, reading summaries, drafts", createdAt: nowIso(), messages: [] },
+
+          // Shared
+          { id: "shared_inbox", tab: "business", title: "Inbox", desc: "Quick dumps (auto-routed later)", createdAt: nowIso(), messages: [] },
+        ]
+      };
+
+      function loadState() {
+        const raw = localStorage.getItem(LS_KEY);
+        const s = raw ? safeJsonParse(raw, null) : null;
+        const merged = s ? s : DEFAULT_STATE;
+
+        // minimal forward-compat safety
+        merged.settings = Object.assign({}, DEFAULT_STATE.settings, merged.settings || {});
+        merged.docs = Array.isArray(merged.docs) ? merged.docs : [];
+        merged.sessions = Array.isArray(merged.sessions) ? merged.sessions : DEFAULT_STATE.sessions.slice();
+
+        if (!merged.activeSessionId) {
+          const first = merged.sessions.find(x => x.tab === merged.activeTab) || merged.sessions[0];
+          merged.activeSessionId = first ? first.id : null;
+        }
+        return merged;
+      }
+
+      function saveState() {
+        localStorage.setItem(LS_KEY, JSON.stringify(state));
+      }
+
+      let state = loadState();
+
+      // --- Syllabus facts (hard-coded into context panel) ---
+      const SCHOOL_FACTS = {
+        math107: {
+          title: "MATH 107 (6392) • College Algebra",
+          dates: "01/07/2026 → 03/03/2026",
+          grading: [
+            "Starting Strong quiz: 5 pts",
+            "LEO Discussions: 195 pts",
+            "MML Quizzes: 300 pts",
+            "MML Homework: 350 pts",
+            "MML Final Exam: 150 pts",
+            "TOTAL: 1000 pts"
+          ],
+          rules: [
+            "Assignments due 11:59pm ET on listed dates",
+            "Late work only for documented emergency",
+            "AI allowed for learning support if aligned + attributed"
+          ],
+          week1: [
+            "Week 1 is overview of MyMathLab + LEO",
+            "Week 1 due date shown in schedule: Jan 13"
+          ]
+        },
+        hist125: {
+          title: "HIST 125 (6386) • Technological Transformations",
+          dates: "01/07/2026 → 03/03/2026",
+          instructor: "Brendan Harris • brendan.harris@faculty.umgc.edu",
+          grading: [
+            "Syllabus Quiz: 50",
+            "Discussion Participation Quiz: 50",
+            "Week 1–8 Discussions: 50 each (400 total)",
+            "Source Evaluation Step 1: 30",
+            "Step 2: 30",
+            "Step 3: 40",
+            "Step 4: 60",
+            "Step 5: 60",
+            "Step 6: 100",
+            "Step 7: 180",
+            "TOTAL: 1000 pts"
+          ],
+          rules: [
+            "No late work accepted",
+            "Initial post due Saturday 11:59pm ET",
+            "Peer replies due Tuesday 11:59pm ET",
+            "Chicago Style expected (per syllabus guidance)"
+          ],
+          weeks: [
+            "Week 1: quizzes + discussion + Source Eval Step 1 due 01/13",
+            "Week 2: Step 2 due 01/20",
+            "Week 3: Step 3 due 01/27",
+            "Week 4: Step 4 due 02/03",
+            "Week 5: Step 5 due 02/10",
+            "Week 6: Step 6 due 02/17",
+            "Week 7: Step 7 due 02/24",
+            "Week 8: final week discussion"
+          ]
+        }
+      };
+
+      // --- DOM refs ---
+      const hdrSub = $("hdrSub");
+      const statusDot = $("statusDot");
+      const statusText = $("statusText");
+      const statusUrl = $("statusUrl");
+      const hdrModel = $("hdrModel");
+
+      const tabBusiness = $("tabBusiness");
+      const tabSchool = $("tabSchool");
+
+      const sessionsTitle = $("sessionsTitle");
+      const sessionsCount = $("sessionsCount");
+      const sessionsList = $("sessionsList");
+
+      const feed = $("feed");
+      const contextArea = $("contextArea");
+
+      const input = $("input");
+      const send = $("send");
+      const modeSelect = $("modeSelect");
+
+      const settingsWrap = $("settingsWrap");
+      const openSettings = $("openSettings");
+      const closeSettings = $("closeSettings");
+      const backendUrl = $("backendUrl");
+      const useBackend = $("useBackend");
+      const modelSelect = $("modelSelect");
+      const saveSettingsBtn = $("saveSettings");
+
+      const exportDataBtn = $("exportData");
+      const clearDataBtn = $("clearData");
+
+      const newSessionBtn = $("newSession");
+      const pinSyllabusBtn = $("pinSyllabus");
+      const pinBusinessBtn = $("pinBusiness");
+      const downloadJsonBtn = $("downloadJson");
+
+      const docPicker = $("docPicker");
+      const docList = $("docList");
+
+      // --- Render helpers ---
+      function setBackendPill() {
+        const ok = state.settings.useBackend && state.settings.backendUrl.trim().length > 0;
+        statusDot.className = "dot" + (ok ? " ok" : "");
+        statusText.textContent = ok ? "Backend ON" : "UI-only";
+        statusUrl.textContent = ok ? state.settings.backendUrl.trim() : "no backend";
+        hdrModel.textContent = state.settings.model || "32B";
+      }
+
+      function setActiveTab(tab) {
+        state.activeTab = tab;
+        tabBusiness.classList.toggle("active", tab === "business");
+        tabSchool.classList.toggle("active", tab === "school");
+
+        // ensure session in that tab is selected
+        const current = state.sessions.find(s => s.id === state.activeSessionId);
+        if (!current || current.tab !== tab) {
+          const first = state.sessions.find(s => s.tab === tab);
+          state.activeSessionId = first ? first.id : null;
+        }
+
+        saveState();
+        renderAll();
+      }
+
+      function setActiveSession(id) {
+        state.activeSessionId = id;
+        saveState();
+        renderAll();
+      }
+
+      function renderSessions() {
+        const tab = state.activeTab;
+        const items = state.sessions.filter(s => s.tab === tab);
+        sessionsTitle.textContent = tab === "business" ? "Business Sessions" : "School Sessions";
+        sessionsCount.textContent = String(items.length);
+
+        sessionsList.innerHTML = "";
+        items.forEach(s => {
+          const div = document.createElement("div");
+          div.className = "session" + (s.id === state.activeSessionId ? " active" : "");
+          div.innerHTML = `
+            <div class="title">${escapeHtml(s.title)}</div>
+            <div class="desc">${escapeHtml(s.desc || "")}</div>
+          `;
+          div.addEventListener("click", () => setActiveSession(s.id));
+          sessionsList.appendChild(div);
+        });
+      }
+
+      function renderHeaderSub() {
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        const tabLabel = state.activeTab === "business" ? "Business" : "School";
+        hdrSub.textContent = `${tabLabel} • ${sess ? sess.title : "—"}`;
+      }
+
+      function renderFeed() {
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        feed.innerHTML = "";
+
+        const seed = getSeedMessages(sess);
+        const msgs = (sess && Array.isArray(sess.messages) ? sess.messages : []);
+
+        [...seed, ...msgs].forEach(m => addMessageToDOM(m.text, m.role, m.meta));
         feed.scrollTop = feed.scrollHeight;
       }
 
-      send.addEventListener("click", () => {
+      function renderContext() {
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        const tab = state.activeTab;
+
+        contextArea.innerHTML = "";
+
+        if (tab === "business") {
+          contextArea.appendChild(ctxBlock("Working assumptions", [
+            "Target contribution margin ≥ 70%",
+            "Primary channels: Amazon + Shopify",
+            "Default model: " + (state.settings.model || "32B"),
+            "Backend: " + (state.settings.useBackend ? "ON" : "OFF"),
+          ]));
+
+          contextArea.appendChild(ctxBlock("Ledger (placeholder)", [
+            "Last decision: 8oz butter → $66 (example)",
+            "Next: confirm COGS + packaging + shipping ranges",
+            "Rule: never expose margins/COGS to customer-facing outputs"
+          ]));
+
+          contextArea.appendChild(ctxBlock("RAG (later)", [
+            "Upload: ingredient sheets, batch logs, ad metrics",
+            "Retrieve: formulas, policies, pricing rules",
+            "Cite: doc name + section"
+          ]));
+
+        } else {
+          // School
+          const isMath = sess && sess.id === "sch_math107";
+          const isHist = sess && sess.id === "sch_hist125";
+
+          if (isMath) {
+            const f = SCHOOL_FACTS.math107;
+            contextArea.appendChild(ctxBlock(f.title, [
+              "Dates: " + f.dates,
+              ...f.rules
+            ]));
+            contextArea.appendChild(ctxBlock("Grading (1000 pts)", f.grading));
+            contextArea.appendChild(ctxBlock("Week 1", f.week1));
+          } else if (isHist) {
+            const f = SCHOOL_FACTS.hist125;
+            contextArea.appendChild(ctxBlock(f.title, [
+              "Dates: " + f.dates,
+              f.instructor,
+              ...f.rules
+            ]));
+            contextArea.appendChild(ctxBlock("Grading (1000 pts)", f.grading));
+            contextArea.appendChild(ctxBlock("Timeline anchors", f.weeks));
+          } else {
+            contextArea.appendChild(ctxBlock("Pinned course facts", [
+              "MATH 107 and HIST 125 are loaded into this UI context",
+              "Use this tab for planning + drafts + studying",
+              "Upload PDFs later -> RAG for quoting exact instructions"
+            ]));
+            contextArea.appendChild(ctxBlock("Study workflow (simple)", [
+              "1) Paste prompt + rubric",
+              "2) Ask for outline + thesis + sources",
+              "3) Draft in sections (intro/body/conclusion)",
+              "4) Self-check against rubric + citations"
+            ]));
+          }
+        }
+      }
+
+      function renderDocs() {
+        if (!state.docs.length) {
+          docList.textContent = "No docs added yet.";
+          return;
+        }
+        docList.innerHTML = state.docs.map(d => {
+          const sizeMb = (d.size / (1024 * 1024)).toFixed(2);
+          return `<div>• ${escapeHtml(d.name)} <span style="opacity:.6">(${sizeMb} MB)</span></div>`;
+        }).join("");
+      }
+
+      function renderAll() {
+        setBackendPill();
+        renderHeaderSub();
+        renderSessions();
+        renderFeed();
+        renderContext();
+        renderDocs();
+      }
+
+      // --- UI components ---
+      function ctxBlock(title, lines) {
+        const div = document.createElement("div");
+        div.className = "contextBlock";
+        const ul = document.createElement("ul");
+        lines.forEach(x => {
+          const li = document.createElement("li");
+          li.textContent = x;
+          ul.appendChild(li);
+        });
+        const strong = document.createElement("strong");
+        strong.textContent = title;
+        div.appendChild(strong);
+        div.appendChild(ul);
+        return div;
+      }
+
+      function addMessageToDOM(text, role, meta) {
+        const wrap = document.createElement("div");
+        wrap.className = "msg " + role;
+        wrap.textContent = text;
+
+        if (meta) {
+          const m = document.createElement("div");
+          m.className = "meta";
+          if (meta.mode) m.appendChild(tagEl("mode: " + meta.mode));
+          if (meta.model) m.appendChild(tagEl("model: " + meta.model));
+          if (meta.ts) m.appendChild(tagEl(new Date(meta.ts).toLocaleString()));
+          wrap.appendChild(m);
+        }
+        feed.appendChild(wrap);
+      }
+
+      function tagEl(t) {
+        const s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = t;
+        return s;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+
+      // --- Seed messages (per session) ---
+      function getSeedMessages(sess) {
+        if (!sess) return [];
+        if (sess.messages && sess.messages.length) return []; // only show seeds when empty
+
+        if (sess.id === "sch_math107") {
+          return [{
+            role: "bot",
+            text:
+`MATH 107 is loaded.\n\nFast rules:\n• Due 11:59pm ET\n• Late only documented emergency\n• Total: 1000 pts\n\nAsk me for: weekly plan, practice sets, or a step-by-step explanation (no shortcuts).`,
+            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
+          }];
+        }
+
+        if (sess.id === "sch_hist125") {
+          return [{
+            role: "bot",
+            text:
+`HIST 125 is loaded.\n\nFast rules:\n• No late work accepted\n• Initial post due Saturday, peer replies Tuesday\n• Total: 1000 pts\n\nAsk me for: discussion post structure, source evaluation steps, Chicago citations, or week-by-week pacing.`,
+            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
+          }];
+        }
+
+        if (sess.tab === "school") {
+          return [{
+            role: "bot",
+            text:
+`School hub ready.\n\nDrop any prompt/rubric/reading and tell me what you need:\n• outline\n• study plan\n• explanation\n• draft sections`,
+            meta: { mode: "info", model: state.settings.model, ts: nowIso() }
+          }];
+        }
+
+        // business default seed
+        return [{
+          role: "bot",
+          text:
+`UI is live.\n\nThis is your personal AI workspace.\nBackend will connect later (Tailscale + local server).\n\nRight now: clean sessions + no-crash UI + model selector.`,
+          meta: { mode: "info", model: state.settings.model, ts: nowIso() }
+        }];
+      }
+
+      // --- Message persistence ---
+      function pushMessage(sessionId, role, text, meta) {
+        const sess = state.sessions.find(s => s.id === sessionId);
+        if (!sess) return;
+        if (!Array.isArray(sess.messages)) sess.messages = [];
+        sess.messages.push({ role, text, meta: meta || { ts: nowIso() } });
+        saveState();
+      }
+
+      // --- Backend call (optional) ---
+      async function backendChat(promptText) {
+        const base = state.settings.backendUrl.trim();
+        const url = base.replace(/\/+$/,"") + "/chat";
+        const payload = {
+          sessionId: state.activeSessionId,
+          tab: state.activeTab,
+          mode: modeSelect.value,
+          model: state.settings.model,
+          message: promptText
+        };
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const t = await res.text().catch(() => "");
+          throw new Error("Backend /chat failed: " + res.status + " " + t);
+        }
+
+        const data = await res.json();
+        // expected: { reply: "..." }
+        if (!data || typeof data.reply !== "string") {
+          throw new Error("Backend /chat returned invalid JSON (missing reply).");
+        }
+        return data.reply;
+      }
+
+      function uiOnlyReply(promptText) {
+        // Minimal, predictable, and safe. No fancy “fake intelligence” here.
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        const mode = modeSelect.value;
+
+        if (sess && sess.tab === "school") {
+          if (sess.id === "sch_hist125") {
+            return `UI-only mode.\n\nHIST 125 reminder:\n• No late work\n• Initial post Sat, peer replies Tue\n\nWhen backend is connected, I’ll answer with retrieval from your uploaded docs.`;
+          }
+          if (sess.id === "sch_math107") {
+            return `UI-only mode.\n\nMATH 107 reminder:\n• Due 11:59pm ET\n• Late only documented emergency\n\nWhen backend is connected, I’ll solve/explain step-by-step with your preferred format.`;
+          }
+          return `UI-only mode.\n\nPaste the assignment prompt + rubric and I’ll structure a plan once backend is connected.\nFor now I can help you outline what to ask.`;
+        }
+
+        // business
+        if (mode === "calculate") {
+          return `UI-only mode.\n\nWhen backend is connected, /chat can run math + pricing logic.\nFor now: paste numbers and I’ll give you the calc format to use.`;
+        }
+        return `Backend not connected yet. UI-only mode.\n\nNext step is wiring /chat + /health on your PC, then this becomes live.`;
+      }
+
+      async function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
+
         input.value = "";
-        addMessage(text, "you");
-        addMessage("Backend not connected yet. UI-only mode.", "bot");
+        autoSizeTextarea();
+
+        // user message
+        addMessageToDOM(text, "you", { mode: modeSelect.value, model: state.settings.model, ts: nowIso() });
+        pushMessage(state.activeSessionId, "you", text, { mode: modeSelect.value, model: state.settings.model, ts: nowIso() });
+        feed.scrollTop = feed.scrollHeight;
+
+        // bot reply
+        let reply = "";
+        const meta = { mode: modeSelect.value, model: state.settings.model, ts: nowIso() };
+
+        if (state.settings.useBackend && state.settings.backendUrl.trim()) {
+          try {
+            reply = await backendChat(text);
+          } catch (e) {
+            reply = "Backend call failed, falling back to UI-only.\n\n" + (e && e.message ? e.message : String(e));
+          }
+        } else {
+          reply = uiOnlyReply(text);
+        }
+
+        addMessageToDOM(reply, "bot", meta);
+        pushMessage(state.activeSessionId, "bot", reply, meta);
+        feed.scrollTop = feed.scrollHeight;
+      }
+
+      // --- Autosize textarea ---
+      function autoSizeTextarea() {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 140) + "px";
+      }
+      input.addEventListener("input", autoSizeTextarea);
+
+      // --- Settings modal ---
+      function openModal() {
+        backendUrl.value = state.settings.backendUrl || "";
+        useBackend.checked = !!state.settings.useBackend;
+        modelSelect.value = state.settings.model || "32B";
+        settingsWrap.style.display = "flex";
+        settingsWrap.setAttribute("aria-hidden", "false");
+      }
+      function closeModal() {
+        settingsWrap.style.display = "none";
+        settingsWrap.setAttribute("aria-hidden", "true");
+      }
+
+      openSettings.addEventListener("click", openModal);
+      closeSettings.addEventListener("click", closeModal);
+      settingsWrap.addEventListener("click", (e) => {
+        if (e.target === settingsWrap) closeModal();
       });
 
-      input.addEventListener("keydown", e => {
+      saveSettingsBtn.addEventListener("click", () => {
+        state.settings.backendUrl = backendUrl.value.trim();
+        state.settings.useBackend = useBackend.checked;
+        state.settings.model = modelSelect.value;
+        saveState();
+        closeModal();
+        renderAll();
+      });
+
+      exportDataBtn.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "williambot_state.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      clearDataBtn.addEventListener("click", () => {
+        if (!confirm("Clear ALL chats, sessions, and settings?")) return;
+        localStorage.removeItem(LS_KEY);
+        state = loadState(); // resets
+        closeModal();
+        renderAll();
+      });
+
+      // --- Tabs ---
+      tabBusiness.addEventListener("click", () => setActiveTab("business"));
+      tabSchool.addEventListener("click", () => setActiveTab("school"));
+
+      // --- Send controls ---
+      send.addEventListener("click", () => sendMessage().catch(showFatal));
+      input.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           send.click();
         }
       });
-    });
+
+      // --- New session ---
+      newSessionBtn.addEventListener("click", () => {
+        const tab = state.activeTab;
+        const name = prompt("Session name?");
+        if (!name) return;
+        const id = (tab === "business" ? "biz_" : "sch_") + "custom_" + Math.random().toString(16).slice(2);
+        state.sessions.unshift({
+          id,
+          tab,
+          title: name.trim(),
+          desc: tab === "business" ? "Custom business session" : "Custom school session",
+          createdAt: nowIso(),
+          messages: []
+        });
+        state.activeSessionId = id;
+        saveState();
+        renderAll();
+      });
+
+      // --- Pins ---
+      pinSyllabusBtn.addEventListener("click", () => {
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        if (!sess || sess.tab !== "school") {
+          alert("Switch to School tab first (MATH 107, HIST 125, or Study Hub).");
+          return;
+        }
+
+        let text = "Pinned syllabus facts:\n\n";
+        text += "MATH 107:\n";
+        text += "• Dates: " + SCHOOL_FACTS.math107.dates + "\n";
+        text += "• Total: 1000 pts\n";
+        text += "• Due 11:59pm ET\n";
+        text += "• Late only documented emergency\n\n";
+        text += "HIST 125:\n";
+        text += "• Dates: " + SCHOOL_FACTS.hist125.dates + "\n";
+        text += "• No late work\n";
+        text += "• Initial post Sat, peers Tue\n";
+
+        addMessageToDOM(text, "bot", { mode: "pin", model: state.settings.model, ts: nowIso() });
+        pushMessage(state.activeSessionId, "bot", text, { mode: "pin", model: state.settings.model, ts: nowIso() });
+      });
+
+      pinBusinessBtn.addEventListener("click", () => {
+        const sess = state.sessions.find(s => s.id === state.activeSessionId);
+        if (!sess || sess.tab !== "business") {
+          alert("Switch to Business tab first.");
+          return;
+        }
+        const text =
+`Pinned business assumptions:\n\n• Target contribution margin ≥ 70%\n• Channels: Amazon + Shopify\n• Rule: customer-facing agents must never disclose profit margins/COGS/internal costs\n• Backend later: /chat + /rag/upload + /rag/query`;
+        addMessageToDOM(text, "bot", { mode: "pin", model: state.settings.model, ts: nowIso() });
+        pushMessage(state.activeSessionId, "bot", text, { mode: "pin", model: state.settings.model, ts: nowIso() });
+      });
+
+      downloadJsonBtn.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "williambot_state.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      // --- Docs picker (UI-only placeholder) ---
+      docPicker.addEventListener("change", () => {
+        const files = Array.from(docPicker.files || []);
+        if (!files.length) return;
+        files.forEach(f => {
+          state.docs.unshift({
+            name: f.name,
+            size: f.size || 0,
+            type: f.type || "application/octet-stream",
+            addedAt: nowIso()
+          });
+        });
+        // keep only last 40 entries
+        state.docs = state.docs.slice(0, 40);
+        saveState();
+        renderDocs();
+        docPicker.value = "";
+      });
+
+      // --- Basic service worker registration (safe) ---
+      try {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("/sw.js").catch(() => { /* no-op */ });
+        }
+      } catch (_) { /* no-op */ }
+
+      // --- Initial render ---
+      renderAll();
+
+      // --- Make textarea height sane on load ---
+      autoSizeTextarea();
+
+    })();
   </script>
 </body>
 </html>
