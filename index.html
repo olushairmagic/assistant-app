@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WilliamBot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#0B0A08" />
+  <meta name="theme-color" content="#0b0a08" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WilliamBot" />
@@ -15,38 +15,53 @@
   <style>
     :root{
       --bg:#0b0a08;
-      --bg2:#0f0d0a;
+      --bg2:#12100c;
+      --panel:#14110d;
+      --panel2:#191611;
+
       --cream:#f3efe6;
-      --ink:#15120d;
-      --muted:rgba(243,239,230,.68);
-      --border:rgba(243,239,230,.14);
-      --glass:rgba(15,13,10,.55);
-      --glass2:rgba(15,13,10,.40);
-      --red:#7a1114;
+      --ink:#1b1813;
+      --muted:#8b8276;
+
+      --border: rgba(243,239,230,.14);
+      --line: rgba(243,239,230,.10);
+
+      --accent:#7a1114;
+      --accent2:#a0141a;
+
       --green:#15803d;
       --amber:#b45309;
+      --red:#b91c1c;
 
       --r:18px;
       --r2:14px;
-      --shadow:0 18px 60px rgba(0,0,0,.35);
-      --shadow2:0 10px 30px rgba(0,0,0,.28);
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --shadow2: 0 10px 30px rgba(0,0,0,.28);
+
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
 
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    html,body{ height:100%; margin:0; }
     body{
-      margin:0;
-      font-family:var(--font);
+      font-family: var(--font);
       background:
         radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
         radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg2));
-      color:var(--cream);
-      -webkit-font-smoothing:antialiased;
-      text-rendering:optimizeLegibility;
+      color: var(--cream);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x:hidden;
     }
 
+    /* helpers */
+    .hidden { display:none !important; }
+    .srOnly{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
+    }
+
+    /* Layout */
     .wrap{
       height:100%;
       padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
@@ -64,10 +79,11 @@
       min-width: 0;
     }
 
+    /* Top bar */
     header{
       grid-column: 1 / -1;
       border: 1px solid var(--border);
-      background: var(--glass);
+      background: rgba(20,17,13,.78);
       backdrop-filter: blur(10px);
       border-radius: var(--r);
       box-shadow: var(--shadow2);
@@ -78,11 +94,10 @@
       gap: 12px;
       min-width: 0;
     }
-
     .brand{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap: 10px;
       min-width: 0;
     }
     .logo{
@@ -92,8 +107,8 @@
       display:grid;
       place-items:center;
       user-select:none;
-      font-weight:900;
-      letter-spacing:.4px;
+      font-weight: 900;
+      letter-spacing: .4px;
       color: var(--cream);
       border: 1px solid rgba(243,239,230,.16);
       background:
@@ -136,14 +151,14 @@
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: var(--glass2);
+      background: rgba(20,17,13,.55);
       color: rgba(243,239,230,.80);
       font-size: 12px;
       user-select:none;
-      cursor: default;
       white-space: nowrap;
-      max-width: 420px;
+      max-width: 100%;
     }
+    .badge.clickable{ cursor:pointer; }
     .badge .label{
       color: rgba(243,239,230,.62);
       font-weight: 650;
@@ -157,11 +172,11 @@
       flex: 0 0 auto;
     }
     .dot.ok{ background: var(--green); box-shadow: 0 0 0 4px rgba(21,128,61,.14); }
-    .dot.bad{ background: #b91c1c; box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
+    .dot.bad{ background: var(--red); box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
 
     .ghostBtn{
       border: 1px solid var(--border);
-      background: rgba(15,13,10,.40);
+      background: rgba(20,17,13,.45);
       color: rgba(243,239,230,.88);
       padding: 10px 12px;
       border-radius: 999px;
@@ -174,13 +189,14 @@
     .ghostBtn:active{ transform: translateY(1px); }
     .ghostBtn:hover{
       border-color: rgba(243,239,230,.22);
-      background: rgba(15,13,10,.55);
+      background: rgba(20,17,13,.62);
     }
 
+    /* Panels */
     .panel{
       border-radius: var(--r);
       border: 1px solid var(--border);
-      background: var(--glass);
+      background: rgba(20,17,13,.78);
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow2);
       overflow:hidden;
@@ -190,7 +206,7 @@
       min-width: 0;
     }
     .panelHeader{
-      padding: 12px 12px;
+      padding: 12px;
       border-bottom: 1px solid rgba(243,239,230,.14);
       display:flex;
       align-items:center;
@@ -202,9 +218,11 @@
       letter-spacing: .2px;
       color: rgba(243,239,230,.92);
     }
-    .panelHeader span{
+    .panelHeader small{
+      display:block;
       font-size: 12px;
       color: rgba(243,239,230,.62);
+      margin-top:4px;
     }
     .panelBody{
       padding: 10px;
@@ -212,39 +230,56 @@
       min-height: 0;
     }
 
-    /* Sessions list */
-    .groupTitle{
-      font-size: 11px;
-      color: rgba(243,239,230,.65);
-      letter-spacing: .18px;
-      margin: 8px 0 6px;
-      text-transform: uppercase;
+    /* Left: Sessions */
+    .segRow{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
     }
-    .sessionItem{
+    .seg{
+      flex:1;
+      padding: 10px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      color: rgba(243,239,230,.80);
+      font-weight: 820;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+      transition: border-color .12s ease, background .12s ease;
+      white-space: nowrap;
+    }
+    .seg.active{
+      border-color: rgba(122,17,20,.45);
+      background: rgba(122,17,20,.18);
+      color: rgba(243,239,230,.92);
+      box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
+    }
+
+    .list{ display:flex; flex-direction:column; gap: 8px; margin-top:10px; }
+    .item{
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(15,13,10,.35);
       border-radius: 14px;
       padding: 10px;
       cursor:pointer;
-      transition: border-color .12s ease, background .12s ease;
-      margin-bottom: 8px;
+      transition: border-color .12s ease, background .12s ease, transform .06s ease;
     }
-    .sessionItem:hover{
+    .item:hover{
       border-color: rgba(243,239,230,.22);
       background: rgba(15,13,10,.48);
     }
-    .sessionItem.active{
-      border-color: rgba(122,17,20,.35);
-      background: rgba(122,17,20,.14);
-    }
-    .sessionTop{
+    .item:active{ transform: translateY(1px); }
+    .itemTop{
       display:flex;
-      justify-content:space-between;
-      gap:10px;
       align-items:center;
+      justify-content:space-between;
+      gap: 10px;
     }
-    .sessionName{
-      font-weight: 820;
+    .itemTitle{
+      font-weight: 850;
       font-size: 13px;
       color: rgba(243,239,230,.92);
       overflow:hidden;
@@ -252,24 +287,30 @@
       white-space: nowrap;
       min-width:0;
     }
-    .pill{
+    .pillMini{
       font-size: 11px;
       padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid rgba(243,239,230,.14);
-      color: rgba(243,239,230,.74);
+      color: rgba(243,239,230,.70);
       background: rgba(15,13,10,.35);
-      user-select:none;
       flex: 0 0 auto;
+      user-select:none;
     }
-    .sessionNote{
-      margin-top: 6px;
+    .itemMeta{
       font-size: 12px;
       color: rgba(243,239,230,.62);
+      margin-top: 6px;
       line-height: 1.25;
     }
+    .rowBtns{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap: wrap;
+    }
 
-    /* Chat */
+    /* Center: Chat */
     .chat{
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -295,7 +336,6 @@
     .row{ display:flex; margin: 10px 0; gap: 10px; }
     .row.you{ justify-content:flex-end; }
     .row.bot{ justify-content:flex-start; }
-
     .bubbleWrap{
       display:flex;
       flex-direction:column;
@@ -335,6 +375,7 @@
       background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
       opacity:.9;
     }
+
     .meta{
       display:flex;
       justify-content:space-between;
@@ -344,11 +385,21 @@
       padding: 0 2px;
       align-items:center;
     }
+    .confidence{ display:flex; align-items:center; gap: 6px; user-select:none; }
+    .confDot{
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #9ca3af;
+      box-shadow: 0 0 0 3px rgba(156,163,175,.18);
+    }
+    .confDot.g{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
+    .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
+    .confDot.r{ background: var(--red); box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
 
+    /* Composer */
     .composer{
       padding: 12px;
       border-top: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.45);
+      background: rgba(20,17,13,.52);
       display:flex;
       gap: 10px;
       align-items:flex-end;
@@ -378,7 +429,7 @@
       border: 1px solid rgba(122,17,20,.45);
       background: linear-gradient(180deg, rgba(122,17,20,.32), rgba(122,17,20,.18));
       color: rgba(243,239,230,.95);
-      font-weight: 820;
+      font-weight: 850;
       cursor: pointer;
       box-shadow: 0 10px 26px rgba(122,17,20,.16);
       transition: transform .06s ease, filter .12s ease;
@@ -391,19 +442,20 @@
       box-shadow: none;
     }
 
-    /* Context */
+    /* Right: Workspace */
     .section{
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(15,13,10,.35);
       border-radius: 14px;
       padding: 10px;
-      margin-bottom: 10px;
     }
+    .section + .section{ margin-top: 10px; }
+
     .sectionTitle{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap: 10px;
       margin-bottom: 8px;
     }
     .sectionTitle strong{
@@ -415,70 +467,149 @@
       font-size: 12px;
       color: rgba(243,239,230,.62);
     }
-    .kv{
-      font-size: 12px;
-      color: rgba(243,239,230,.82);
-      line-height: 1.45;
-    }
-    .kv .muted{ color: rgba(243,239,230,.62); }
 
-    /* Mobile drawers */
-    .drawerBack{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-      z-index: 998;
-    }
-    .drawer{
-      width: min(820px, 100%);
-      max-height: 86vh;
-      border-radius: 22px;
-      border: 1px solid rgba(243,239,230,.18);
-      background: rgba(15,13,10,.86);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 22px 80px rgba(0,0,0,.55);
-      overflow:hidden;
+    .kv{ display:flex; flex-direction:column; gap: 8px; }
+    .kvRow{
       display:flex;
-      flex-direction:column;
-      min-height: 0;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(243,239,230,.12);
     }
-    .drawerGrip{
-      height: 20px;
-      display:grid;
-      place-items:center;
-      border-bottom: 1px solid rgba(243,239,230,.14);
+    .kvRow:first-child{ border-top:none; padding-top:0; }
+    .kvKey{
+      font-size: 12px;
+      color: rgba(243,239,230,.78);
+      line-height: 1.25;
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
     }
-    .gripBar{
-      width: 56px; height: 6px;
-      border-radius: 999px;
-      background: rgba(243,239,230,.18);
+    .kvVal{
+      font-size: 12px;
+      color: rgba(243,239,230,.92);
+      font-weight: 780;
+      text-align:right;
+      line-height: 1.25;
+      white-space: nowrap;
     }
-    .drawerHdr{
-      padding: 12px 14px;
+    .kvSub{
+      font-size: 11px;
+      color: rgba(243,239,230,.62);
+      margin-top: 2px;
+    }
+
+    .fileChip{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.30);
+      color: rgba(243,239,230,.80);
+      font-size: 12px;
     }
-    .drawerHdr strong{ font-size: 13px; color: rgba(243,239,230,.92); }
-    .drawerHdr span{ font-size: 12px; color: rgba(243,239,230,.62); }
-    .drawerBody{
-      padding: 12px;
-      overflow:auto;
-      min-height: 0;
+    .fileChip small{ color: rgba(243,239,230,.60); }
+    .miniBtn{
+      border-radius: 999px;
+      padding: 7px 10px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(20,17,13,.45);
+      color: rgba(243,239,230,.88);
+      font-weight: 820;
+      cursor:pointer;
+      user-select:none;
+      font-size: 12px;
+      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      white-space: nowrap;
+    }
+    .miniBtn:hover{ border-color: rgba(243,239,230,.22); background: rgba(20,17,13,.62); }
+    .miniBtn:active{ transform: translateY(1px); }
+    .miniBtn.danger{
+      border-color: rgba(185,28,28,.35);
+      background: rgba(185,28,28,.12);
     }
 
+    /* Fatal overlay (prevents silent white screen) */
+    .fatal{
+      position: fixed;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      background: rgba(0,0,0,.78);
+      z-index: 9999;
+    }
+    .fatalCard{
+      width: min(860px, 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(243,239,230,.18);
+      background: rgba(20,17,13,.92);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      padding: 14px;
+      color: rgba(243,239,230,.90);
+    }
+    .fatalCard strong{ font-size: 13px; }
+    .fatalCard pre{
+      margin: 10px 0 0;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(11,10,8,.55);
+      overflow:auto;
+      max-height: 45vh;
+      color: rgba(243,239,230,.86);
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Mobile drawers */
+    .drawerBackdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.58);
+      display:none;
+      z-index: 9000;
+    }
+    .drawer{
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: min(92vw, 420px);
+      background: rgba(20,17,13,.92);
+      border-right: 1px solid rgba(243,239,230,.14);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      transform: translateX(-110%);
+      transition: transform .18s ease;
+      z-index: 9100;
+      padding: 12px;
+      overflow:auto;
+    }
+    .drawer.right{
+      right: 0;
+      left: auto;
+      border-right: none;
+      border-left: 1px solid rgba(243,239,230,.14);
+      transform: translateX(110%);
+    }
+    .drawer.open{ transform: translateX(0); }
+    .drawerBackdrop.open{ display:block; }
+
+    /* Responsive */
     @media (max-width: 1080px){
       .app{ grid-template-columns: 300px 1fr; }
-      #contextPanel{ display:none; }
+      #workspacePanel{ display:none; }
     }
     @media (max-width: 760px){
       .app{ grid-template-columns: 1fr; }
       #leftPanel{ display:none; }
+      #workspacePanel{ display:none; }
     }
   </style>
 </head>
@@ -487,6 +618,7 @@
   <div class="wrap">
     <div class="app">
 
+      <!-- TOP -->
       <header>
         <div class="brand">
           <div class="logo">W</div>
@@ -497,462 +629,992 @@
         </div>
 
         <div class="statusRow">
-          <div class="badge" title="Backend status">
-            <span id="backendDot" class="dot bad"></span>
+          <div class="badge clickable" id="profileBadge" title="Agent profile (UI now; backend later)">
+            <span class="label">Profile</span>
+            <span id="profileText">Study</span>
+          </div>
+
+          <div class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)">
+            <span id="notionDot" class="dot bad"></span>
+            <span class="label">Notion</span>
+            <span id="notionText">Not connected</span>
+          </div>
+
+          <div class="badge" title="Local backend connection">
+            <span id="engineDot" class="dot bad"></span>
             <span class="label">Engine</span>
-            <span id="backendText">UI-only</span>
+            <span id="engineText">UI only</span>
           </div>
 
-          <div class="badge" title="Storage is local (per session)">
-            <span class="dot ok"></span>
-            <span class="label">State</span>
-            <span>Saved per session</span>
-          </div>
-
-          <button class="ghostBtn" id="sessionsBtn">Sessions</button>
-          <button class="ghostBtn" id="contextBtn">Context</button>
+          <button class="ghostBtn" id="openSessions">Sessions</button>
+          <button class="ghostBtn" id="openWorkspace">Workspace</button>
         </div>
       </header>
 
-      <!-- LEFT: Sessions (desktop/tablet) -->
+      <!-- LEFT: SESSIONS (desktop/tablet) -->
       <aside class="panel" id="leftPanel">
         <div class="panelHeader">
           <div>
             <strong>Sessions</strong>
-            <div><span id="sessionCount">0</span><span> total</span></div>
+            <small><span id="sessionCount">0</span> total • <span id="activeLabel">Active: —</span></small>
+
+            <div class="segRow" role="tablist" aria-label="Session groups">
+              <button class="seg active" id="tabBiz" role="tab" aria-selected="true">Business</button>
+              <button class="seg" id="tabSchool" role="tab" aria-selected="false">School</button>
+            </div>
           </div>
-          <span id="activeSessionLabel">Active: —</span>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="miniBtn" id="newSessionBtn" title="Create a new session">New</button>
+          </div>
         </div>
-        <div class="panelBody" id="sessionList"></div>
+
+        <div class="panelBody">
+          <div class="list" id="sessionList"></div>
+        </div>
       </aside>
 
-      <!-- CENTER: Chat -->
+      <!-- CENTER: CHAT -->
       <main class="chat">
-        <div class="feed" id="feed"></div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+
         <div class="composer">
-          <textarea id="input" placeholder="Send a message… (Enter to send, Shift+Enter new line)"></textarea>
+          <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
           <button class="send" id="sendBtn" disabled>Send</button>
         </div>
       </main>
 
-      <!-- RIGHT: Context (desktop only) -->
-      <aside class="panel" id="contextPanel">
+      <!-- RIGHT: WORKSPACE (desktop only; mobile uses drawer) -->
+      <aside class="panel" id="workspacePanel">
         <div class="panelHeader">
           <div>
-            <strong>Context</strong>
-            <div><span>Session-scoped</span></div>
+            <strong>Workspace</strong>
+            <small id="wsSubtitle">Session-bound state</small>
           </div>
-          <span id="ctxHint">—</span>
+          <span id="wsHint" style="font-size:12px; color: rgba(243,239,230,.62);">—</span>
         </div>
-        <div class="panelBody" id="contextContentDesktop"></div>
+        <div class="panelBody" id="workspaceBody"></div>
       </aside>
 
     </div>
   </div>
 
-  <!-- MOBILE: Sessions Drawer -->
-  <div class="drawerBack" id="sessionsDrawerBack" aria-hidden="true">
-    <div class="drawer">
-      <div class="drawerGrip"><div class="gripBar"></div></div>
-      <div class="drawerHdr">
-        <div>
-          <strong>Sessions</strong><br/>
-          <span>Tap a session to switch (old ones stay here).</span>
-        </div>
-        <button class="ghostBtn" id="sessionsDrawerClose">Close</button>
-      </div>
-      <div class="drawerBody" id="sessionListMobile"></div>
+  <!-- Mobile drawers -->
+  <div class="drawerBackdrop" id="drawerBackdrop"></div>
+
+  <div class="drawer" id="sessionsDrawer" aria-hidden="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <strong>Sessions</strong>
+      <button class="miniBtn" id="closeSessionsDrawer">Close</button>
     </div>
+
+    <div class="segRow" style="margin-top:12px;">
+      <button class="seg active" id="drawerTabBiz">Business</button>
+      <button class="seg" id="drawerTabSchool">School</button>
+    </div>
+
+    <div class="rowBtns" style="margin-top:10px;">
+      <button class="miniBtn" id="drawerNewSession">New session</button>
+    </div>
+
+    <div class="list" id="drawerSessionList" style="margin-top:12px;"></div>
   </div>
 
-  <!-- MOBILE: Context Drawer -->
-  <div class="drawerBack" id="contextDrawerBack" aria-hidden="true">
-    <div class="drawer">
-      <div class="drawerGrip"><div class="gripBar"></div></div>
-      <div class="drawerHdr">
-        <div>
-          <strong>Context</strong><br/>
-          <span>Session-scoped working state.</span>
-        </div>
-        <button class="ghostBtn" id="contextDrawerClose">Close</button>
+  <div class="drawer right" id="workspaceDrawer" aria-hidden="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <strong>Workspace</strong>
+      <button class="miniBtn" id="closeWorkspaceDrawer">Close</button>
+    </div>
+    <div id="drawerWorkspaceBody" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- Fatal overlay -->
+  <div class="fatal" id="fatal">
+    <div class="fatalCard">
+      <strong>WilliamBot UI crashed (no silent white screen).</strong>
+      <div style="margin-top:6px; color: rgba(243,239,230,.75); font-size:12px;">
+        Copy the error, refresh, and you’re back.
       </div>
-      <div class="drawerBody" id="contextContentMobile"></div>
+      <pre id="fatalText"></pre>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+        <button class="miniBtn" id="fatalCopy">Copy error</button>
+        <button class="miniBtn" id="fatalClose">Close</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // ====== STORAGE KEYS ======
-    const STORE = {
-      sessions: "wb_sessions_v3",
-      activeSession: "wb_active_session_v3",
-      historyPrefix: "wb_history_v3_"
-    };
+    (function(){
+      "use strict";
 
-    const $ = (id) => document.getElementById(id);
+      // -------------------- Safety: show errors instead of blank/white --------------------
+      const fatalEl = document.getElementById("fatal");
+      const fatalText = document.getElementById("fatalText");
+      const fatalCopy = document.getElementById("fatalCopy");
+      const fatalClose = document.getElementById("fatalClose");
 
-    const feed = $("feed");
-    const input = $("input");
-    const sendBtn = $("sendBtn");
+      function showFatal(err){
+        try{
+          const msg = (err && err.stack) ? err.stack : String(err);
+          fatalText.textContent = msg;
+          fatalEl.style.display = "flex";
+        } catch {}
+      }
+      window.addEventListener("error", (e) => showFatal(e.error || e.message || e), true);
+      window.addEventListener("unhandledrejection", (e) => showFatal(e.reason || e), true);
 
-    const sessionsBtn = $("sessionsBtn");
-    const contextBtn = $("contextBtn");
+      fatalCopy.addEventListener("click", async () => {
+        try{ await navigator.clipboard.writeText(fatalText.textContent || ""); } catch {}
+      });
+      fatalClose.addEventListener("click", () => { fatalEl.style.display = "none"; });
 
-    const sessionList = $("sessionList");
-    const sessionListMobile = $("sessionListMobile");
-    const sessionCount = $("sessionCount");
-    const activeSessionLabel = $("activeSessionLabel");
+      // -------------------- DOM helpers --------------------
+      const $ = (id) => document.getElementById(id);
+      const escapeHtml = (s) =>
+        String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
-    const topSub = $("topSub");
-    const ctxHint = $("ctxHint");
+      function stamp(){
+        const d = new Date();
+        return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+      }
+      function nowTime(){
+        const d = new Date();
+        return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+      }
+      function uid(){
+        // short, collision-resistant enough for sessions
+        return "s_" + Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
+      }
 
-    const contextPanel = $("contextPanel");
-    const contextContentDesktop = $("contextContentDesktop");
-    const contextContentMobile = $("contextContentMobile");
+      function setDot(el, state){
+        el.classList.remove("ok","bad");
+        if(state === "ok") el.classList.add("ok");
+        if(state === "bad") el.classList.add("bad");
+      }
 
-    const sessionsDrawerBack = $("sessionsDrawerBack");
-    const sessionsDrawerClose = $("sessionsDrawerClose");
-    const contextDrawerBack = $("contextDrawerBack");
-    const contextDrawerClose = $("contextDrawerClose");
+      // -------------------- Storage --------------------
+      const STORE = {
+        sessions: "wb_sessions_v5",
+        activeSession: "wb_active_session_v5",
+        activeGroup: "wb_active_group_v5",  // "business" | "school"
+        historyPrefix: "wb_history_v5_"
+      };
+      const historyKey = (sid) => STORE.historyPrefix + sid;
 
-    // ====== UTILS ======
-    function nowTime(){
-      const d = new Date();
-      return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-    }
-    function nowStamp(){
-      const d = new Date();
-      return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
-    }
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-    }
-    function historyKey(sessionId){ return STORE.historyPrefix + sessionId; }
-    function isMobileLayout(){ return window.matchMedia("(max-width: 760px)").matches; }
+      function safeParse(json, fallback){
+        try { return JSON.parse(json); } catch { return fallback; }
+      }
 
-    // ====== SESSIONS MODEL ======
-    const DEFAULT_SESSIONS = [
-      // Business
-      { id:"biz_pricing", group:"Business", title:"Pricing & Margins", note:"MSRP, fees, profit targets" },
-      { id:"biz_formulation", group:"Business", title:"Formulation", note:"Constraints, batches, stability" },
-      { id:"biz_amazon", group:"Business", title:"Amazon Ops", note:"Listings, compliance, reviews" },
+      // -------------------- Default sessions (Business + 2 classes) --------------------
+      function defaultSessions(){
+        return [
+          {
+            id: "biz_main",
+            group: "business",
+            title: "Business — Pricing & Ops",
+            note: "COGS • margins • Amazon/Shopify • decision ledger",
+            updated: stamp(),
+            files: [
+              { name: "Products & SKUs (local)", desc: "Later: Notion + invoices + COGS tables" },
+              { name: "Pricing guardrails (local)", desc: "Margin floors • fees • shipping • overhead" }
+            ]
+          },
+          {
+            id: "math107",
+            group: "school",
+            title: "UMGC — MATH 107 (College Algebra)",
+            note: "Syllabus PDF • homework help • study plan",
+            updated: stamp(),
+            files: [
+              { name: "MATH_107_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }
+            ]
+          },
+          {
+            id: "hist125",
+            group: "school",
+            title: "UMGC — HIST 125 (Technological Transformations)",
+            note: "Syllabus PDF • readings • discussion prep",
+            updated: stamp(),
+            files: [
+              { name: "HIST_125_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }
+            ]
+          }
+        ];
+      }
 
-      // School
-      { id:"school_math107", group:"School", title:"MATH 107 — College Algebra", note:"UMGC • Spring 2026" },
-      { id:"school_hist125", group:"School", title:"HIST 125 — Technological Transformations", note:"UMGC • Spring 2026" }
-    ];
-
-    function loadSessions(){
-      try{
+      function loadSessions(){
         const raw = localStorage.getItem(STORE.sessions);
-        const data = raw ? JSON.parse(raw) : null;
-        if(Array.isArray(data) && data.length) return data;
-      } catch {}
-      // first run
-      const seeded = DEFAULT_SESSIONS.map(s => ({...s, updated: nowStamp()}));
-      localStorage.setItem(STORE.sessions, JSON.stringify(seeded));
-      return seeded;
-    }
-    function saveSessions(list){
-      localStorage.setItem(STORE.sessions, JSON.stringify(list));
-    }
+        const parsed = safeParse(raw, null);
+        if(Array.isArray(parsed) && parsed.length) return parsed;
 
-    function getActiveSessionId(){
-      const v = localStorage.getItem(STORE.activeSession);
-      return v || "biz_pricing";
-    }
-    function setActiveSessionId(id){
-      localStorage.setItem(STORE.activeSession, id);
-    }
-
-    function loadHistory(sessionId){
-      try{
-        const raw = localStorage.getItem(historyKey(sessionId));
-        if(!raw) return [];
-        const data = JSON.parse(raw);
-        return Array.isArray(data) ? data : [];
-      } catch { return []; }
-    }
-    function saveHistory(sessionId, hist){
-      localStorage.setItem(historyKey(sessionId), JSON.stringify(hist.slice(-400)));
-    }
-
-    let sessions = loadSessions();
-    let activeSessionId = getActiveSessionId();
-    let history = loadHistory(activeSessionId);
-
-    // ====== RENDER: SESSIONS LIST ======
-    function renderSessions(targetEl){
-      const groups = {};
-      for(const s of sessions){
-        groups[s.group] = groups[s.group] || [];
-        groups[s.group].push(s);
+        const s = defaultSessions();
+        localStorage.setItem(STORE.sessions, JSON.stringify(s));
+        return s;
       }
 
-      targetEl.innerHTML = "";
-      const order = ["Business","School"];
-      const keys = order.filter(k => groups[k]).concat(Object.keys(groups).filter(k => !order.includes(k)));
-
-      for(const g of keys){
-        const gt = document.createElement("div");
-        gt.className = "groupTitle";
-        gt.textContent = g;
-        targetEl.appendChild(gt);
-
-        for(const s of groups[g]){
-          const div = document.createElement("div");
-          div.className = "sessionItem" + (s.id === activeSessionId ? " active" : "");
-          div.innerHTML = `
-            <div class="sessionTop">
-              <div class="sessionName">${escapeHtml(s.title)}</div>
-              <span class="pill">${s.id === activeSessionId ? "Active" : "Open"}</span>
-            </div>
-            <div class="sessionNote">
-              ${escapeHtml(s.note || "")}<br/>
-              <span style="opacity:.75;">Updated: ${escapeHtml(s.updated || "—")}</span>
-            </div>
-          `;
-          div.addEventListener("click", () => switchSession(s.id));
-          targetEl.appendChild(div);
-        }
+      function saveSessions(sessions){
+        localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
       }
-    }
 
-    function renderAllSessions(){
-      sessionCount.textContent = String(sessions.length);
-      const active = sessions.find(s => s.id === activeSessionId);
-      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
-      renderSessions(sessionList);
-      renderSessions(sessionListMobile);
-
-      topSub.textContent = "Session: " + (active ? active.title : activeSessionId);
-      ctxHint.textContent = active ? active.group : "—";
-    }
-
-    // ====== RENDER: CHAT ======
-    function renderMessage(m){
-      const row = document.createElement("div");
-      row.className = "row " + (m.role === "you" ? "you" : "bot");
-
-      const wrap = document.createElement("div");
-      wrap.className = "bubbleWrap";
-
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.textContent = m.content || "";
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      meta.innerHTML = `<span>${m.role === "you" ? "You" : "WilliamBot"}</span><span>${escapeHtml(m.ts || nowTime())}</span>`;
-
-      wrap.appendChild(bubble);
-      wrap.appendChild(meta);
-      row.appendChild(wrap);
-      feed.appendChild(row);
-      feed.scrollTop = feed.scrollHeight;
-    }
-
-    function hydrateThread(){
-      feed.innerHTML = "";
-      if(history.length === 0){
-        const active = sessions.find(s => s.id === activeSessionId);
-        const intro = {
-          role:"bot",
-          ts: nowTime(),
-          content:
-`UI is live.
-
-You are in: ${active ? active.title : activeSessionId}
-
-Sessions are the main switch now.
-Old sessions never disappear — they stay in the Sessions list.
-
-Backend will connect later (Tailscale + local server).`
-        };
-        history.push(intro);
-        saveHistory(activeSessionId, history);
+      function getActiveSessionId(){
+        return localStorage.getItem(STORE.activeSession) || "biz_main";
       }
-      history.forEach(renderMessage);
-    }
-
-    // ====== CONTEXT (SESSION-SCOPED) ======
-    function contextForSession(sessionId){
-      // Calm + minimal. Replace later with real RAG + syllabus parsing.
-      if(sessionId.startsWith("biz_")){
-        return {
-          title:"Business context",
-          blocks:[
-            { k:"Focus", v:"Pricing, ops, formulation, Amazon/Shopify" },
-            { k:"Rule", v:"Don’t commit pricing without fresh COGS + fees + ship cost." },
-            { k:"Backend", v:"UI-only until PC arrives." }
-          ]
-        };
+      function setActiveSessionId(id){
+        localStorage.setItem(STORE.activeSession, id);
       }
-      if(sessionId === "school_math107"){
-        return {
-          title:"MATH 107 context",
-          blocks:[
-            { k:"Course", v:"College Algebra (UMGC)" },
-            { k:"Use", v:"Upload worksheets/notes; I’ll explain steps and check work." },
-            { k:"Next", v:"Later: add syllabus as a local RAG source." }
-          ]
-        };
+
+      function getActiveGroup(){
+        return localStorage.getItem(STORE.activeGroup) || "business";
       }
-      if(sessionId === "school_hist125"){
-        return {
-          title:"HIST 125 context",
-          blocks:[
-            { k:"Course", v:"Technological Transformations (UMGC)" },
-            { k:"Use", v:"Summaries, outlines, discussion post structure, citations help." },
-            { k:"Next", v:"Later: add syllabus as a local RAG source." }
-          ]
-        };
+      function setActiveGroup(g){
+        localStorage.setItem(STORE.activeGroup, g);
       }
-      return { title:"Context", blocks:[{k:"—",v:"—"}] };
-    }
 
-    function renderContext(){
-      const data = contextForSession(activeSessionId);
-      const stamp = nowStamp();
+      function loadHistory(sid){
+        const raw = localStorage.getItem(historyKey(sid));
+        const parsed = safeParse(raw, []);
+        return Array.isArray(parsed) ? parsed : [];
+      }
 
-      const html = `
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>${escapeHtml(data.title)}</strong>
-            <span>${escapeHtml(stamp)}</span>
-          </div>
-          <div class="kv">
-            ${data.blocks.map(b => `
-              <div style="margin-bottom:8px;">
-                <div><strong style="color:rgba(243,239,230,.92)">${escapeHtml(b.k)}:</strong></div>
-                <div class="muted">${escapeHtml(b.v)}</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
+      function saveHistory(sid, hist){
+        // keep recent messages only
+        localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-500)));
+      }
 
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Session storage</strong>
-            <span>${escapeHtml(stamp)}</span>
-          </div>
-          <div class="kv">
-            <div class="muted">Each session has its own saved chat history (localStorage).</div>
-            <div style="margin-top:8px;" class="muted">Switch sessions using the Sessions button.</div>
-          </div>
-        </div>
-      `;
+      // -------------------- Profiles (NOT session switching) --------------------
+      // You asked specifically: sessions should be what you toggle—not plan/draft/calc.
+      // So the top badge cycles a "profile" label only. It does not change sessions.
+      const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
+      const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
+      let profileIdx = 0;
 
-      contextContentDesktop.innerHTML = html;
-      contextContentMobile.innerHTML = html;
-    }
+      function profileListForSession(session){
+        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
+      }
+      function setProfileDefault(session){
+        const list = profileListForSession(session);
+        const preferred = (session.group === "business") ? "Financial" : "Study";
+        profileIdx = Math.max(0, list.indexOf(preferred));
+        $("profileText").textContent = list[profileIdx] || list[0];
+      }
+      function cycleProfile(currentSession){
+        const list = profileListForSession(currentSession);
+        profileIdx = (profileIdx + 1) % list.length;
+        $("profileText").textContent = list[profileIdx];
+      }
 
-    // ====== SWITCH SESSION ======
-    function switchSession(newId){
-      if(newId === activeSessionId) return;
+      // -------------------- UI elements --------------------
+      const feed = $("feed");
+      const input = $("input");
+      const sendBtn = $("sendBtn");
+      const topSub = $("topSub");
+      const sessionCount = $("sessionCount");
+      const activeLabel = $("activeLabel");
 
-      activeSessionId = newId;
-      setActiveSessionId(newId);
+      // Desktop lists
+      const sessionList = $("sessionList");
 
-      history = loadHistory(activeSessionId);
+      // Tabs (desktop + drawer)
+      const tabBiz = $("tabBiz");
+      const tabSchool = $("tabSchool");
+      const drawerTabBiz = $("drawerTabBiz");
+      const drawerTabSchool = $("drawerTabSchool");
 
-      // update updated stamp
-      sessions = sessions.map(s => s.id === newId ? {...s, updated: nowStamp()} : s);
+      // Drawer
+      const backdrop = $("drawerBackdrop");
+      const sessionsDrawer = $("sessionsDrawer");
+      const workspaceDrawer = $("workspaceDrawer");
+      const drawerSessionList = $("drawerSessionList");
+      const drawerWorkspaceBody = $("drawerWorkspaceBody");
+
+      // Workspace (desktop)
+      const wsHint = $("wsHint");
+      const wsSubtitle = $("wsSubtitle");
+      const workspaceBody = $("workspaceBody");
+
+      // Badges
+      const notionDot = $("notionDot");
+      const engineDot = $("engineDot");
+
+      // -------------------- State --------------------
+      let sessions = loadSessions();
       saveSessions(sessions);
 
-      renderAllSessions();
-      hydrateThread();
-      renderContext();
+      let history = [];
 
-      if(isMobileLayout()){
-        closeSessionsDrawer();
+      function currentSession(){
+        const sid = getActiveSessionId();
+        return sessions.find(s => s.id === sid) || sessions[0];
       }
-    }
 
-    // ====== SEND ======
-    function syncSend(){ sendBtn.disabled = input.value.trim().length === 0; }
-
-    function addToHistory(m){
-      history.push(m);
-      saveHistory(activeSessionId, history);
-    }
-
-    function sendMessage(){
-      const text = input.value.trim();
-      if(!text) return;
-
-      input.value = "";
-      syncSend();
-
-      const you = { role:"you", ts: nowTime(), content:text };
-      renderMessage(you);
-      addToHistory(you);
-
-      const bot = {
-        role:"bot",
-        ts: nowTime(),
-        content:"Backend not connected yet (UI-only). When your PC arrives, we’ll wire /health + /chat over Tailscale."
-      };
-      renderMessage(bot);
-      addToHistory(bot);
-
-      renderContext();
-    }
-
-    // ====== DRAWERS ======
-    function openSessionsDrawer(){
-      sessionsDrawerBack.style.display = "flex";
-      sessionsDrawerBack.setAttribute("aria-hidden","false");
-    }
-    function closeSessionsDrawer(){
-      sessionsDrawerBack.style.display = "none";
-      sessionsDrawerBack.setAttribute("aria-hidden","true");
-    }
-    function openContextDrawer(){
-      contextDrawerBack.style.display = "flex";
-      contextDrawerBack.setAttribute("aria-hidden","false");
-    }
-    function closeContextDrawer(){
-      contextDrawerBack.style.display = "none";
-      contextDrawerBack.setAttribute("aria-hidden","true");
-    }
-
-    // ====== EVENTS ======
-    input.addEventListener("input", syncSend);
-    input.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendMessage();
+      function setTopSubText(){
+        const s = currentSession();
+        topSub.textContent = "Session: " + (s ? s.title : "—");
       }
-    });
-    sendBtn.addEventListener("click", sendMessage);
 
-    sessionsBtn.addEventListener("click", () => {
-      if(isMobileLayout()) openSessionsDrawer();
-      else $("leftPanel").classList.toggle("hidden");
-    });
+      // -------------------- Session rendering --------------------
+      function setTabsUI(group){
+        // desktop
+        tabBiz.classList.toggle("active", group === "business");
+        tabSchool.classList.toggle("active", group === "school");
+        tabBiz.setAttribute("aria-selected", group === "business" ? "true" : "false");
+        tabSchool.setAttribute("aria-selected", group === "school" ? "true" : "false");
+        // drawer
+        drawerTabBiz.classList.toggle("active", group === "business");
+        drawerTabSchool.classList.toggle("active", group === "school");
+      }
 
-    contextBtn.addEventListener("click", () => {
-      if(window.matchMedia("(max-width: 1080px)").matches) openContextDrawer();
-      else contextPanel.classList.toggle("hidden");
-    });
+      function sessionPillText(s){
+        const active = s.id === getActiveSessionId();
+        if(active) return "Active";
+        return (s.group === "school") ? "Class" : "Business";
+      }
 
-    sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
-    sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
+      function renderSessionListInto(el, group){
+        el.innerHTML = "";
+        const filtered = sessions.filter(s => s.group === group);
 
-    contextDrawerClose.addEventListener("click", closeContextDrawer);
-    contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
+        if(filtered.length === 0){
+          const empty = document.createElement("div");
+          empty.style.color = "rgba(243,239,230,.62)";
+          empty.style.fontSize = "12px";
+          empty.textContent = "No sessions yet.";
+          el.appendChild(empty);
+          return;
+        }
 
-    // ====== INIT ======
-    // ensure active session exists
-    if(!sessions.some(s => s.id === activeSessionId)){
-      activeSessionId = "biz_pricing";
-      setActiveSessionId(activeSessionId);
-    }
+        for(const s of filtered){
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <div class="itemTop">
+              <div class="itemTitle">${escapeHtml(s.title)}</div>
+              <span class="pillMini">${escapeHtml(sessionPillText(s))}</span>
+            </div>
+            <div class="itemMeta">
+              ${escapeHtml(s.note || "")}<br/>
+              <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span>
+            </div>
 
-    renderAllSessions();
-    hydrateThread();
-    renderContext();
-    syncSend();
+            <div class="rowBtns">
+              <button class="miniBtn" data-act="activate" data-id="${escapeHtml(s.id)}">Open</button>
+              <button class="miniBtn" data-act="rename" data-id="${escapeHtml(s.id)}">Rename</button>
+              <button class="miniBtn danger" data-act="delete" data-id="${escapeHtml(s.id)}">Delete</button>
+            </div>
+          `;
+          el.appendChild(div);
+        }
+      }
+
+      function renderSessions(){
+        const group = getActiveGroup();
+        setTabsUI(group);
+
+        sessionCount.textContent = String(sessions.length);
+        activeLabel.textContent = (currentSession() ? currentSession().title : "—");
+
+        renderSessionListInto(sessionList, group);
+        renderSessionListInto(drawerSessionList, group);
+
+        setTopSubText();
+      }
+
+      function activateSession(id){
+        const s = sessions.find(x => x.id === id);
+        if(!s) return;
+
+        setActiveSessionId(id);
+        setActiveGroup(s.group);
+
+        setProfileDefault(s);
+
+        loadThread();
+        hydrateWorkspace();
+        renderSessions();
+
+        // On mobile, close sessions drawer after choosing
+        closeDrawer("sessions");
+      }
+
+      // -------------------- CRUD sessions --------------------
+      function createSession(group){
+        const isBiz = group === "business";
+        const newId = uid();
+
+        const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
+        const note  = isBiz
+          ? "Pricing • ops • planning"
+          : "Study plan • assignments • notes";
+
+        const sess = {
+          id: newId,
+          group,
+          title,
+          note,
+          updated: stamp(),
+          files: []
+        };
+
+        sessions = [sess, ...sessions];
+        saveSessions(sessions);
+
+        // seed intro thread
+        saveHistory(newId, [introForSession(sess)]);
+
+        activateSession(newId);
+      }
+
+      function renameSession(id){
+        const s = sessions.find(x => x.id === id);
+        if(!s) return;
+
+        const next = prompt("Rename session:", s.title);
+        if(!next) return;
+
+        s.title = next.trim().slice(0, 90) || s.title;
+        s.updated = stamp();
+        saveSessions(sessions);
+
+        renderSessions();
+        setTopSubText();
+        hydrateWorkspace();
+      }
+
+      function deleteSession(id){
+        const s = sessions.find(x => x.id === id);
+        if(!s) return;
+
+        // protect the 3 defaults if you want; comment this out if you want deletable
+        const protectedIds = new Set(["biz_main","math107","hist125"]);
+        if(protectedIds.has(id)){
+          alert("That session is protected (default). Create new ones and delete those instead.");
+          return;
+        }
+
+        const ok = confirm("Delete this session? This removes its chat history from this browser.");
+        if(!ok) return;
+
+        sessions = sessions.filter(x => x.id !== id);
+        saveSessions(sessions);
+
+        try{ localStorage.removeItem(historyKey(id)); } catch {}
+
+        // If deleted active, fall back to biz_main (or first session)
+        if(getActiveSessionId() === id){
+          const fallback = sessions.find(x => x.id === "biz_main") || sessions[0];
+          if(fallback) activateSession(fallback.id);
+        } else {
+          renderSessions();
+        }
+      }
+
+      // -------------------- Chat --------------------
+      function renderMessage(m){
+        const row = document.createElement("div");
+        row.className = "row " + (m.role === "you" ? "you" : "bot");
+
+        const wrap = document.createElement("div");
+        wrap.className = "bubbleWrap";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = m.content || "";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const who = document.createElement("span");
+        who.textContent = m.role === "you" ? "You" : "WilliamBot";
+
+        const conf = document.createElement("span");
+        conf.className = "confidence";
+
+        const dot = document.createElement("span");
+        dot.className = "confDot " + (m.confidence || "y");
+
+        const label = document.createElement("span");
+        label.textContent = (m.confidence === "g") ? "High" : (m.confidence === "r") ? "Low" : "Medium";
+
+        const time = document.createElement("span");
+        time.style.opacity = ".65";
+        time.textContent = "• " + (m.ts || nowTime());
+
+        conf.appendChild(dot);
+        conf.appendChild(label);
+        conf.appendChild(time);
+
+        meta.appendChild(who);
+        meta.appendChild(conf);
+
+        wrap.appendChild(bubble);
+        wrap.appendChild(meta);
+
+        row.appendChild(wrap);
+        feed.appendChild(row);
+        feed.scrollTop = feed.scrollHeight;
+      }
+
+      function introForSession(session){
+        if(session.group === "business"){
+          return {
+            role:"bot",
+            confidence:"y",
+            ts: nowTime(),
+            content:
+`Business session loaded.
+
+What this will do when backend connects:
+• COGS-aware pricing & margin math
+• Channel fees (Amazon/Shopify) + shipping + overhead allocation
+• Decision ledger so pricing changes are traceable
+• RAG for your product specs, invoices, policies
+
+Try prompts:
+- "Build pricing guardrails for luxury hair care"
+- "What inputs do you need to lock MSRP?"
+- "Create a decision ledger template"`
+          };
+        }
+
+        // school
+        return {
+          role:"bot",
+          confidence:"y",
+          ts: nowTime(),
+          content:
+`Class session loaded.
+
+What this will do when backend connects:
+• Read syllabus PDF and extract deadlines + grading
+• Build a weekly plan and checklists
+• Explain concepts and help you structure drafts
+
+Try prompts:
+- "Summarize grading breakdown"
+- "Extract deadlines into a checklist"
+- "Explain this topic like I'm new"`
+        };
+      }
+
+      function loadThread(){
+        const sid = getActiveSessionId();
+        history = loadHistory(sid);
+        feed.innerHTML = "";
+
+        if(history.length === 0){
+          const s = currentSession();
+          const intro = introForSession(s);
+          history.push(intro);
+          saveHistory(sid, history);
+        }
+
+        for(const m of history) renderMessage(m);
+      }
+
+      function addToHistory(m){
+        const sid = getActiveSessionId();
+        history.push(m);
+        saveHistory(sid, history);
+      }
+
+      function syncSendButton(){
+        sendBtn.disabled = input.value.trim().length === 0;
+      }
+
+      function sendMessage(){
+        const text = input.value.trim();
+        if(!text) return;
+
+        input.value = "";
+        syncSendButton();
+
+        const youMsg = { role:"you", confidence:"g", ts: nowTime(), content: text };
+        renderMessage(youMsg);
+        addToHistory(youMsg);
+
+        const s = currentSession();
+        s.updated = stamp();
+        saveSessions(sessions);
+        renderSessions();
+
+        // UI-only reply (clean, predictable)
+        let reply;
+        if(s.group === "business"){
+          reply =
+`UI-only mode (backend not connected).
+
+When backend is live, I will:
+• compute margins step-by-step
+• use your real COGS/fees/shipping
+• store decisions in a ledger
+
+Tell me which one you want next:
+1) MSRP guardrails
+2) Margin calculator inputs
+3) Decision ledger format`;
+        } else {
+          reply =
+`UI-only mode (backend not connected).
+
+When backend is live, I will:
+• parse the syllabus PDF
+• extract deadlines + grading
+• build a weekly plan
+
+Tell me what you want next:
+1) Weekly plan
+2) Deadlines checklist
+3) Concept help`;
+        }
+
+        const botMsg = { role:"bot", confidence:"y", ts: nowTime(), content: reply };
+        renderMessage(botMsg);
+        addToHistory(botMsg);
+      }
+
+      // -------------------- Workspace --------------------
+      function workspaceTemplate(session){
+        const isBiz = session.group === "business";
+
+        wsHint.textContent = session.id.toUpperCase();
+        wsSubtitle.textContent = (isBiz ? "Business state" : "Class state") + " • " + stamp();
+
+        const files = session.files || [];
+        const fileRows = files.map(f => `
+          <div class="fileChip">
+            <div>
+              <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
+              <small>${escapeHtml(f.desc || "")}</small>
+            </div>
+            <button class="miniBtn" data-ws="open">Open</button>
+          </div>
+        `).join("");
+
+        const assumptions = isBiz
+          ? [
+              { k:"Target gross margin", v:"≥ 70%", sub:"Luxury guardrail", c:"g" },
+              { k:"Channels", v:"Amazon + Shopify", sub:"Different fees, same COGS base", c:"g" },
+              { k:"Fee risk", v:"Verify category", sub:"Amazon referral/fulfillment vary", c:"y" },
+              { k:"COGS freshness", v:"Notion not connected", sub:"Avoid locking MSRP w/out data", c:"r" }
+            ]
+          : [
+              { k:"Syllabus", v:"Mounted (PDF)", sub:"Use for deadlines + grading policy", c:"g" },
+              { k:"Weekly plan", v:"Build cadence", sub:"Make it automatic later", c:"y" },
+              { k:"Notes", v:"Structured", sub:"Definitions • examples • self-test", c:"g" }
+            ];
+
+        const assRows = assumptions.map(a => `
+          <div class="kvRow">
+            <div>
+              <div class="kvKey">
+                <span class="confDot ${a.c}" style="transform: translateY(2px);"></span>
+                <div>
+                  <div>${escapeHtml(a.k)}</div>
+                  <div class="kvSub">${escapeHtml(a.sub || "")}</div>
+                </div>
+              </div>
+            </div>
+            <div class="kvVal">${escapeHtml(a.v)}</div>
+          </div>
+        `).join("");
+
+        const actions = isBiz ? `
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="miniBtn" data-ws="guardrails">Pricing guardrails</button>
+            <button class="miniBtn" data-ws="inputs">MSRP inputs list</button>
+            <button class="miniBtn" data-ws="ledger">Decision ledger</button>
+          </div>
+        ` : `
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="miniBtn" data-ws="plan">Weekly plan</button>
+            <button class="miniBtn" data-ws="deadlines">Extract deadlines</button>
+            <button class="miniBtn" data-ws="notes">Study notes</button>
+          </div>
+        `;
+
+        const rag = `
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Knowledge (RAG)</strong>
+              <span>Local-only</span>
+            </div>
+            <div style="color: rgba(243,239,230,.72); font-size:12px; line-height:1.35;">
+              This is where your syllabi, notes, invoices, product specs, and policies live for retrieval.
+              <br/>UI today; backend will index files later.
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="miniBtn" data-ws="ragAdd">Add document</button>
+              <button class="miniBtn" data-ws="ragReindex">Re-index</button>
+            </div>
+          </div>
+        `;
+
+        return `
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Active session</strong>
+              <span>${escapeHtml(session.updated || "")}</span>
+            </div>
+            <div style="color: rgba(243,239,230,.86); font-size:12.5px; line-height:1.35;">
+              <div style="font-weight:900; color: rgba(243,239,230,.94);">${escapeHtml(session.title)}</div>
+              <div style="margin-top:4px; color: rgba(243,239,230,.70);">${escapeHtml(session.note || "")}</div>
+            </div>
+            <div style="margin-top:10px;">${actions}</div>
+          </div>
+
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Mounted files</strong>
+              <span>${files.length} items</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${fileRows || `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files yet.</div>`}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Working assumptions</strong>
+              <span>${escapeHtml($("profileText").textContent || "")}</span>
+            </div>
+            <div class="kv">${assRows}</div>
+          </div>
+
+          ${rag}
+        `;
+      }
+
+      function hydrateWorkspace(){
+        const s = currentSession();
+        const html = workspaceTemplate(s);
+        workspaceBody.innerHTML = html;
+        drawerWorkspaceBody.innerHTML = html;
+
+        // Workspace button actions -> add bot message (and persist)
+        const handler = (e) => {
+          const btn = e.target.closest("[data-ws]");
+          if(!btn) return;
+          const act = btn.getAttribute("data-ws");
+
+          const canned = (function(){
+            if(s.group === "business"){
+              if(act === "guardrails") return
+`Pricing guardrails (UI preview):
+• Don’t lock MSRP until: COGS + packaging + shipping + fees are verified.
+• Keep gross margin floor ≥ 70% (luxury guardrail).
+• Separate prices by channel (Amazon fees vs Shopify).
+• Log every price change in a decision ledger (why + inputs + risk).`;
+              if(act === "inputs") return
+`MSRP inputs list (UI preview):
+1) Unit ingredient cost (COGS)
+2) Packaging unit cost (jar/bottle + label + shrink + box)
+3) Avg shipping + worst-case shipping
+4) Channel fees (Amazon referral/FBA; Shopify payment fees)
+5) Returns + damage reserve
+6) Overhead allocation per unit (fixed costs / volume assumption)
+7) Target margin floor + promo buffer`;
+              if(act === "ledger") return
+`Decision ledger template (UI preview):
+• Date/time
+• SKU + channel
+• Old price → new price
+• Inputs used (COGS, fees, ship, overhead)
+• Margin impact (before/after)
+• Reason (what changed)
+• Risks + mitigations
+• Sources (links/files)`;
+            } else {
+              if(act === "plan") return
+`Weekly plan (UI preview):
+• Mon: read/watch + outline
+• Tue: practice/problems/notes
+• Wed: draft discussion/assignment
+• Thu: revise + self-test
+• Fri: final polish + submit
+Backend later will auto-pull deadlines from syllabus.`;
+              if(act === "deadlines") return
+`Deadlines extraction (backend hook):
+Backend will parse the syllabus PDF and generate:
+• assignment list
+• due dates
+• grading weights
+• reminders`;
+              if(act === "notes") return
+`Study notes (backend hook):
+Backend will generate structured notes:
+• key terms
+• examples
+• common mistakes
+• quick quiz questions`;
+            }
+            if(act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
+            if(act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
+            if(act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
+            return "UI-only action.";
+          })();
+
+          const msg = { role:"bot", confidence:"y", ts: nowTime(), content: canned };
+          renderMessage(msg);
+          addToHistory(msg);
+        };
+
+        workspaceBody.onclick = handler;
+        drawerWorkspaceBody.onclick = handler;
+      }
+
+      // -------------------- Drawers --------------------
+      function openDrawer(which){
+        backdrop.classList.add("open");
+        if(which === "sessions"){
+          sessionsDrawer.classList.add("open");
+          sessionsDrawer.setAttribute("aria-hidden","false");
+        } else {
+          workspaceDrawer.classList.add("open");
+          workspaceDrawer.setAttribute("aria-hidden","false");
+        }
+      }
+      function closeDrawer(which){
+        if(which === "sessions"){
+          sessionsDrawer.classList.remove("open");
+          sessionsDrawer.setAttribute("aria-hidden","true");
+        } else if(which === "workspace"){
+          workspaceDrawer.classList.remove("open");
+          workspaceDrawer.setAttribute("aria-hidden","true");
+        } else {
+          sessionsDrawer.classList.remove("open");
+          workspaceDrawer.classList.remove("open");
+          sessionsDrawer.setAttribute("aria-hidden","true");
+          workspaceDrawer.setAttribute("aria-hidden","true");
+        }
+
+        // hide backdrop only if both are closed
+        const anyOpen = sessionsDrawer.classList.contains("open") || workspaceDrawer.classList.contains("open");
+        if(!anyOpen) backdrop.classList.remove("open");
+      }
+
+      // -------------------- Event wiring (single, stable) --------------------
+      function wireEvents(){
+        // Chat
+        input.addEventListener("input", syncSendButton);
+        input.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+        sendBtn.addEventListener("click", sendMessage);
+
+        // Tabs (desktop + drawer)
+        const setGroup = (g) => {
+          setActiveGroup(g);
+          setTabsUI(g);
+          renderSessions();
+        };
+
+        tabBiz.addEventListener("click", () => setGroup("business"));
+        tabSchool.addEventListener("click", () => setGroup("school"));
+        drawerTabBiz.addEventListener("click", () => setGroup("business"));
+        drawerTabSchool.addEventListener("click", () => setGroup("school"));
+
+        // New session
+        $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
+        $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
+
+        // Session list actions (event delegation)
+        function sessionActionHandler(e){
+          const btn = e.target.closest("[data-act]");
+          if(!btn) return;
+          const act = btn.getAttribute("data-act");
+          const id = btn.getAttribute("data-id");
+          if(!id) return;
+
+          if(act === "activate") activateSession(id);
+          if(act === "rename") renameSession(id);
+          if(act === "delete") deleteSession(id);
+        }
+        sessionList.addEventListener("click", sessionActionHandler);
+        drawerSessionList.addEventListener("click", sessionActionHandler);
+
+        // Profile cycle (label only)
+        $("profileBadge").addEventListener("click", () => {
+          cycleProfile(currentSession());
+          hydrateWorkspace();
+        });
+
+        // Notion badge demo (just UI)
+        $("notionBadge").addEventListener("click", () => {
+          const cur = $("notionText").textContent || "";
+          if(cur.includes("Not connected")){
+            setDot(notionDot,"bad"); $("notionText").textContent = "Out of sync (12h)";
+          } else if(cur.includes("Out of sync")){
+            setDot(notionDot,"ok"); $("notionText").textContent = "Synced 3 min ago";
+          } else {
+            setDot(notionDot,"bad"); $("notionText").textContent = "Not connected";
+          }
+        });
+
+        // Drawers open/close
+        $("openSessions").addEventListener("click", () => openDrawer("sessions"));
+        $("openWorkspace").addEventListener("click", () => openDrawer("workspace"));
+
+        $("closeSessionsDrawer").addEventListener("click", () => closeDrawer("sessions"));
+        $("closeWorkspaceDrawer").addEventListener("click", () => closeDrawer("workspace"));
+
+        backdrop.addEventListener("click", () => closeDrawer("all"));
+        window.addEventListener("keydown", (e) => {
+          if(e.key === "Escape") closeDrawer("all");
+        });
+      }
+
+      // -------------------- Init --------------------
+      let didInit = false;
+      function init(){
+        if(didInit) return;
+        didInit = true;
+
+        // ensure active session exists
+        const sid = getActiveSessionId();
+        if(!sessions.some(s => s.id === sid)){
+          const fallback = sessions.find(s => s.id === "biz_main") || sessions[0];
+          if(fallback) setActiveSessionId(fallback.id);
+        }
+
+        // set active group aligned with active session (prevents “where did it go”)
+        const cs = currentSession();
+        if(cs && cs.group) setActiveGroup(cs.group);
+
+        // Badges baseline
+        setDot(notionDot, "bad");
+        $("notionText").textContent = "Not connected";
+
+        setDot(engineDot, "bad");
+        $("engineText").textContent = "UI only";
+
+        // Profile default for active session
+        setProfileDefault(currentSession());
+
+        // Render
+        renderSessions();
+        loadThread();
+        hydrateWorkspace();
+
+        // Wire events once
+        wireEvents();
+
+        // Button state
+        syncSendButton();
+      }
+
+      try{
+        if(document.readyState === "loading"){
+          document.addEventListener("DOMContentLoaded", init, { once:true });
+        } else {
+          init();
+        }
+      } catch (e){
+        showFatal(e);
+      }
+    })();
   </script>
 </body>
 </html>
