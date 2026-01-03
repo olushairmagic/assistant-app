@@ -1,1051 +1,271 @@
-<script>
-  /**
-   * BACKEND (set later to your Tailscale-only server)
-   * Example: const API_BASE = "http://100.x.x.x:8787";
-   */
-  const API_BASE = "";
-  const CHAT_ENDPOINT = "/chat";
-  const PING_ENDPOINT = "/health";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WilliamBot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  // ====== DOM ======
-  const $ = (id) => document.getElementById(id);
-  const feed = $("feed");
-  const input = $("input");
-  const sendBtn = $("sendBtn");
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a08">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WilliamBot">
 
-  const topSub = $("topSub");
-
-  const modeBadge = $("modeBadge");
-  const modeText = $("modeText");
-  const syncDot = $("syncDot");
-  const syncText = $("syncText");
-  const backendDot = $("backendDot");
-  const backendText = $("backendText");
-
-  const sessionsBtn = $("sessionsBtn");
-  const contextBtn = $("contextBtn");
-  const exitBtn = $("exitBtn");
-
-  const leftPanel = $("leftPanel");
-  const sessionList = $("sessionList");
-  const sessionListMobile = $("sessionListMobile");
-  const sessionCount = $("sessionCount");
-  const activeSessionLabel = $("activeSessionLabel");
-
-  const ctxHint = $("ctxHint");
-  const contextPanel = $("contextPanel");
-  const contextContentDesktop = $("contextContentDesktop");
-  const contextContentMobile = $("contextContentMobile");
-
-  // Drawers
-  const sessionsDrawerBack = $("sessionsDrawerBack");
-  const sessionsDrawerClose = $("sessionsDrawerClose");
-  const contextDrawerBack = $("contextDrawerBack");
-  const contextDrawerClose = $("contextDrawerClose");
-
-  // High-stakes modal
-  const hsModalBack = $("hsModalBack");
-  const hsBody = $("hsBody");
-  const hsClose = $("hsClose");
-  const hsDiscuss = $("hsDiscuss");
-  const hsCommit = $("hsCommit");
-
-  // ====== STORAGE ======
-  const STORE = {
-    sessions: "wb_sessions_v2",
-    activeSession: "wb_active_session_v2",
-    activeBranch: "wb_active_branch_v2",
-    branchesPrefix: "wb_branches_",
-    historyPrefix: "wb_history_v2_",
-
-    // NEW: UI state
-    uiMode: "wb_ui_mode_v1",          // "chat" | "workspace" | "review"
-    workspaceOn: "wb_workspace_on_v1" // "1" | "0"
-  };
-
-  // ====== UI MODE / SESSION STATE (EXACT RULES) ======
-  function getUiMode(){
-    return localStorage.getItem(STORE.uiMode) || "chat";
-  }
-  function setUiMode(mode){
-    localStorage.setItem(STORE.uiMode, mode);
-    applyUiMode();
-  }
-  function isWorkspaceOn(){
-    return localStorage.getItem(STORE.workspaceOn) === "1";
-  }
-  function setWorkspaceOn(on){
-    localStorage.setItem(STORE.workspaceOn, on ? "1" : "0");
-    applyUiMode();
-  }
-
-  // "Start session" => workspace ON + uiMode workspace
-  function startSession(sessionId){
-    setActiveSessionId(sessionId);
-    // ensure branches exist
-    const branches = loadBranches(sessionId);
-    saveBranches(sessionId, branches);
-    // keep branch valid
-    const bid = getActiveBranchId();
-    const ok = branches.some(b => b.id === bid);
-    setActiveBranchId(ok ? bid : "main");
-
-    setWorkspaceOn(true);
-    setUiMode("workspace");
-    loadActiveThread();
-    renderSessionLists();
-    hydrateWorkspaceForThread();
-  }
-
-  // "Exit workspace" => keep history/session selected, but hide all workspace panels/widgets
-  function exitWorkspace(){
-    setWorkspaceOn(false);
-    setUiMode("chat");
-    hydrateWorkspaceForThread();
-    setTopSub();
-  }
-
-  function applyUiMode(){
-    const mode = getUiMode();
-    const workspace = isWorkspaceOn();
-
-    // Workspace panel visible ONLY when workspace is on and mode != chat
-    const showWorkspacePanel = workspace && (mode === "workspace" || mode === "review");
-
-    // Toggle panel visibility (desktop)
-    contextPanel.classList.toggle("hidden", !showWorkspacePanel);
-
-    // Exit button only when workspace is on
-    exitBtn.classList.toggle("hidden", !workspace);
-
-    // If you open Workspace drawer on mobile, content is still gated by hydrateWorkspaceForThread()
-    setTopSub();
-  }
-
-  // ====== UTILS ======
-  function nowTime(){
-    const d = new Date();
-    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  }
-  function nowStamp(){
-    const d = new Date();
-    return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
-  }
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-  }
-  function setDot(dotEl, state){
-    dotEl.classList.remove("ok","bad");
-    if(state === "ok") dotEl.classList.add("ok");
-    if(state === "bad") dotEl.classList.add("bad");
-  }
-  function isMobileLayout(){
-    return window.matchMedia("(max-width: 1080px)").matches;
-  }
-
-  // ====== MODE ======
-  const MODES = ["Financial","Formulation","Compliance","Strategy"];
-  let modeIdx = 0;
-  function cycleMode(){
-    modeIdx = (modeIdx + 1) % MODES.length;
-    modeText.textContent = MODES[modeIdx];
-  }
-
-  // ====== SESSIONS + BRANCHES ======
-  function branchesKey(sessionId){ return STORE.branchesPrefix + sessionId; }
-  function historyKey(sessionId, branchId){ return STORE.historyPrefix + sessionId + "_" + branchId; }
-
-  function loadSessions(){
-    try{
-      const raw = localStorage.getItem(STORE.sessions);
-      const data = raw ? JSON.parse(raw) : null;
-      if(Array.isArray(data) && data.length) return data;
-    } catch {}
-    return [
-      { id: "pricing", title: "Pricing & Margin Review", note: "Retail, wholesale, Amazon fees", updated: nowStamp(), lastDecision: "—" },
-      { id: "formulation", title: "Formulation Iteration", note: "Leave-in + shampoo constraints", updated: nowStamp(), lastDecision: "—" },
-      { id: "amazon", title: "Amazon Ops", note: "Listings + compliance + reviews", updated: nowStamp(), lastDecision: "—" }
-    ];
-  }
-  function saveSessions(list){ localStorage.setItem(STORE.sessions, JSON.stringify(list)); }
-
-  function loadBranches(sessionId){
-    try{
-      const raw = localStorage.getItem(branchesKey(sessionId));
-      const data = raw ? JSON.parse(raw) : null;
-      if(Array.isArray(data) && data.length) return data;
-    } catch {}
-    return [{ id:"main", name:"Main", kind:"main", created: nowStamp() }];
-  }
-  function saveBranches(sessionId, branches){
-    localStorage.setItem(branchesKey(sessionId), JSON.stringify(branches));
-  }
-
-  // NOTE: we keep a "selected session" even in chat-only mode, but workspace widgets won’t appear unless workspaceOn=true.
-  function getActiveSessionId(){ return localStorage.getItem(STORE.activeSession) || "pricing"; }
-  function setActiveSessionId(id){ localStorage.setItem(STORE.activeSession, id); }
-  function getActiveBranchId(){ return localStorage.getItem(STORE.activeBranch) || "main"; }
-  function setActiveBranchId(id){ localStorage.setItem(STORE.activeBranch, id); }
-
-  let sessions = loadSessions();
-  saveSessions(sessions);
-
-  function loadHistory(sessionId, branchId){
-    try{
-      const raw = localStorage.getItem(historyKey(sessionId, branchId));
-      if(!raw) return [];
-      const data = JSON.parse(raw);
-      return Array.isArray(data) ? data : [];
-    } catch { return []; }
-  }
-  function saveHistory(sessionId, branchId, hist){
-    localStorage.setItem(historyKey(sessionId, branchId), JSON.stringify(hist.slice(-400)));
-  }
-
-  function setTopSub(){
-    const sid = getActiveSessionId();
-    const bid = getActiveBranchId();
-    const s = sessions.find(x => x.id === sid);
-    const branches = loadBranches(sid);
-    const b = branches.find(x => x.id === bid);
-
-    if(!isWorkspaceOn()){
-      topSub.textContent = `Session: — • Branch: —`;
-      ctxHint.textContent = `Chat-only`;
-      return;
+  <style>
+    :root {
+      --bg:#0b0a08;
+      --panel:#14110d;
+      --cream:#f3efe6;
+      --ink:#1b1813;
+      --muted:#8b8276;
+      --border:rgba(243,239,230,.12);
+      --accent:#7a1114;
+      --radius:18px;
+      --font:-apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial;
     }
 
-    topSub.textContent = `Session: ${s ? s.title : sid} • Branch: ${b ? b.name : bid}`;
-    ctxHint.textContent = `Session: ${sid} • Branch: ${bid}`;
-  }
+    * { box-sizing:border-box; }
+    html,body { height:100%; margin:0; }
 
-  function renderSessionLists(){
-    const activeSid = getActiveSessionId();
-    const activeBid = getActiveBranchId();
-    const active = sessions.find(s => s.id === activeSid) || sessions[0];
+    body {
+      font-family:var(--font);
+      background:linear-gradient(180deg,#0b0a08,#12100c);
+      color:var(--cream);
+    }
 
-    // active label reflects WORKSPACE state
-    activeSessionLabel.textContent = isWorkspaceOn()
-      ? ("Active: " + (active ? active.title : "—"))
-      : "Active: —";
+    .app {
+      height:100%;
+      display:grid;
+      grid-template-columns:280px 1fr 320px;
+      grid-template-rows:auto 1fr auto;
+      gap:12px;
+      padding:12px;
+    }
 
-    sessionCount.textContent = String(sessions.length);
+    header {
+      grid-column:1 / -1;
+      background:var(--panel);
+      border-radius:var(--radius);
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border:1px solid var(--border);
+    }
 
-    function buildList(targetEl, isMobile){
-      targetEl.innerHTML = "";
-      for(const s of sessions){
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .logo {
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:var(--accent);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+    }
+
+    aside {
+      background:var(--panel);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      padding:12px;
+      overflow:auto;
+    }
+
+    .panelTitle {
+      font-size:12px;
+      opacity:.7;
+      margin-bottom:8px;
+    }
+
+    .session {
+      padding:10px;
+      border-radius:12px;
+      background:rgba(255,255,255,.04);
+      margin-bottom:8px;
+      font-size:13px;
+      cursor:pointer;
+    }
+
+    main {
+      background:linear-gradient(180deg,#f5f1e9,#efe9dd);
+      color:var(--ink);
+      border-radius:var(--radius);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .feed {
+      flex:1;
+      padding:16px;
+      overflow:auto;
+    }
+
+    .msg {
+      max-width:75%;
+      margin-bottom:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:14.5px;
+      line-height:1.45;
+    }
+
+    .msg.bot {
+      background:white;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .msg.you {
+      background:rgba(122,17,20,.08);
+      border-left:4px solid var(--accent);
+      margin-left:auto;
+    }
+
+    .meta {
+      font-size:11px;
+      opacity:.6;
+      margin-top:4px;
+    }
+
+    .composer {
+      display:flex;
+      gap:10px;
+      padding:12px;
+      border-top:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.6);
+    }
+
+    textarea {
+      flex:1;
+      resize:none;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.12);
+      padding:12px;
+      font-size:14px;
+      font-family:inherit;
+    }
+
+    button {
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:700;
+      background:var(--accent);
+      color:white;
+      border:none;
+    }
+
+    .context {
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .contextBlock {
+      background:rgba(255,255,255,.04);
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:10px;
+    }
+
+    @media (max-width:1100px) {
+      .app { grid-template-columns:260px 1fr; }
+      .contextPanel { display:none; }
+    }
+
+    @media (max-width:760px) {
+      .app { grid-template-columns:1fr; }
+      aside { display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">W</div>
+        <strong>WilliamBot</strong>
+      </div>
+      <div style="font-size:12px;opacity:.7">
+        UI-only • Local backend later
+      </div>
+    </header>
+
+    <aside>
+      <div class="panelTitle">Sessions</div>
+      <div class="session">Pricing & Margins</div>
+      <div class="session">Formulation</div>
+      <div class="session">Amazon Ops</div>
+    </aside>
+
+    <main>
+      <div class="feed" id="feed">
+        <div class="msg bot">
+          UI is live.<br><br>
+          This is your personal AI workspace.<br>
+          Backend will connect via Tailscale when your PC arrives.
+          <div class="meta">Confidence: Medium</div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <textarea id="input" placeholder="Ask, calculate, simulate…"></textarea>
+        <button id="send">Send</button>
+      </div>
+    </main>
+
+    <aside class="contextPanel">
+      <div class="panelTitle">Context</div>
+      <div class="context">
+        <div class="contextBlock">
+          <strong>Working assumptions</strong><br>
+          Target margin ≥ 70%<br>
+          Channel: Amazon + Shopify
+        </div>
+        <div class="contextBlock">
+          <strong>Ledger</strong><br>
+          Last decision: 8oz butter → $66
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const feed = document.getElementById("feed");
+      const input = document.getElementById("input");
+      const send = document.getElementById("send");
+
+      function addMessage(text, role) {
         const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="itemTop">
-            <div class="itemTitle">${escapeHtml(s.title)}</div>
-            <span class="pillMini">${(isWorkspaceOn() && s.id === activeSid) ? "Active" : "Open"}</span>
-          </div>
-          <div class="itemMeta">
-            ${escapeHtml(s.note || "")}<br/>
-            <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
-            <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
-          </div>
-        `;
-
-        // Clicking a session STARTS WORKSPACE (intentional)
-        div.addEventListener("click", () => {
-          startSession(s.id);
-          if(isMobile) closeSessionsDrawer();
-        });
-
-        // Branch area only when workspace on + session active
-        if(isWorkspaceOn() && s.id === activeSid){
-          const branches = loadBranches(activeSid);
-          const wrap = document.createElement("div");
-          wrap.className = "branchWrap";
-
-          const row = document.createElement("div");
-          row.className = "branchRow";
-
-          for(const b of branches){
-            const chip = document.createElement("div");
-            chip.className = "branchChip" + (b.id === activeBid ? " active" : "");
-            chip.innerHTML = `
-              <span class="branchDot ${b.kind === "main" ? "main" : "fork"}"></span>
-              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:${isMobile ? "240px" : "160px"};">${escapeHtml(b.name)}</span>
-            `;
-            chip.addEventListener("click", (e) => {
-              e.stopPropagation();
-              setActiveBranchId(b.id);
-              loadActiveThread();
-              renderSessionLists();
-              hydrateWorkspaceForThread();
-              if(isMobile) closeSessionsDrawer();
-            });
-            row.appendChild(chip);
-          }
-
-          const hint = document.createElement("div");
-          hint.style.color = "rgba(243,239,230,.58)";
-          hint.style.fontSize = "11px";
-          hint.textContent = "Fork from any message via ⋯ menu (keeps assumptions + history).";
-
-          wrap.appendChild(row);
-          wrap.appendChild(hint);
-          div.appendChild(wrap);
-        }
-
-        targetEl.appendChild(div);
+        div.className = "msg " + role;
+        div.textContent = text;
+        feed.appendChild(div);
+        feed.scrollTop = feed.scrollHeight;
       }
-    }
 
-    buildList(sessionList, false);
-    buildList(sessionListMobile, true);
-    setTopSub();
-  }
-
-  // ====== WORKSPACE PANEL (session-scoped; never injected into chat feed) ======
-  function renderWorkspaceToolsHtml(sessionId){
-    const engineOnline = backendText.textContent === "Connected";
-    const engineLine = engineOnline
-      ? `<span style="color: rgba(243,239,230,.72);font-size:12px;">Engine: connected</span>`
-      : `<span style="color: rgba(243,239,230,.72);font-size:12px;">Engine: offline (UI-only). Set API_BASE when PC arrives.</span>`;
-
-    if(sessionId === "pricing"){
-      return `
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Pricing guardrails</strong>
-            <span>${engineLine}</span>
-          </div>
-          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
-            <div style="margin-bottom:8px;">Do not finalize MSRP until:</div>
-            <ul style="margin:0 0 0 18px; padding:0; color: rgba(243,239,230,.78);">
-              <li>Costs are synced (fresh COGS)</li>
-              <li>Amazon fee category is confirmed</li>
-              <li>Packaging + ship cost per unit are locked</li>
-            </ul>
-          </div>
-        </div>
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Pricing table (panel preview)</strong>
-            <span>Session-scoped</span>
-          </div>
-          <div class="tblWrap">
-            <table class="tbl">
-              <thead><tr><th>SKU</th><th>MSRP</th><th>Channel</th><th>Notes</th></tr></thead>
-              <tbody>
-                <tr><td>8oz Butter</td><td>—</td><td>Shopify</td><td>Set after fresh COGS</td></tr>
-                <tr><td>8oz Shampoo</td><td>—</td><td>Amazon</td><td>Pending fee category + COGS</td></tr>
-                <tr><td>8oz Conditioner</td><td>—</td><td>Amazon</td><td>Pending fee category + COGS</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div style="margin-top:8px;color: rgba(243,239,230,.62);font-size:12px;">
-            This stays out of the chat feed. It only shows because Pricing workspace is active.
-          </div>
-        </div>
-      `;
-    }
-
-    if(sessionId === "formulation"){
-      return `
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Formulation workspace</strong>
-            <span>${engineLine}</span>
-          </div>
-          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
-            Use this session for controlled creativity inside constraints (INCI, heat stability, slip).
-            When backend is online, this panel becomes your “spec + version” hub (diffs, batch logs, ingredient pulls).
-          </div>
-        </div>
-      `;
-    }
-
-    if(sessionId === "amazon"){
-      return `
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Amazon ops workspace</strong>
-            <span>${engineLine}</span>
-          </div>
-          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
-            Listings, images, compliance notes, review triage. When backend is online,
-            this becomes file-aware and can pull from your mounted /Amazon folder.
-          </div>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="section">
-        <div class="sectionTitle">
-          <strong>Workspace</strong>
-          <span>${engineLine}</span>
-        </div>
-        <div style="color: rgba(243,239,230,.78); font-size: 13px; line-height:1.45;">
-          No tools defined for this session yet.
-        </div>
-      </div>
-    `;
-  }
-
-  // Your existing context blocks, kept as “context” inside workspace (not shown in chat-only mode)
-  function renderContextHtml(data){
-    const assRows = data.assumptions.map(a => {
-      const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
-      return `
-        <div class="kvRow">
-          <div>
-            <div class="kvKey">
-              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-              ${escapeHtml(a.k)}
-            </div>
-            <div class="kvSub">${escapeHtml(a.sub || "")}</div>
-          </div>
-          <div class="kvVal">${escapeHtml(a.v)}</div>
-        </div>
-      `;
-    }).join("");
-
-    const srcChips = data.sources.map(s => {
-      const bg = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
-      return `
-        <div class="chip">
-          <span class="chipDot" style="background:${bg}"></span>
-          ${escapeHtml(s.name)} • ${escapeHtml(s.state)}
-        </div>
-      `;
-    }).join("");
-
-    const ledRows = data.ledger.map(l => {
-      const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
-      return `
-        <div class="kvRow">
-          <div>
-            <div class="kvKey">
-              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-              ${escapeHtml(l.k)}
-            </div>
-            <div class="kvSub">${escapeHtml(l.sub || "")}</div>
-          </div>
-          <div class="kvVal">${escapeHtml(l.v)}</div>
-        </div>
-      `;
-    }).join("");
-
-    const stamp = nowStamp();
-
-    return `
-      <div class="section">
-        <div class="sectionTitle">
-          <strong>Working assumptions</strong>
-          <span>${stamp}</span>
-        </div>
-        <div class="kv">${assRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No assumptions yet.</div>`}</div>
-      </div>
-
-      <div class="section">
-        <div class="sectionTitle">
-          <strong>Active sources</strong>
-          <span>${stamp}</span>
-        </div>
-        <div>${srcChips || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No sources mounted.</div>`}</div>
-      </div>
-
-      <div class="section">
-        <div class="sectionTitle">
-          <strong>Decision ledger (preview)</strong>
-          <span>${stamp}</span>
-        </div>
-        <div class="kv">${ledRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No decisions committed.</div>`}</div>
-      </div>
-    `;
-  }
-
-  function hydrateWorkspaceForThread(){
-    // CHAT-ONLY: do not show workspace panel content
-    if(!isWorkspaceOn()){
-      contextContentDesktop.innerHTML = "";
-      contextContentMobile.innerHTML = "";
-      return;
-    }
-
-    const sid = getActiveSessionId();
-    const bid = getActiveBranchId();
-
-    // Stub context state (replace later with backend real state + Notion sync)
-    const stub = {
-      pricing: {
-        assumptions: [
-          { k:"Target margin", v:"≥ 70%", sub:"Guardrail", c:"g" },
-          { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify category", c:"y" },
-          { k:"COGS source", v:"Local sheet v1", sub:"Notion not connected", c:"r" }
-        ],
-        sources: [
-          { name:"/Financial", state:"mounted", c:"y" },
-          { name:"Products & SKUs.CSV", state:"local", c:"y" }
-        ],
-        ledger: [
-          { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh costs", c:"y" }
-        ]
-      },
-      formulation: {
-        assumptions: [
-          { k:"Fragrance load", v:"4%", sub:"Brand standard", c:"g" },
-          { k:"Heat stability target", v:"SFC ≥ 28% @ 40°C", sub:"Shipping stability", c:"g" },
-          { k:"Preservation", v:"TBD", sub:"Requires testing", c:"r" }
-        ],
-        sources: [
-          { name:"/Formulas", state:"mounted", c:"y" }
-        ],
-        ledger: []
-      },
-      amazon: {
-        assumptions: [
-          { k:"Listing priority", v:"Title + bullets + images", sub:"Launch readiness", c:"g" },
-          { k:"Compliance risk", v:"Ingredient claims", sub:"Use Compliance mode", c:"y" }
-        ],
-        sources: [
-          { name:"/Amazon", state:"mounted", c:"y" }
-        ],
-        ledger: []
-      }
-    };
-
-    const base = stub[sid] || stub.pricing;
-    const data = JSON.parse(JSON.stringify(base));
-    if(bid !== "main"){
-      data.assumptions = data.assumptions.map(a => a.c === "g" ? {...a, c:"y"} : a);
-      data.ledger = data.ledger.map(l => l.c === "g" ? {...l, c:"y"} : l);
-    }
-
-    const toolsHtml = renderWorkspaceToolsHtml(sid);
-    const ctxHtml = renderContextHtml(data);
-
-    // Workspace panel = tools + context
-    const html = toolsHtml + ctxHtml;
-
-    contextContentDesktop.innerHTML = html;
-    contextContentMobile.innerHTML = html;
-    setTopSub();
-  }
-
-  // ====== BACKEND STATUS ======
-  async function pingBackend(){
-    if(!API_BASE){
-      setDot(backendDot, "bad");
-      backendText.textContent = "UI only";
-      return false;
-    }
-    try{
-      const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
-      if(!res.ok) throw new Error("bad");
-      setDot(backendDot, "ok");
-      backendText.textContent = "Connected";
-      return true;
-    } catch {
-      setDot(backendDot, "bad");
-      backendText.textContent = "Not reachable";
-      return false;
-    }
-  }
-
-  // ====== SYNC STATUS (UI-only demo for now) ======
-  function setSync(state, text){
-    setDot(syncDot, state);
-    syncText.textContent = text;
-  }
-
-  // ====== MESSAGE RENDERING (unchanged, except no auto demo injection) ======
-  function parseTable(text){
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-    if(lines.length < 2) return null;
-
-    if(lines[0].includes("|")){
-      const rows = lines
-        .filter(l => !/^\|?\s*[-:| ]+\s*\|?$/.test(l))
-        .map(l => l.replace(/^\|/,"").replace(/\|$/,"").split("|").map(x => x.trim()));
-      if(rows.length < 2) return null;
-      return rows;
-    }
-
-    const rows = lines.map(l => l.split(/\s{2,}/g).map(x => x.trim()));
-    const maxCols = Math.max(...rows.map(r => r.length));
-    if(maxCols < 2) return null;
-    return rows.map(r => {
-      const rr = r.slice();
-      while(rr.length < maxCols) rr.push("");
-      return rr;
-    });
-  }
-
-  function shouldClamp(content){
-    return content && content.length > 700;
-  }
-
-  function closeAllMenus(){
-    document.querySelectorAll(".menu").forEach(m => m.style.display = "none");
-  }
-
-  function renderMessage(m, indexInHistory){
-    const row = document.createElement("div");
-    row.className = "row " + (m.role === "you" ? "you" : "bot");
-
-    const bubbleWrap = document.createElement("div");
-    bubbleWrap.className = "bubbleWrap";
-
-    const bubble = document.createElement("div");
-    const t = m.type || "text";
-    bubble.className = "bubble " + (t === "text" ? "" : t);
-
-    if(t === "decision"){
-      const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
-      const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
-      bubble.innerHTML = `
-        <div class="decisionHdr">
-          <strong>${escapeHtml(title)}</strong>
-          <span class="decisionTag">${escapeHtml(tag)}</span>
-        </div>
-        <div>${escapeHtml(m.content)}</div>
-      `;
-    } else if(t === "table"){
-      const parsed = parseTable(m.content || "");
-      if(parsed){
-        const [head, ...body] = parsed;
-        const tblWrap = document.createElement("div");
-        tblWrap.className = "tblWrap";
-        const table = document.createElement("table");
-        table.className = "tbl";
-        table.innerHTML = `
-          <thead><tr>${head.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
-          <tbody>${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody>
-        `;
-        tblWrap.appendChild(table);
-        bubble.appendChild(tblWrap);
-      } else {
-        bubble.textContent = m.content;
-      }
-    } else {
-      const textDiv = document.createElement("div");
-      textDiv.textContent = m.content || "";
-      if(shouldClamp(m.content || "")){
-        textDiv.classList.add("clamp");
-        const moreRow = document.createElement("div");
-        moreRow.className = "moreRow";
-        const btn = document.createElement("button");
-        btn.className = "moreBtn";
-        btn.textContent = "Show more";
-        btn.addEventListener("click", () => {
-          const isClamped = textDiv.classList.toggle("clamp");
-          btn.textContent = isClamped ? "Show more" : "Show less";
-        });
-        moreRow.appendChild(btn);
-        bubble.appendChild(textDiv);
-        bubble.appendChild(moreRow);
-      } else {
-        bubble.appendChild(textDiv);
-      }
-    }
-
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    const name = m.role === "you" ? "You" : "WilliamBot";
-
-    const conf = m.confidence || "";
-    const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
-    const confDotClass = conf ? conf : "";
-
-    const right = document.createElement("div");
-    right.style.display = "flex";
-    right.style.alignItems = "center";
-    right.style.gap = "8px";
-    right.style.position = "relative";
-
-    const confEl = document.createElement("span");
-    confEl.className = "confidence";
-    confEl.title = "Confidence (UI now; backend later)";
-    confEl.innerHTML = `
-      <span class="confDot ${confDotClass}"></span>
-      <span>${confLabel}</span>
-      <span style="opacity:.65">•</span>
-      <span>${escapeHtml(m.ts || nowTime())}</span>
-    `;
-
-    const menuBtn = document.createElement("button");
-    menuBtn.className = "menuBtn";
-    menuBtn.textContent = "⋯";
-    menuBtn.title = "Message actions";
-
-    const menu = document.createElement("div");
-    menu.className = "menu";
-    menu.innerHTML = `
-      <div class="menuItem" data-act="copy">Copy</div>
-      <div class="menuItem" data-act="fork">Fork from here</div>
-    `;
-
-    menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = menu.style.display === "block";
-      closeAllMenus();
-      menu.style.display = isOpen ? "none" : "block";
-    });
-
-    menu.addEventListener("click", async (e) => {
-      const act = e.target && e.target.getAttribute && e.target.getAttribute("data-act");
-      if(!act) return;
-      closeAllMenus();
-
-      if(act === "copy"){
-        try{ await navigator.clipboard.writeText(m.content || ""); } catch {}
-      }
-      if(act === "fork"){
-        if(!isWorkspaceOn()){
-          // keep forks a workspace feature (clean separation)
-          const note = { role:"bot", type:"text", confidence:"y", ts: nowTime(),
-            content:"Forking is available inside an active workspace session. Start a session first (Sessions → choose one)." };
-          renderMessage(note, history.length);
-          addToHistory(note);
-          return;
-        }
-        forkFromIndex(indexInHistory);
-      }
-    });
-
-    right.appendChild(confEl);
-    right.appendChild(menuBtn);
-    right.appendChild(menu);
-
-    meta.innerHTML = `<span>${escapeHtml(name)}</span>`;
-    meta.appendChild(right);
-
-    bubbleWrap.appendChild(bubble);
-    bubbleWrap.appendChild(meta);
-    row.appendChild(bubbleWrap);
-    feed.appendChild(row);
-    feed.scrollTop = feed.scrollHeight;
-  }
-
-  document.addEventListener("click", () => closeAllMenus());
-
-  // ====== THREAD STATE ======
-  let activeSession = getActiveSessionId();
-  let activeBranch = getActiveBranchId();
-  let history = [];
-
-  function loadActiveThread(){
-    activeSession = getActiveSessionId();
-    activeBranch = getActiveBranchId();
-    history = loadHistory(activeSession, activeBranch);
-    feed.innerHTML = "";
-    hydrate();
-    setTopSub();
-  }
-
-  function addToHistory(m){
-    history.push(m);
-    saveHistory(activeSession, activeBranch, history);
-  }
-
-  function forkFromIndex(idx){
-    const sid = getActiveSessionId();
-    const branches = loadBranches(sid);
-
-    const forkId = "fork_" + Date.now();
-    const forkName = "Fork " + new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
-    branches.push({ id: forkId, name: forkName, kind:"fork", created: nowStamp() });
-    saveBranches(sid, branches);
-
-    const base = history.slice(0, idx + 1);
-    saveHistory(sid, forkId, base);
-
-    setActiveBranchId(forkId);
-    loadActiveThread();
-    renderSessionLists();
-    hydrateWorkspaceForThread();
-
-    const note = {
-      role:"bot",
-      type:"decision",
-      confidence:"y",
-      ts: nowTime(),
-      meta:{ title:"Fork created", tag:"Branch" },
-      content:`Forked from message #${idx + 1}. This branch preserves context up to that point. Continue with corrected assumptions here.`
-    };
-    renderMessage(note, history.length);
-    addToHistory(note);
-    hydrateWorkspaceForThread();
-  }
-
-  // ====== CHAT FLOW ======
-  function hydrate(){
-    if(history.length === 0){
-      const intro = {
-        role:"bot",
-        type:"text",
-        confidence:"y",
-        content:
-`UI is live.
-
-This build is intentionally calm:
-• Chat never auto-spawns pricing tables
-• Workspace tools only appear inside an active session
-• Exit returns to chat-only
-
-Next (when PC arrives):
-1) Tailscale on PC + phone
-2) Run local backend (/health, /chat)
-3) Set API_BASE in this file`,
-        ts: nowTime()
-      };
-      renderMessage(intro, 0);
-      addToHistory(intro);
-      return;
-    }
-    history.forEach((m, i) => renderMessage(m, i));
-  }
-
-  function syncButtons(){
-    sendBtn.disabled = input.value.trim().length === 0;
-  }
-
-  function maybeHighStakes(text){
-    const t = text.toLowerCase();
-    return t.includes("change price") || t.includes("raise price") || t.includes("lower price") || t.includes("reprice");
-  }
-
-  function openHighStakesModal(example){
-    hsBody.innerHTML = `
-      <div style="color: rgba(243,239,230,.86); font-size: 13px;">
-        <div style="margin-bottom:8px;"><strong>Change:</strong> ${escapeHtml(example.change)}</div>
-        <div class="modalGrid">
-          <div class="modalCard">
-            <strong>Impact analysis</strong>
-            <ul>${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-          </div>
-          <div class="modalCard">
-            <strong>Risks identified</strong>
-            <ul>${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-          </div>
-        </div>
-        <div style="margin-top:10px; color: rgba(243,239,230,.70);">
-          UI component today. Later, backend populates this from real data + assumptions.
-        </div>
-      </div>
-    `;
-    hsModalBack.style.display = "flex";
-  }
-  function closeHighStakesModal(){ hsModalBack.style.display = "none"; }
-
-  function ensureEngineNotice(){
-    // prevent repeating the same offline notice every message
-    const recent = history.slice(-6).some(m => (m.role==="bot" && (m.content||"").includes("Engine is offline")));
-    if(recent) return;
-    const botMsg = {
-      role:"bot",
-      type:"text",
-      confidence:"y",
-      content:"Engine is offline (UI-only). Your chat still works as notes. When PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).",
-      ts: nowTime()
-    };
-    renderMessage(botMsg, history.length);
-    addToHistory(botMsg);
-  }
-
-  async function sendMessage(){
-    const text = input.value.trim();
-    if(!text) return;
-
-    input.value = "";
-    syncButtons();
-
-    const youMsg = { role:"you", type:"text", confidence:"g", content:text, ts: nowTime() };
-    renderMessage(youMsg, history.length);
-    addToHistory(youMsg);
-
-    if(maybeHighStakes(text) && isWorkspaceOn()){
-      openHighStakesModal({
-        change: "Retail price $32 → $36",
-        impact: ["Margin: 42% → 48%", "Est. volume: −12%", "Net revenue: +3.2%"],
-        risks: ["Price exceeds competitor X", "Amazon Buy Box sensitivity"]
-      });
-    }
-
-    const ok = await pingBackend();
-    if(!ok){
-      // IMPORTANT: no more auto pricing widgets in chat
-      ensureEngineNotice();
-      hydrateWorkspaceForThread();
-      return;
-    }
-
-    // Real backend call (later)
-    try{
-      const payload = {
-        message: text,
-        mode: modeText.textContent,
-        session_id: isWorkspaceOn() ? activeSession : null,
-        branch_id: isWorkspaceOn() ? activeBranch : null,
-        history: history.map(m => ({
-          role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta, ts: m.ts
-        }))
-      };
-
-      const res = await fetch(API_BASE + CHAT_ENDPOINT, {
-        method:"POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
+      send.addEventListener("click", () => {
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = "";
+        addMessage(text, "you");
+        addMessage("Backend not connected yet. UI-only mode.", "bot");
       });
 
-      if(!res.ok) throw new Error("Backend error " + res.status);
-      const data = await res.json();
-
-      const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
-      const botMsg = { role:"bot", type:"text", confidence:"y", content: reply, ts: nowTime() };
-      renderMessage(botMsg, history.length);
-      addToHistory(botMsg);
-
-      hydrateWorkspaceForThread();
-
-    } catch {
-      const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
-      const botMsg = { role:"bot", type:"warning", confidence:"r", content: msg, ts: nowTime() };
-      renderMessage(botMsg, history.length);
-      addToHistory(botMsg);
-      setDot(backendDot, "bad");
-      backendText.textContent = "Error";
-      hydrateWorkspaceForThread();
-    }
-  }
-
-  // ====== DRAWERS ======
-  function openSessionsDrawer(){
-    sessionsDrawerBack.style.display = "flex";
-    sessionsDrawerBack.setAttribute("aria-hidden", "false");
-  }
-  function closeSessionsDrawer(){
-    sessionsDrawerBack.style.display = "none";
-    sessionsDrawerBack.setAttribute("aria-hidden", "true");
-  }
-  function openContextDrawer(){
-    contextDrawerBack.style.display = "flex";
-    contextDrawerBack.setAttribute("aria-hidden", "false");
-  }
-  function closeContextDrawer(){
-    contextDrawerBack.style.display = "none";
-    contextDrawerBack.setAttribute("aria-hidden", "true");
-  }
-
-  // ====== EVENTS ======
-  input.addEventListener("input", syncButtons);
-  input.addEventListener("keydown", (e) => {
-    if(e.key === "Enter" && !e.shiftKey){
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  sendBtn.addEventListener("click", sendMessage);
-
-  modeBadge.addEventListener("click", cycleMode);
-
-  $("syncBadge").addEventListener("click", () => {
-    const cur = syncText.textContent;
-    if(cur.includes("Not connected")){
-      setSync("bad","Out of sync (12h)");
-    } else if(cur.includes("Out of sync")){
-      setSync("ok","Synced 3 min ago");
-    } else {
-      setSync("bad","Not connected");
-    }
-  });
-
-  // Sessions button behavior:
-  // - On desktop: toggle left panel
-  // - On mobile: open drawer
-  sessionsBtn.addEventListener("click", () => {
-    if(window.matchMedia("(max-width: 760px)").matches){
-      openSessionsDrawer();
-    } else {
-      leftPanel.classList.toggle("hidden");
-    }
-  });
-
-  // Workspace button behavior:
-  // - Desktop: toggle panel (only if workspace on)
-  // - Tablet/mobile: open drawer (only if workspace on)
-  contextBtn.addEventListener("click", () => {
-    if(!isWorkspaceOn()){
-      // calm hint instead of opening empty workspace
-      const note = { role:"bot", type:"text", confidence:"y", ts: nowTime(),
-        content:"Workspace is off. Start a session first (Sessions → choose Pricing / Formulation / Amazon)." };
-      renderMessage(note, history.length); addToHistory(note);
-      return;
-    }
-    if(isMobileLayout()){
-      openContextDrawer();
-    } else {
-      contextPanel.classList.toggle("hidden");
-    }
-  });
-
-  exitBtn.addEventListener("click", exitWorkspace);
-
-  sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
-  sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
-
-  contextDrawerClose.addEventListener("click", closeContextDrawer);
-  contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
-
-  hsClose.addEventListener("click", closeHighStakesModal);
-  hsModalBack.addEventListener("click", (e) => { if(e.target === hsModalBack) closeHighStakesModal(); });
-
-  hsDiscuss.addEventListener("click", () => {
-    closeHighStakesModal();
-    const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Tell me what to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
-    renderMessage(msg, history.length); addToHistory(msg);
-    hydrateWorkspaceForThread();
-  });
-  hsCommit.addEventListener("click", () => {
-    closeHighStakesModal();
-    const msg = {
-      role:"bot",
-      type:"decision",
-      confidence:"y",
-      ts: nowTime(),
-      meta:{title:"Ledger commit (stub)", tag:"Committed"},
-      content:"Committed to ledger (UI stub). Later, this writes to your local ledger store with inputs + rationale + sources."
-    };
-    renderMessage(msg, history.length); addToHistory(msg);
-    hydrateWorkspaceForThread();
-  });
-
-  // ====== INIT ======
-  function ensureBranchesForAll(){
-    for(const s of sessions){
-      const b = loadBranches(s.id);
-      saveBranches(s.id, b);
-    }
-  }
-
-  // First run defaults: chat-only, workspace off
-  if(localStorage.getItem(STORE.workspaceOn) === null){
-    localStorage.setItem(STORE.workspaceOn, "0");
-  }
-  if(localStorage.getItem(STORE.uiMode) === null){
-    localStorage.setItem(STORE.uiMode, "chat");
-  }
-
-  ensureBranchesForAll();
-  renderSessionLists();
-  loadActiveThread();
-
-  applyUiMode();             // apply chat/workspace visibility
-  hydrateWorkspaceForThread();
-
-  syncButtons();
-  pingBackend();
-  setSync("bad","Not connected");
-
-  window.addEventListener("resize", () => {
-    hydrateWorkspaceForThread();
-    applyUiMode();
-  });
-</script>
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          send.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
