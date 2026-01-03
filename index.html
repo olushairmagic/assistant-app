@@ -1,1867 +1,1051 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>WilliamBot</title>
+<script>
+  /**
+   * BACKEND (set later to your Tailscale-only server)
+   * Example: const API_BASE = "http://100.x.x.x:8787";
+   */
+  const API_BASE = "";
+  const CHAT_ENDPOINT = "/chat";
+  const PING_ENDPOINT = "/health";
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#0B0A08" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="WilliamBot" />
+  // ====== DOM ======
+  const $ = (id) => document.getElementById(id);
+  const feed = $("feed");
+  const input = $("input");
+  const sendBtn = $("sendBtn");
 
-  <style>
-    /* ====== THEME: warm neutral base + restrained deep red accents ====== */
-    :root{
-      --bg:#0b0a08;
-      --bg2:#0f0d0a;
-      --cream:#f3efe6;
-      --cream2:#ebe4d8;
-      --ink:#15120d;
-      --muted:#5a5147;
-      --line: rgba(21,18,13,.14);
+  const topSub = $("topSub");
 
-      --red:#7a1114;
-      --red2:#a0141a;
-      --amber:#b45309;
-      --green:#15803d;
-      --blue:#1d4ed8;
+  const modeBadge = $("modeBadge");
+  const modeText = $("modeText");
+  const syncDot = $("syncDot");
+  const syncText = $("syncText");
+  const backendDot = $("backendDot");
+  const backendText = $("backendText");
 
-      --glass: rgba(15,13,10,.55);
-      --glass2: rgba(15,13,10,.40);
-      --border: rgba(243,239,230,.14);
+  const sessionsBtn = $("sessionsBtn");
+  const contextBtn = $("contextBtn");
+  const exitBtn = $("exitBtn");
 
-      --r:18px;
-      --r2:14px;
-      --shadow: 0 18px 60px rgba(0,0,0,.35);
-      --shadow2: 0 10px 30px rgba(0,0,0,.28);
+  const leftPanel = $("leftPanel");
+  const sessionList = $("sessionList");
+  const sessionListMobile = $("sessionListMobile");
+  const sessionCount = $("sessionCount");
+  const activeSessionLabel = $("activeSessionLabel");
 
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    }
+  const ctxHint = $("ctxHint");
+  const contextPanel = $("contextPanel");
+  const contextContentDesktop = $("contextContentDesktop");
+  const contextContentMobile = $("contextContentMobile");
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: var(--font);
-      background:
-        radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
-        radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
-      color: var(--cream);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
+  // Drawers
+  const sessionsDrawerBack = $("sessionsDrawerBack");
+  const sessionsDrawerClose = $("sessionsDrawerClose");
+  const contextDrawerBack = $("contextDrawerBack");
+  const contextDrawerClose = $("contextDrawerClose");
 
-    /* ====== APP GRID ====== */
-    .wrap{
-      height:100%;
-      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-      display:flex;
-      justify-content:center;
-    }
-    .app{
-      width:100%;
-      max-width: 1280px;
-      height: 100%;
-      display:grid;
-      grid-template-columns: 280px 1fr 360px;
-      grid-template-rows: auto 1fr;
-      gap: 12px;
-      min-width: 0;
-    }
+  // High-stakes modal
+  const hsModalBack = $("hsModalBack");
+  const hsBody = $("hsBody");
+  const hsClose = $("hsClose");
+  const hsDiscuss = $("hsDiscuss");
+  const hsCommit = $("hsCommit");
 
-    /* ====== TOP BAR ====== */
-    header{
-      grid-column: 1 / -1;
-      border: 1px solid var(--border);
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      border-radius: var(--r);
-      box-shadow: var(--shadow2);
-      padding: 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      min-width: 0;
-    }
+  // ====== STORAGE ======
+  const STORE = {
+    sessions: "wb_sessions_v2",
+    activeSession: "wb_active_session_v2",
+    activeBranch: "wb_active_branch_v2",
+    branchesPrefix: "wb_branches_",
+    historyPrefix: "wb_history_v2_",
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .logo{
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      display:grid;
-      place-items:center;
-      user-select:none;
-      font-weight: 900;
-      letter-spacing: .4px;
-      color: var(--cream);
-      border: 1px solid rgba(243,239,230,.16);
-      background:
-        radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
-        linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
-      box-shadow: 0 10px 22px rgba(122,17,20,.18);
-    }
-    .brandText{
-      display:flex;
-      flex-direction:column;
-      line-height: 1.06;
-      min-width: 0;
-    }
-    .brandText strong{
-      font-size: 15.5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .brandText span{
-      font-size: 12px;
-      color: rgba(243,239,230,.68);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    // NEW: UI state
+    uiMode: "wb_ui_mode_v1",          // "chat" | "workspace" | "review"
+    workspaceOn: "wb_workspace_on_v1" // "1" | "0"
+  };
 
-    .statusRow{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
+  // ====== UI MODE / SESSION STATE (EXACT RULES) ======
+  function getUiMode(){
+    return localStorage.getItem(STORE.uiMode) || "chat";
+  }
+  function setUiMode(mode){
+    localStorage.setItem(STORE.uiMode, mode);
+    applyUiMode();
+  }
+  function isWorkspaceOn(){
+    return localStorage.getItem(STORE.workspaceOn) === "1";
+  }
+  function setWorkspaceOn(on){
+    localStorage.setItem(STORE.workspaceOn, on ? "1" : "0");
+    applyUiMode();
+  }
 
-    .badge{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--glass2);
-      color: rgba(243,239,230,.80);
-      font-size: 12px;
-      user-select:none;
-      max-width: 360px;
-      cursor: default;
-      white-space: nowrap;
-    }
-    .badge.clickable{ cursor:pointer; }
-    .badge .label{
-      color: rgba(243,239,230,.62);
-      font-weight: 650;
-    }
-    .dot{
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--amber);
-      box-shadow: 0 0 0 4px rgba(180,83,9,.14);
-      flex: 0 0 auto;
-    }
-    .dot.ok{ background: var(--green); box-shadow: 0 0 0 4px rgba(21,128,61,.14); }
-    .dot.bad{ background: #b91c1c; box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
+  // "Start session" => workspace ON + uiMode workspace
+  function startSession(sessionId){
+    setActiveSessionId(sessionId);
+    // ensure branches exist
+    const branches = loadBranches(sessionId);
+    saveBranches(sessionId, branches);
+    // keep branch valid
+    const bid = getActiveBranchId();
+    const ok = branches.some(b => b.id === bid);
+    setActiveBranchId(ok ? bid : "main");
 
-    .ghostBtn{
-      border: 1px solid var(--border);
-      background: rgba(15,13,10,.40);
-      color: rgba(243,239,230,.88);
-      padding: 10px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 740;
-      font-size: 13px;
-      transition: transform .06s ease, border-color .12s ease, background .12s ease;
-      user-select:none;
-    }
-    .ghostBtn:active{ transform: translateY(1px); }
-    .ghostBtn:hover{
-      border-color: rgba(243,239,230,.22);
-      background: rgba(15,13,10,.55);
-    }
+    setWorkspaceOn(true);
+    setUiMode("workspace");
+    loadActiveThread();
+    renderSessionLists();
+    hydrateWorkspaceForThread();
+  }
 
-    /* ====== PANELS ====== */
-    .panel{
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow2);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height: 0;
-      min-width: 0;
-    }
-    .panelHeader{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(243,239,230,.14);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .panelHeader strong{
-      font-size: 13px;
-      letter-spacing: .2px;
-      color: rgba(243,239,230,.92);
-    }
-    .panelHeader span{
-      font-size: 12px;
-      color: rgba(243,239,230,.62);
-    }
-    .panelBody{
-      padding: 10px;
-      overflow:auto;
-      min-height: 0;
+  // "Exit workspace" => keep history/session selected, but hide all workspace panels/widgets
+  function exitWorkspace(){
+    setWorkspaceOn(false);
+    setUiMode("chat");
+    hydrateWorkspaceForThread();
+    setTopSub();
+  }
+
+  function applyUiMode(){
+    const mode = getUiMode();
+    const workspace = isWorkspaceOn();
+
+    // Workspace panel visible ONLY when workspace is on and mode != chat
+    const showWorkspacePanel = workspace && (mode === "workspace" || mode === "review");
+
+    // Toggle panel visibility (desktop)
+    contextPanel.classList.toggle("hidden", !showWorkspacePanel);
+
+    // Exit button only when workspace is on
+    exitBtn.classList.toggle("hidden", !workspace);
+
+    // If you open Workspace drawer on mobile, content is still gated by hydrateWorkspaceForThread()
+    setTopSub();
+  }
+
+  // ====== UTILS ======
+  function nowTime(){
+    const d = new Date();
+    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }
+  function nowStamp(){
+    const d = new Date();
+    return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  }
+  function setDot(dotEl, state){
+    dotEl.classList.remove("ok","bad");
+    if(state === "ok") dotEl.classList.add("ok");
+    if(state === "bad") dotEl.classList.add("bad");
+  }
+  function isMobileLayout(){
+    return window.matchMedia("(max-width: 1080px)").matches;
+  }
+
+  // ====== MODE ======
+  const MODES = ["Financial","Formulation","Compliance","Strategy"];
+  let modeIdx = 0;
+  function cycleMode(){
+    modeIdx = (modeIdx + 1) % MODES.length;
+    modeText.textContent = MODES[modeIdx];
+  }
+
+  // ====== SESSIONS + BRANCHES ======
+  function branchesKey(sessionId){ return STORE.branchesPrefix + sessionId; }
+  function historyKey(sessionId, branchId){ return STORE.historyPrefix + sessionId + "_" + branchId; }
+
+  function loadSessions(){
+    try{
+      const raw = localStorage.getItem(STORE.sessions);
+      const data = raw ? JSON.parse(raw) : null;
+      if(Array.isArray(data) && data.length) return data;
+    } catch {}
+    return [
+      { id: "pricing", title: "Pricing & Margin Review", note: "Retail, wholesale, Amazon fees", updated: nowStamp(), lastDecision: "—" },
+      { id: "formulation", title: "Formulation Iteration", note: "Leave-in + shampoo constraints", updated: nowStamp(), lastDecision: "—" },
+      { id: "amazon", title: "Amazon Ops", note: "Listings + compliance + reviews", updated: nowStamp(), lastDecision: "—" }
+    ];
+  }
+  function saveSessions(list){ localStorage.setItem(STORE.sessions, JSON.stringify(list)); }
+
+  function loadBranches(sessionId){
+    try{
+      const raw = localStorage.getItem(branchesKey(sessionId));
+      const data = raw ? JSON.parse(raw) : null;
+      if(Array.isArray(data) && data.length) return data;
+    } catch {}
+    return [{ id:"main", name:"Main", kind:"main", created: nowStamp() }];
+  }
+  function saveBranches(sessionId, branches){
+    localStorage.setItem(branchesKey(sessionId), JSON.stringify(branches));
+  }
+
+  // NOTE: we keep a "selected session" even in chat-only mode, but workspace widgets won’t appear unless workspaceOn=true.
+  function getActiveSessionId(){ return localStorage.getItem(STORE.activeSession) || "pricing"; }
+  function setActiveSessionId(id){ localStorage.setItem(STORE.activeSession, id); }
+  function getActiveBranchId(){ return localStorage.getItem(STORE.activeBranch) || "main"; }
+  function setActiveBranchId(id){ localStorage.setItem(STORE.activeBranch, id); }
+
+  let sessions = loadSessions();
+  saveSessions(sessions);
+
+  function loadHistory(sessionId, branchId){
+    try{
+      const raw = localStorage.getItem(historyKey(sessionId, branchId));
+      if(!raw) return [];
+      const data = JSON.parse(raw);
+      return Array.isArray(data) ? data : [];
+    } catch { return []; }
+  }
+  function saveHistory(sessionId, branchId, hist){
+    localStorage.setItem(historyKey(sessionId, branchId), JSON.stringify(hist.slice(-400)));
+  }
+
+  function setTopSub(){
+    const sid = getActiveSessionId();
+    const bid = getActiveBranchId();
+    const s = sessions.find(x => x.id === sid);
+    const branches = loadBranches(sid);
+    const b = branches.find(x => x.id === bid);
+
+    if(!isWorkspaceOn()){
+      topSub.textContent = `Session: — • Branch: —`;
+      ctxHint.textContent = `Chat-only`;
+      return;
     }
 
-    /* ====== LEFT SIDEBAR: Sessions + Branches ====== */
-    .list{ display:flex; flex-direction:column; gap: 8px; }
+    topSub.textContent = `Session: ${s ? s.title : sid} • Branch: ${b ? b.name : bid}`;
+    ctxHint.textContent = `Session: ${sid} • Branch: ${bid}`;
+  }
 
-    .item{
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.35);
-      border-radius: 14px;
-      padding: 10px;
-      cursor:pointer;
-      transition: border-color .12s ease, background .12s ease;
-    }
-    .item:hover{
-      border-color: rgba(243,239,230,.22);
-      background: rgba(15,13,10,.48);
-    }
-    .itemTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .itemTitle{
-      font-weight: 780;
-      font-size: 13px;
-      color: rgba(243,239,230,.92);
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .pillMini{
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(243,239,230,.14);
-      color: rgba(243,239,230,.70);
-      background: rgba(15,13,10,.35);
-      flex: 0 0 auto;
-      user-select:none;
-    }
-    .itemMeta{
-      font-size: 12px;
-      color: rgba(243,239,230,.62);
-      margin-top: 6px;
-      line-height: 1.25;
-    }
+  function renderSessionLists(){
+    const activeSid = getActiveSessionId();
+    const activeBid = getActiveBranchId();
+    const active = sessions.find(s => s.id === activeSid) || sessions[0];
 
-    .branchWrap{
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed rgba(243,239,230,.12);
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-    }
-    .branchRow{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-    .branchChip{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.30);
-      font-size: 11px;
-      color: rgba(243,239,230,.76);
-      cursor:pointer;
-      user-select:none;
-      transition: border-color .12s ease, background .12s ease;
-      max-width: 100%;
-    }
-    .branchChip:hover{ border-color: rgba(243,239,230,.22); background: rgba(15,13,10,.42); }
-    .branchChip.active{ border-color: rgba(122,17,20,.35); background: rgba(122,17,20,.14); }
+    // active label reflects WORKSPACE state
+    activeSessionLabel.textContent = isWorkspaceOn()
+      ? ("Active: " + (active ? active.title : "—"))
+      : "Active: —";
 
-    .branchDot{
-      width: 8px; height: 8px; border-radius:50%;
-      background: #9ca3af;
-      box-shadow: 0 0 0 3px rgba(156,163,175,.16);
-      flex: 0 0 auto;
-    }
-    .branchDot.main{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
-    .branchDot.fork{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
+    sessionCount.textContent = String(sessions.length);
 
-    /* ====== MAIN CHAT ====== */
-    .chat{
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height: 0;
-      background:
-        radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
-        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
-      min-width: 0;
-    }
-    .feed{
-      flex:1;
-      overflow:auto;
-      padding: 14px 12px;
-      background:
-        radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
-        linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
-      min-height: 0;
-    }
-
-    .row{ display:flex; margin: 10px 0; gap: 10px; }
-    .row.you{ justify-content:flex-end; }
-    .row.bot{ justify-content:flex-start; }
-
-    .bubbleWrap{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-      max-width: min(92ch, 96%);
-      min-width: 0;
-    }
-
-    .bubble{
-      padding: 12px 12px;
-      border-radius: var(--r2);
-      border: 1px solid var(--line);
-      background: rgba(243,239,230,.92);
-      color: var(--ink);
-      box-shadow: 0 8px 20px rgba(0,0,0,.10);
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.42;
-      font-size: 14.6px;
-      position: relative;
-      min-width: 0;
-    }
-    .you .bubble{
-      border-color: rgba(122,17,20,.25);
-      box-shadow:
-        0 10px 24px rgba(122,17,20,.10),
-        0 0 0 1px rgba(122,17,20,.08) inset;
-      padding-left: 14px;
-    }
-    .you .bubble:before{
-      content:"";
-      position:absolute;
-      left: 0;
-      top: 10px;
-      bottom: 10px;
-      width: 3px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
-      opacity:.9;
-    }
-
-    /* Message Types */
-    .bubble.warning{
-      border-color: rgba(122,17,20,.35);
-      box-shadow:
-        0 0 0 4px rgba(122,17,20,.10) inset,
-        0 10px 22px rgba(122,17,20,.10);
-    }
-    .bubble.decision{
-      border-color: rgba(21,18,13,.18);
-      background: rgba(243,239,230,.96);
-    }
-
-    .decisionHdr{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(21,18,13,.10);
-    }
-    .decisionHdr strong{ font-size: 13px; letter-spacing: .2px; }
-    .decisionTag{
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(122,17,20,.25);
-      background: rgba(122,17,20,.10);
-      color: rgba(21,18,13,.78);
-      font-weight: 750;
-      user-select:none;
-    }
-
-    /* Table renderer */
-    .tblWrap{
-      overflow:auto;
-      border: 1px solid rgba(21,18,13,.10);
-      border-radius: 12px;
-      background: rgba(243,239,230,.88);
-    }
-    table.tbl{
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-      min-width: 520px;
-      color: var(--ink);
-      font-size: 13.5px;
-    }
-    .tbl thead th{
-      position: sticky;
-      top: 0;
-      background: rgba(243,239,230,.96);
-      border-bottom: 1px solid rgba(21,18,13,.12);
-      text-align:left;
-      padding: 10px;
-      font-weight: 850;
-      letter-spacing: .2px;
-      white-space: nowrap;
-    }
-    .tbl tbody td{
-      border-bottom: 1px solid rgba(21,18,13,.08);
-      padding: 10px;
-      vertical-align: top;
-    }
-    .tbl tbody tr:last-child td{ border-bottom:none; }
-
-    /* Collapsible long blocks (for big outputs) */
-    .clamp{
-      position: relative;
-      max-height: 220px;
-      overflow: hidden;
-    }
-    .clamp:after{
-      content:"";
-      position:absolute;
-      left:0; right:0; bottom:0;
-      height: 72px;
-      background: linear-gradient(180deg, rgba(243,239,230,0), rgba(243,239,230,.94));
-      pointer-events:none;
-    }
-    .moreRow{
-      display:flex;
-      justify-content:flex-end;
-      margin-top: 8px;
-    }
-    .moreBtn{
-      border: 1px solid rgba(21,18,13,.14);
-      background: rgba(243,239,230,.92);
-      color: rgba(21,18,13,.72);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-weight: 820;
-      cursor:pointer;
-      user-select:none;
-      font-size: 12px;
-    }
-    .moreBtn:hover{ border-color: rgba(21,18,13,.22); }
-
-    /* Message meta row + subtle menu */
-    .meta{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size: 11px;
-      color: rgba(21,18,13,.62);
-      padding: 0 2px;
-      align-items:center;
-    }
-    .confidence{ display:flex; align-items:center; gap: 6px; user-select:none; }
-    .confDot{
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #9ca3af;
-      box-shadow: 0 0 0 3px rgba(156,163,175,.18);
-    }
-    .confDot.g{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
-    .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
-    .confDot.r{ background: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
-
-    .menuBtn{
-      border: 1px solid rgba(21,18,13,.12);
-      background: rgba(243,239,230,.90);
-      color: rgba(21,18,13,.70);
-      border-radius: 999px;
-      padding: 4px 9px;
-      font-weight: 900;
-      cursor:pointer;
-      user-select:none;
-      line-height: 1;
-    }
-
-    .menu{
-      position: absolute;
-      right: 8px;
-      top: calc(100% + 6px);
-      border-radius: 14px;
-      border: 1px solid rgba(21,18,13,.14);
-      background: rgba(243,239,230,.98);
-      box-shadow: 0 12px 34px rgba(0,0,0,.16);
-      overflow:hidden;
-      min-width: 170px;
-      display:none;
-      z-index: 50;
-    }
-    .menuItem{
-      padding: 10px 10px;
-      font-size: 12px;
-      color: rgba(21,18,13,.82);
-      cursor:pointer;
-      user-select:none;
-      border-bottom: 1px solid rgba(21,18,13,.08);
-      font-weight: 750;
-    }
-    .menuItem:last-child{ border-bottom:none; }
-    .menuItem:hover{ background: rgba(21,18,13,.05); }
-
-    /* Composer */
-    .composer{
-      padding: 12px;
-      border-top: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.45);
-      display:flex;
-      gap: 10px;
-      align-items:flex-end;
-    }
-    textarea{
-      flex:1;
-      resize:none;
-      min-height: 48px;
-      max-height: 180px;
-      padding: 12px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(243,239,230,.16);
-      background: rgba(11,10,8,.55);
-      color: rgba(243,239,230,.92);
-      font-size: 14.6px;
-      outline:none;
-    }
-    textarea::placeholder{ color: rgba(243,239,230,.55); }
-    textarea:focus{
-      border-color: rgba(122,17,20,.40);
-      box-shadow: 0 0 0 5px rgba(122,17,20,.16);
-    }
-    .send{
-      min-width: 96px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(122,17,20,.45);
-      background: linear-gradient(180deg, rgba(122,17,20,.32), rgba(122,17,20,.18));
-      color: rgba(243,239,230,.95);
-      font-weight: 820;
-      cursor: pointer;
-      box-shadow: 0 10px 26px rgba(122,17,20,.16);
-      transition: transform .06s ease, filter .12s ease;
-    }
-    .send:hover{ filter: brightness(1.06); }
-    .send:active{ transform: translateY(1px); }
-    .send:disabled{
-      opacity: .55;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    /* ====== CONTEXT PANEL CONTENT ====== */
-    .section{
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.35);
-      border-radius: 14px;
-      padding: 10px;
-    }
-    .section + .section{ margin-top: 10px; }
-
-    .sectionTitle{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-    .sectionTitle strong{
-      font-size: 12.5px;
-      color: rgba(243,239,230,.90);
-      letter-spacing: .2px;
-    }
-    .sectionTitle span{
-      font-size: 12px;
-      color: rgba(243,239,230,.62);
-    }
-
-    .kv{ display:flex; flex-direction:column; gap: 8px; }
-    .kvRow{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 10px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(243,239,230,.12);
-    }
-    .kvRow:first-child{ border-top: none; padding-top: 0; }
-    .kvKey{
-      font-size: 12px;
-      color: rgba(243,239,230,.78);
-      line-height: 1.25;
-    }
-    .kvVal{
-      font-size: 12px;
-      color: rgba(243,239,230,.92);
-      font-weight: 760;
-      text-align:right;
-      line-height: 1.25;
-      white-space: nowrap;
-    }
-    .kvSub{
-      font-size: 11px;
-      color: rgba(243,239,230,.62);
-      margin-top: 2px;
-    }
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.30);
-      font-size: 11px;
-      color: rgba(243,239,230,.70);
-      margin: 4px 6px 0 0;
-    }
-    .chipDot{ width: 7px; height: 7px; border-radius:50%; background: #9ca3af; }
-
-    /* ====== MODALS / DRAWERS ====== */
-
-    /* High-stakes modal */
-    .modalBack{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 16px;
-      z-index: 999;
-    }
-    .modal{
-      width: min(720px, 100%);
-      border-radius: 20px;
-      border: 1px solid rgba(243,239,230,.18);
-      background: rgba(15,13,10,.85);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 22px 80px rgba(0,0,0,.50);
-      overflow:hidden;
-    }
-    .modalHdr{
-      padding: 14px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      border-bottom: 1px solid rgba(243,239,230,.14);
-    }
-    .modalHdr strong{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      font-size: 13px;
-      letter-spacing: .2px;
-      color: rgba(243,239,230,.92);
-    }
-    .warnMark{
-      width: 26px; height: 26px; border-radius: 10px;
-      display:grid; place-items:center;
-      border: 1px solid rgba(122,17,20,.35);
-      background: rgba(122,17,20,.18);
-      color: rgba(243,239,230,.92);
-      font-weight: 900;
-    }
-    .modalBody{
-      padding: 14px;
-      color: rgba(243,239,230,.86);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .modalGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .modalCard{
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.45);
-      border-radius: 14px;
-      padding: 10px;
-    }
-    .modalCard strong{
-      font-size: 12px;
-      color: rgba(243,239,230,.90);
-    }
-    .modalCard ul{
-      margin: 8px 0 0 18px;
-      padding: 0;
-      color: rgba(243,239,230,.78);
-    }
-    .modalFtr{
-      padding: 12px 14px;
-      display:flex;
-      justify-content:flex-end;
-      gap: 10px;
-      border-top: 1px solid rgba(243,239,230,.14);
-    }
-    .modalBtn{
-      border-radius: 999px;
-      padding: 10px 12px;
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.40);
-      color: rgba(243,239,230,.88);
-      font-weight: 780;
-      cursor:pointer;
-      user-select:none;
-    }
-    .modalBtn.primary{
-      border-color: rgba(122,17,20,.40);
-      background: rgba(122,17,20,.24);
-    }
-
-    /* Mobile drawer */
-    .drawerBack{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-      z-index: 998;
-    }
-    .drawer{
-      width: min(760px, 100%);
-      max-height: 86vh;
-      border-radius: 22px;
-      border: 1px solid rgba(243,239,230,.18);
-      background: rgba(15,13,10,.86);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 22px 80px rgba(0,0,0,.55);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height: 0;
-    }
-    .drawerGrip{
-      height: 20px;
-      display:grid;
-      place-items:center;
-      border-bottom: 1px solid rgba(243,239,230,.14);
-    }
-    .gripBar{
-      width: 56px; height: 6px;
-      border-radius: 999px;
-      background: rgba(243,239,230,.18);
-    }
-    .drawerHdr{
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .drawerHdr strong{ font-size: 13px; color: rgba(243,239,230,.92); }
-    .drawerHdr span{ font-size: 12px; color: rgba(243,239,230,.62); }
-    .drawerBody{
-      padding: 12px;
-      overflow:auto;
-      min-height: 0;
-    }
-
-    /* ====== HIDES ====== */
-    .hidden{ display:none !important; }
-
-    /* ====== RESPONSIVE ====== */
-    @media (max-width: 1080px){
-      .app{ grid-template-columns: 260px 1fr; grid-template-rows: auto 1fr; }
-      #contextPanel{ display:none; } /* on tablet/mobile use drawer instead */
-    }
-    @media (max-width: 760px){
-      .app{ grid-template-columns: 1fr; }
-      #leftPanel{ display:none; }
-      .badge{ max-width: 100%; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="app">
-
-      <!-- TOP BAR -->
-      <header>
-        <div class="brand">
-          <div class="logo">W</div>
-          <div class="brandText">
-            <strong>WilliamBot</strong>
-            <span id="topSub">Session: — • Branch: —</span>
+    function buildList(targetEl, isMobile){
+      targetEl.innerHTML = "";
+      for(const s of sessions){
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="itemTop">
+            <div class="itemTitle">${escapeHtml(s.title)}</div>
+            <span class="pillMini">${(isWorkspaceOn() && s.id === activeSid) ? "Active" : "Open"}</span>
           </div>
-        </div>
-
-        <div class="statusRow">
-          <!-- MODE -->
-          <div class="badge clickable" id="modeBadge" title="Inference profile (UI now; backend later)">
-            <span class="label">Mode</span>
-            <span id="modeText">Financial</span>
+          <div class="itemMeta">
+            ${escapeHtml(s.note || "")}<br/>
+            <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
+            <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
           </div>
+        `;
 
-          <!-- SYNC -->
-          <div class="badge clickable" id="syncBadge" title="Data freshness (hook later)">
-            <span id="syncDot" class="dot"></span>
-            <span class="label">Notion</span>
-            <span id="syncText">Not connected</span>
-          </div>
+        // Clicking a session STARTS WORKSPACE (intentional)
+        div.addEventListener("click", () => {
+          startSession(s.id);
+          if(isMobile) closeSessionsDrawer();
+        });
 
-          <!-- BACKEND -->
-          <div class="badge" title="Local backend connection">
-            <span id="backendDot" class="dot"></span>
-            <span class="label">Engine</span>
-            <span id="backendText">UI only</span>
-          </div>
+        // Branch area only when workspace on + session active
+        if(isWorkspaceOn() && s.id === activeSid){
+          const branches = loadBranches(activeSid);
+          const wrap = document.createElement("div");
+          wrap.className = "branchWrap";
 
-          <button class="ghostBtn" id="sessionsBtn">Sessions</button>
-          <button class="ghostBtn" id="contextBtn">Context</button>
-        </div>
-      </header>
+          const row = document.createElement("div");
+          row.className = "branchRow";
 
-      <!-- LEFT: SESSIONS / BRANCHES -->
-      <aside class="panel" id="leftPanel">
-        <div class="panelHeader">
-          <div>
-            <strong>Sessions</strong>
-            <div><span id="sessionCount">0</span><span> total</span></div>
-          </div>
-          <span id="activeSessionLabel">Active: —</span>
-        </div>
-
-        <div class="panelBody">
-          <div class="list" id="sessionList"></div>
-        </div>
-      </aside>
-
-      <!-- CENTER: CHAT -->
-      <main class="chat">
-        <div class="feed" id="feed"></div>
-
-        <div class="composer">
-          <textarea id="input" placeholder="Ask, calculate, compare, simulate… (Enter to send, Shift+Enter new line)"></textarea>
-          <button class="send" id="sendBtn" disabled>Send</button>
-        </div>
-      </main>
-
-      <!-- RIGHT: CONTEXT PANEL (desktop only) -->
-      <aside class="panel" id="contextPanel">
-        <div class="panelHeader">
-          <div>
-            <strong>Context</strong>
-            <div><span>Working state (UI now, real data later)</span></div>
-          </div>
-          <span id="ctxHint">Session-bound</span>
-        </div>
-
-        <div class="panelBody" id="contextContentDesktop">
-          <!-- injected -->
-        </div>
-      </aside>
-
-    </div>
-  </div>
-
-  <!-- MOBILE: Sessions Drawer -->
-  <div class="drawerBack" id="sessionsDrawerBack" aria-hidden="true">
-    <div class="drawer">
-      <div class="drawerGrip"><div class="gripBar"></div></div>
-      <div class="drawerHdr">
-        <div>
-          <strong>Sessions</strong><br/>
-          <span id="sessionsDrawerMeta">Tap to switch • Branches below</span>
-        </div>
-        <button class="modalBtn" id="sessionsDrawerClose">Close</button>
-      </div>
-      <div class="drawerBody">
-        <div class="list" id="sessionListMobile"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MOBILE: Context Drawer -->
-  <div class="drawerBack" id="contextDrawerBack" aria-hidden="true">
-    <div class="drawer">
-      <div class="drawerGrip"><div class="gripBar"></div></div>
-      <div class="drawerHdr">
-        <div>
-          <strong>Context</strong><br/>
-          <span id="contextDrawerMeta">Working state (local-only)</span>
-        </div>
-        <button class="modalBtn" id="contextDrawerClose">Close</button>
-      </div>
-      <div class="drawerBody" id="contextContentMobile">
-        <!-- injected -->
-      </div>
-    </div>
-  </div>
-
-  <!-- HIGH-STAKES DECISION MODAL (stubbed component) -->
-  <div class="modalBack" id="hsModalBack" role="dialog" aria-modal="true" aria-label="High-stakes decision review">
-    <div class="modal">
-      <div class="modalHdr">
-        <strong><span class="warnMark">!</span> HIGH-STAKES DECISION</strong>
-        <button class="modalBtn" id="hsClose">Close</button>
-      </div>
-      <div class="modalBody" id="hsBody"></div>
-      <div class="modalFtr">
-        <button class="modalBtn" id="hsDiscuss">Discuss further</button>
-        <button class="modalBtn primary" id="hsCommit">Commit to ledger</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    /**
-     * BACKEND (set later to your Tailscale-only server)
-     * Example: const API_BASE = "http://100.x.x.x:8787";
-     */
-    const API_BASE = "";
-    const CHAT_ENDPOINT = "/chat";
-    const PING_ENDPOINT = "/health";
-
-    // ====== DOM ======
-    const $ = (id) => document.getElementById(id);
-    const feed = $("feed");
-    const input = $("input");
-    const sendBtn = $("sendBtn");
-
-    const topSub = $("topSub");
-
-    const modeBadge = $("modeBadge");
-    const modeText = $("modeText");
-    const syncDot = $("syncDot");
-    const syncText = $("syncText");
-    const backendDot = $("backendDot");
-    const backendText = $("backendText");
-
-    const sessionsBtn = $("sessionsBtn");
-    const contextBtn = $("contextBtn");
-
-    const leftPanel = $("leftPanel");
-    const sessionList = $("sessionList");
-    const sessionListMobile = $("sessionListMobile");
-    const sessionCount = $("sessionCount");
-    const activeSessionLabel = $("activeSessionLabel");
-
-    const ctxHint = $("ctxHint");
-    const contextPanel = $("contextPanel");
-    const contextContentDesktop = $("contextContentDesktop");
-    const contextContentMobile = $("contextContentMobile");
-
-    // Drawers
-    const sessionsDrawerBack = $("sessionsDrawerBack");
-    const sessionsDrawerClose = $("sessionsDrawerClose");
-    const contextDrawerBack = $("contextDrawerBack");
-    const contextDrawerClose = $("contextDrawerClose");
-
-    // High-stakes modal
-    const hsModalBack = $("hsModalBack");
-    const hsBody = $("hsBody");
-    const hsClose = $("hsClose");
-    const hsDiscuss = $("hsDiscuss");
-    const hsCommit = $("hsCommit");
-
-    // ====== STORAGE ======
-    const STORE = {
-      sessions: "wb_sessions_v2",
-      activeSession: "wb_active_session_v2",
-      activeBranch: "wb_active_branch_v2",
-      branchesPrefix: "wb_branches_",
-      historyPrefix: "wb_history_v2_"
-    };
-
-    // ====== UTILS ======
-    function nowTime(){
-      const d = new Date();
-      return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-    }
-    function nowStamp(){
-      const d = new Date();
-      return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
-    }
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-    }
-    function setDot(dotEl, state){
-      dotEl.classList.remove("ok","bad");
-      if(state === "ok") dotEl.classList.add("ok");
-      if(state === "bad") dotEl.classList.add("bad");
-    }
-    function isMobileLayout(){
-      return window.matchMedia("(max-width: 1080px)").matches;
-    }
-
-    // ====== MODE ======
-    const MODES = ["Financial","Formulation","Compliance","Strategy"];
-    let modeIdx = 0;
-    function cycleMode(){
-      modeIdx = (modeIdx + 1) % MODES.length;
-      modeText.textContent = MODES[modeIdx];
-    }
-
-    // ====== SESSIONS + BRANCHES ======
-    function branchesKey(sessionId){ return STORE.branchesPrefix + sessionId; }
-    function historyKey(sessionId, branchId){ return STORE.historyPrefix + sessionId + "_" + branchId; }
-
-    function loadSessions(){
-      try{
-        const raw = localStorage.getItem(STORE.sessions);
-        const data = raw ? JSON.parse(raw) : null;
-        if(Array.isArray(data) && data.length) return data;
-      } catch {}
-      return [
-        { id: "pricing", title: "Pricing & Margin Review", note: "Retail, wholesale, Amazon fees", updated: nowStamp(), lastDecision: "8 oz butter → $66" },
-        { id: "formulation", title: "Formulation Iteration", note: "Leave-in + shampoo constraints", updated: nowStamp(), lastDecision: "Fragrance load 4%" },
-        { id: "amazon", title: "Amazon Ops", note: "Listings + compliance + reviews", updated: nowStamp(), lastDecision: "Draft bullets v2" }
-      ];
-    }
-    function saveSessions(list){ localStorage.setItem(STORE.sessions, JSON.stringify(list)); }
-
-    function loadBranches(sessionId){
-      try{
-        const raw = localStorage.getItem(branchesKey(sessionId));
-        const data = raw ? JSON.parse(raw) : null;
-        if(Array.isArray(data) && data.length) return data;
-      } catch {}
-      // default
-      return [{ id:"main", name:"Main", kind:"main", created: nowStamp() }];
-    }
-    function saveBranches(sessionId, branches){
-      localStorage.setItem(branchesKey(sessionId), JSON.stringify(branches));
-    }
-
-    function getActiveSessionId(){ return localStorage.getItem(STORE.activeSession) || "pricing"; }
-    function setActiveSessionId(id){ localStorage.setItem(STORE.activeSession, id); }
-    function getActiveBranchId(){ return localStorage.getItem(STORE.activeBranch) || "main"; }
-    function setActiveBranchId(id){ localStorage.setItem(STORE.activeBranch, id); }
-
-    let sessions = loadSessions();
-    saveSessions(sessions);
-
-    function loadHistory(sessionId, branchId){
-      try{
-        const raw = localStorage.getItem(historyKey(sessionId, branchId));
-        if(!raw) return [];
-        const data = JSON.parse(raw);
-        return Array.isArray(data) ? data : [];
-      } catch { return []; }
-    }
-    function saveHistory(sessionId, branchId, hist){
-      localStorage.setItem(historyKey(sessionId, branchId), JSON.stringify(hist.slice(-400)));
-    }
-
-    function setTopSub(){
-      const sid = getActiveSessionId();
-      const bid = getActiveBranchId();
-      const s = sessions.find(x => x.id === sid);
-      const branches = loadBranches(sid);
-      const b = branches.find(x => x.id === bid);
-      topSub.textContent = `Session: ${s ? s.title : sid} • Branch: ${b ? b.name : bid}`;
-      ctxHint.textContent = `Session: ${sid} • Branch: ${bid}`;
-    }
-
-    function renderSessionLists(){
-      const activeSid = getActiveSessionId();
-      const activeBid = getActiveBranchId();
-      const active = sessions.find(s => s.id === activeSid) || sessions[0];
-
-      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
-      sessionCount.textContent = String(sessions.length);
-
-      function buildList(targetEl, isMobile){
-        targetEl.innerHTML = "";
-        for(const s of sessions){
-          const div = document.createElement("div");
-          div.className = "item";
-          div.innerHTML = `
-            <div class="itemTop">
-              <div class="itemTitle">${escapeHtml(s.title)}</div>
-              <span class="pillMini">${s.id === activeSid ? "Active" : "Open"}</span>
-            </div>
-            <div class="itemMeta">
-              ${escapeHtml(s.note || "")}<br/>
-              <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
-              <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
-            </div>
-          `;
-
-          div.addEventListener("click", () => {
-            setActiveSessionId(s.id);
-            // ensure branches exist
-            const branches = loadBranches(s.id);
-            saveBranches(s.id, branches);
-            // if old branch not present, reset to main
-            const currBid = getActiveBranchId();
-            const exists = branches.some(b => b.id === currBid);
-            setActiveBranchId(exists ? currBid : "main");
-            // reload
-            loadActiveThread();
-            renderSessionLists();
-            hydrateContextForThread();
-            if(isMobile) closeSessionsDrawer();
-          });
-
-          // Branch area (only show expanded for active session)
-          if(s.id === activeSid){
-            const branches = loadBranches(activeSid);
-            const wrap = document.createElement("div");
-            wrap.className = "branchWrap";
-
-            const row = document.createElement("div");
-            row.className = "branchRow";
-
-            for(const b of branches){
-              const chip = document.createElement("div");
-              chip.className = "branchChip" + (b.id === activeBid ? " active" : "");
-              chip.innerHTML = `
-                <span class="branchDot ${b.kind === "main" ? "main" : "fork"}"></span>
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:${isMobile ? "240px" : "160px"};">${escapeHtml(b.name)}</span>
-              `;
-              chip.addEventListener("click", (e) => {
-                e.stopPropagation();
-                setActiveBranchId(b.id);
-                loadActiveThread();
-                renderSessionLists();
-                hydrateContextForThread();
-                if(isMobile) closeSessionsDrawer();
-              });
-              row.appendChild(chip);
-            }
-
-            const hint = document.createElement("div");
-            hint.style.color = "rgba(243,239,230,.58)";
-            hint.style.fontSize = "11px";
-            hint.textContent = "Fork from any message via ⋯ menu (keeps assumptions + history).";
-
-            wrap.appendChild(row);
-            wrap.appendChild(hint);
-            div.appendChild(wrap);
+          for(const b of branches){
+            const chip = document.createElement("div");
+            chip.className = "branchChip" + (b.id === activeBid ? " active" : "");
+            chip.innerHTML = `
+              <span class="branchDot ${b.kind === "main" ? "main" : "fork"}"></span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:${isMobile ? "240px" : "160px"};">${escapeHtml(b.name)}</span>
+            `;
+            chip.addEventListener("click", (e) => {
+              e.stopPropagation();
+              setActiveBranchId(b.id);
+              loadActiveThread();
+              renderSessionLists();
+              hydrateWorkspaceForThread();
+              if(isMobile) closeSessionsDrawer();
+            });
+            row.appendChild(chip);
           }
 
-          targetEl.appendChild(div);
-        }
-      }
+          const hint = document.createElement("div");
+          hint.style.color = "rgba(243,239,230,.58)";
+          hint.style.fontSize = "11px";
+          hint.textContent = "Fork from any message via ⋯ menu (keeps assumptions + history).";
 
-      buildList(sessionList, false);
-      buildList(sessionListMobile, true);
-      setTopSub();
+          wrap.appendChild(row);
+          wrap.appendChild(hint);
+          div.appendChild(wrap);
+        }
+
+        targetEl.appendChild(div);
+      }
     }
 
-    // ====== CONTEXT PANEL (render once, inject both desktop + mobile) ======
-    function renderContextHtml(data){
-      // data: { assumptions:[], sources:[], ledger:[] }
-      const assRows = data.assumptions.map(a => {
-        const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
-        return `
-          <div class="kvRow">
-            <div>
-              <div class="kvKey">
-                <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-                ${escapeHtml(a.k)}
-              </div>
-              <div class="kvSub">${escapeHtml(a.sub || "")}</div>
-            </div>
-            <div class="kvVal">${escapeHtml(a.v)}</div>
-          </div>
-        `;
-      }).join("");
+    buildList(sessionList, false);
+    buildList(sessionListMobile, true);
+    setTopSub();
+  }
 
-      const srcChips = data.sources.map(s => {
-        const bg = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
-        return `
-          <div class="chip">
-            <span class="chipDot" style="background:${bg}"></span>
-            ${escapeHtml(s.name)} • ${escapeHtml(s.state)}
-          </div>
-        `;
-      }).join("");
+  // ====== WORKSPACE PANEL (session-scoped; never injected into chat feed) ======
+  function renderWorkspaceToolsHtml(sessionId){
+    const engineOnline = backendText.textContent === "Connected";
+    const engineLine = engineOnline
+      ? `<span style="color: rgba(243,239,230,.72);font-size:12px;">Engine: connected</span>`
+      : `<span style="color: rgba(243,239,230,.72);font-size:12px;">Engine: offline (UI-only). Set API_BASE when PC arrives.</span>`;
 
-      const ledRows = data.ledger.map(l => {
-        const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
-        return `
-          <div class="kvRow">
-            <div>
-              <div class="kvKey">
-                <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
-                ${escapeHtml(l.k)}
-              </div>
-              <div class="kvSub">${escapeHtml(l.sub || "")}</div>
-            </div>
-            <div class="kvVal">${escapeHtml(l.v)}</div>
-          </div>
-        `;
-      }).join("");
-
-      const stamp = nowStamp();
-
+    if(sessionId === "pricing"){
       return `
         <div class="section">
           <div class="sectionTitle">
-            <strong>Working assumptions</strong>
-            <span>${stamp}</span>
+            <strong>Pricing guardrails</strong>
+            <span>${engineLine}</span>
           </div>
-          <div class="kv">${assRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No assumptions yet.</div>`}</div>
+          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
+            <div style="margin-bottom:8px;">Do not finalize MSRP until:</div>
+            <ul style="margin:0 0 0 18px; padding:0; color: rgba(243,239,230,.78);">
+              <li>Costs are synced (fresh COGS)</li>
+              <li>Amazon fee category is confirmed</li>
+              <li>Packaging + ship cost per unit are locked</li>
+            </ul>
+          </div>
         </div>
-
         <div class="section">
           <div class="sectionTitle">
-            <strong>Active sources</strong>
-            <span>${stamp}</span>
+            <strong>Pricing table (panel preview)</strong>
+            <span>Session-scoped</span>
           </div>
-          <div>${srcChips || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No sources mounted.</div>`}</div>
-        </div>
-
-        <div class="section">
-          <div class="sectionTitle">
-            <strong>Decision ledger (preview)</strong>
-            <span>${stamp}</span>
+          <div class="tblWrap">
+            <table class="tbl">
+              <thead><tr><th>SKU</th><th>MSRP</th><th>Channel</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>8oz Butter</td><td>—</td><td>Shopify</td><td>Set after fresh COGS</td></tr>
+                <tr><td>8oz Shampoo</td><td>—</td><td>Amazon</td><td>Pending fee category + COGS</td></tr>
+                <tr><td>8oz Conditioner</td><td>—</td><td>Amazon</td><td>Pending fee category + COGS</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="kv">${ledRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No decisions committed.</div>`}</div>
+          <div style="margin-top:8px;color: rgba(243,239,230,.62);font-size:12px;">
+            This stays out of the chat feed. It only shows because Pricing workspace is active.
+          </div>
         </div>
       `;
     }
 
-    function hydrateContextForThread(){
-      const sid = getActiveSessionId();
-      const bid = getActiveBranchId();
-
-      // Stub state (replace later with backend real state + Notion sync)
-      const stub = {
-        pricing: {
-          assumptions: [
-            { k:"Channel focus", v:"Amazon + Shopify", sub:"Thread scope", c:"g" },
-            { k:"Target margin", v:"≥ 70%", sub:"Guardrail", c:"g" },
-            { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify category", c:"y" },
-            { k:"COGS source", v:"Local sheet v1", sub:"Notion not connected", c:"r" }
-          ],
-          sources: [
-            { name:"/Financial", state:"mounted", c:"y" },
-            { name:"Products & SKUs.CSV", state:"local", c:"y" }
-          ],
-          ledger: [
-            { k:"Last committed", v:"8 oz butter MSRP $66", sub:"Pricing session", c:"g" },
-            { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh costs", c:"y" }
-          ]
-        },
-        formulation: {
-          assumptions: [
-            { k:"Fragrance load", v:"4%", sub:"Brand standard", c:"g" },
-            { k:"Heat stability target", v:"SFC ≥ 28% @ 40°C", sub:"Shipping stability", c:"g" },
-            { k:"Preservation", v:"TBD", sub:"Requires testing", c:"r" }
-          ],
-          sources: [
-            { name:"/Formulas", state:"mounted", c:"y" },
-            { name:"Batch Logs", state:"local", c:"y" }
-          ],
-          ledger: [
-            { k:"Last committed", v:"Mica-friendly base selected", sub:"Strawberry Dream line", c:"g" }
-          ]
-        },
-        amazon: {
-          assumptions: [
-            { k:"Listing priority", v:"Title + bullets + images", sub:"Launch readiness", c:"g" },
-            { k:"Compliance risk", v:"Ingredient claims", sub:"Use Compliance mode", c:"y" }
-          ],
-          sources: [
-            { name:"/Amazon", state:"mounted", c:"y" }
-          ],
-          ledger: [
-            { k:"Last committed", v:"Draft bullets v2", sub:"Await final copy", c:"y" }
-          ]
-        }
-      };
-
-      const base = stub[sid] || stub.pricing;
-
-      // Make fork slightly more “uncertain” by default (visual cue)
-      const data = JSON.parse(JSON.stringify(base));
-      if(bid !== "main"){
-        data.assumptions = data.assumptions.map(a => a.c === "g" ? {...a, c:"y"} : a);
-        data.ledger = data.ledger.map(l => l.c === "g" ? {...l, c:"y"} : l);
-      }
-
-      const html = renderContextHtml(data);
-      contextContentDesktop.innerHTML = html;
-      contextContentMobile.innerHTML = html;
-      setTopSub();
-    }
-
-    // ====== BACKEND STATUS ======
-    async function pingBackend(){
-      if(!API_BASE){
-        setDot(backendDot, "bad");
-        backendText.textContent = "UI only";
-        return false;
-      }
-      try{
-        const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
-        if(!res.ok) throw new Error("bad");
-        setDot(backendDot, "ok");
-        backendText.textContent = "Connected";
-        return true;
-      } catch {
-        setDot(backendDot, "bad");
-        backendText.textContent = "Not reachable";
-        return false;
-      }
-    }
-
-    // ====== SYNC STATUS (UI-only demo for now) ======
-    function setSync(state, text){
-      setDot(syncDot, state);
-      syncText.textContent = text;
-    }
-
-    // ====== MESSAGE RENDERING (table + clamp + menu + fork) ======
-
-    function parseTable(text){
-      // Accept either:
-      // 1) pipe table (markdown-ish)
-      // 2) whitespace column table (2+ spaces)
-      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-      if(lines.length < 2) return null;
-
-      // pipe format
-      if(lines[0].includes("|")){
-        const rows = lines
-          .filter(l => !/^\|?\s*[-:| ]+\s*\|?$/.test(l))
-          .map(l => l.replace(/^\|/,"").replace(/\|$/,"").split("|").map(x => x.trim()));
-        if(rows.length < 2) return null;
-        return rows;
-      }
-
-      // whitespace format (2+ spaces)
-      const rows = lines.map(l => l.split(/\s{2,}/g).map(x => x.trim()));
-      const maxCols = Math.max(...rows.map(r => r.length));
-      if(maxCols < 2) return null;
-      // pad
-      return rows.map(r => {
-        const rr = r.slice();
-        while(rr.length < maxCols) rr.push("");
-        return rr;
-      });
-    }
-
-    function shouldClamp(content){
-      // clamp long text blobs (not tables/decision)
-      return content && content.length > 700;
-    }
-
-    function closeAllMenus(){
-      document.querySelectorAll(".menu").forEach(m => m.style.display = "none");
-    }
-
-    function renderMessage(m, indexInHistory){
-      const row = document.createElement("div");
-      row.className = "row " + (m.role === "you" ? "you" : "bot");
-
-      const bubbleWrap = document.createElement("div");
-      bubbleWrap.className = "bubbleWrap";
-
-      const bubble = document.createElement("div");
-      const t = m.type || "text";
-      bubble.className = "bubble " + (t === "text" ? "" : t);
-
-      // content area (clampable)
-      const contentBox = document.createElement("div");
-      contentBox.style.position = "relative";
-
-      if(t === "decision"){
-        const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
-        const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
-        bubble.innerHTML = `
-          <div class="decisionHdr">
-            <strong>${escapeHtml(title)}</strong>
-            <span class="decisionTag">${escapeHtml(tag)}</span>
+    if(sessionId === "formulation"){
+      return `
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Formulation workspace</strong>
+            <span>${engineLine}</span>
           </div>
-          <div>${escapeHtml(m.content)}</div>
+          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
+            Use this session for controlled creativity inside constraints (INCI, heat stability, slip).
+            When backend is online, this panel becomes your “spec + version” hub (diffs, batch logs, ingredient pulls).
+          </div>
+        </div>
+      `;
+    }
+
+    if(sessionId === "amazon"){
+      return `
+        <div class="section">
+          <div class="sectionTitle">
+            <strong>Amazon ops workspace</strong>
+            <span>${engineLine}</span>
+          </div>
+          <div style="color: rgba(243,239,230,.80); font-size: 13px; line-height:1.45;">
+            Listings, images, compliance notes, review triage. When backend is online,
+            this becomes file-aware and can pull from your mounted /Amazon folder.
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="section">
+        <div class="sectionTitle">
+          <strong>Workspace</strong>
+          <span>${engineLine}</span>
+        </div>
+        <div style="color: rgba(243,239,230,.78); font-size: 13px; line-height:1.45;">
+          No tools defined for this session yet.
+        </div>
+      </div>
+    `;
+  }
+
+  // Your existing context blocks, kept as “context” inside workspace (not shown in chat-only mode)
+  function renderContextHtml(data){
+    const assRows = data.assumptions.map(a => {
+      const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
+      return `
+        <div class="kvRow">
+          <div>
+            <div class="kvKey">
+              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+              ${escapeHtml(a.k)}
+            </div>
+            <div class="kvSub">${escapeHtml(a.sub || "")}</div>
+          </div>
+          <div class="kvVal">${escapeHtml(a.v)}</div>
+        </div>
+      `;
+    }).join("");
+
+    const srcChips = data.sources.map(s => {
+      const bg = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
+      return `
+        <div class="chip">
+          <span class="chipDot" style="background:${bg}"></span>
+          ${escapeHtml(s.name)} • ${escapeHtml(s.state)}
+        </div>
+      `;
+    }).join("");
+
+    const ledRows = data.ledger.map(l => {
+      const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
+      return `
+        <div class="kvRow">
+          <div>
+            <div class="kvKey">
+              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+              ${escapeHtml(l.k)}
+            </div>
+            <div class="kvSub">${escapeHtml(l.sub || "")}</div>
+          </div>
+          <div class="kvVal">${escapeHtml(l.v)}</div>
+        </div>
+      `;
+    }).join("");
+
+    const stamp = nowStamp();
+
+    return `
+      <div class="section">
+        <div class="sectionTitle">
+          <strong>Working assumptions</strong>
+          <span>${stamp}</span>
+        </div>
+        <div class="kv">${assRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No assumptions yet.</div>`}</div>
+      </div>
+
+      <div class="section">
+        <div class="sectionTitle">
+          <strong>Active sources</strong>
+          <span>${stamp}</span>
+        </div>
+        <div>${srcChips || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No sources mounted.</div>`}</div>
+      </div>
+
+      <div class="section">
+        <div class="sectionTitle">
+          <strong>Decision ledger (preview)</strong>
+          <span>${stamp}</span>
+        </div>
+        <div class="kv">${ledRows || `<div style="color:rgba(243,239,230,.62);font-size:12px;">No decisions committed.</div>`}</div>
+      </div>
+    `;
+  }
+
+  function hydrateWorkspaceForThread(){
+    // CHAT-ONLY: do not show workspace panel content
+    if(!isWorkspaceOn()){
+      contextContentDesktop.innerHTML = "";
+      contextContentMobile.innerHTML = "";
+      return;
+    }
+
+    const sid = getActiveSessionId();
+    const bid = getActiveBranchId();
+
+    // Stub context state (replace later with backend real state + Notion sync)
+    const stub = {
+      pricing: {
+        assumptions: [
+          { k:"Target margin", v:"≥ 70%", sub:"Guardrail", c:"g" },
+          { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify category", c:"y" },
+          { k:"COGS source", v:"Local sheet v1", sub:"Notion not connected", c:"r" }
+        ],
+        sources: [
+          { name:"/Financial", state:"mounted", c:"y" },
+          { name:"Products & SKUs.CSV", state:"local", c:"y" }
+        ],
+        ledger: [
+          { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh costs", c:"y" }
+        ]
+      },
+      formulation: {
+        assumptions: [
+          { k:"Fragrance load", v:"4%", sub:"Brand standard", c:"g" },
+          { k:"Heat stability target", v:"SFC ≥ 28% @ 40°C", sub:"Shipping stability", c:"g" },
+          { k:"Preservation", v:"TBD", sub:"Requires testing", c:"r" }
+        ],
+        sources: [
+          { name:"/Formulas", state:"mounted", c:"y" }
+        ],
+        ledger: []
+      },
+      amazon: {
+        assumptions: [
+          { k:"Listing priority", v:"Title + bullets + images", sub:"Launch readiness", c:"g" },
+          { k:"Compliance risk", v:"Ingredient claims", sub:"Use Compliance mode", c:"y" }
+        ],
+        sources: [
+          { name:"/Amazon", state:"mounted", c:"y" }
+        ],
+        ledger: []
+      }
+    };
+
+    const base = stub[sid] || stub.pricing;
+    const data = JSON.parse(JSON.stringify(base));
+    if(bid !== "main"){
+      data.assumptions = data.assumptions.map(a => a.c === "g" ? {...a, c:"y"} : a);
+      data.ledger = data.ledger.map(l => l.c === "g" ? {...l, c:"y"} : l);
+    }
+
+    const toolsHtml = renderWorkspaceToolsHtml(sid);
+    const ctxHtml = renderContextHtml(data);
+
+    // Workspace panel = tools + context
+    const html = toolsHtml + ctxHtml;
+
+    contextContentDesktop.innerHTML = html;
+    contextContentMobile.innerHTML = html;
+    setTopSub();
+  }
+
+  // ====== BACKEND STATUS ======
+  async function pingBackend(){
+    if(!API_BASE){
+      setDot(backendDot, "bad");
+      backendText.textContent = "UI only";
+      return false;
+    }
+    try{
+      const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
+      if(!res.ok) throw new Error("bad");
+      setDot(backendDot, "ok");
+      backendText.textContent = "Connected";
+      return true;
+    } catch {
+      setDot(backendDot, "bad");
+      backendText.textContent = "Not reachable";
+      return false;
+    }
+  }
+
+  // ====== SYNC STATUS (UI-only demo for now) ======
+  function setSync(state, text){
+    setDot(syncDot, state);
+    syncText.textContent = text;
+  }
+
+  // ====== MESSAGE RENDERING (unchanged, except no auto demo injection) ======
+  function parseTable(text){
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    if(lines.length < 2) return null;
+
+    if(lines[0].includes("|")){
+      const rows = lines
+        .filter(l => !/^\|?\s*[-:| ]+\s*\|?$/.test(l))
+        .map(l => l.replace(/^\|/,"").replace(/\|$/,"").split("|").map(x => x.trim()));
+      if(rows.length < 2) return null;
+      return rows;
+    }
+
+    const rows = lines.map(l => l.split(/\s{2,}/g).map(x => x.trim()));
+    const maxCols = Math.max(...rows.map(r => r.length));
+    if(maxCols < 2) return null;
+    return rows.map(r => {
+      const rr = r.slice();
+      while(rr.length < maxCols) rr.push("");
+      return rr;
+    });
+  }
+
+  function shouldClamp(content){
+    return content && content.length > 700;
+  }
+
+  function closeAllMenus(){
+    document.querySelectorAll(".menu").forEach(m => m.style.display = "none");
+  }
+
+  function renderMessage(m, indexInHistory){
+    const row = document.createElement("div");
+    row.className = "row " + (m.role === "you" ? "you" : "bot");
+
+    const bubbleWrap = document.createElement("div");
+    bubbleWrap.className = "bubbleWrap";
+
+    const bubble = document.createElement("div");
+    const t = m.type || "text";
+    bubble.className = "bubble " + (t === "text" ? "" : t);
+
+    if(t === "decision"){
+      const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
+      const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
+      bubble.innerHTML = `
+        <div class="decisionHdr">
+          <strong>${escapeHtml(title)}</strong>
+          <span class="decisionTag">${escapeHtml(tag)}</span>
+        </div>
+        <div>${escapeHtml(m.content)}</div>
+      `;
+    } else if(t === "table"){
+      const parsed = parseTable(m.content || "");
+      if(parsed){
+        const [head, ...body] = parsed;
+        const tblWrap = document.createElement("div");
+        tblWrap.className = "tblWrap";
+        const table = document.createElement("table");
+        table.className = "tbl";
+        table.innerHTML = `
+          <thead><tr>${head.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
+          <tbody>${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody>
         `;
-      } else if(t === "table"){
-        const parsed = parseTable(m.content || "");
-        if(parsed){
-          const [head, ...body] = parsed;
-          const tblWrap = document.createElement("div");
-          tblWrap.className = "tblWrap";
-          const table = document.createElement("table");
-          table.className = "tbl";
-          table.innerHTML = `
-            <thead>
-              <tr>${head.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr>
-            </thead>
-            <tbody>
-              ${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}
-            </tbody>
-          `;
-          tblWrap.appendChild(table);
-          bubble.appendChild(tblWrap);
-        } else {
-          // fallback
-          bubble.textContent = m.content;
-        }
+        tblWrap.appendChild(table);
+        bubble.appendChild(tblWrap);
       } else {
-        const textDiv = document.createElement("div");
-        textDiv.textContent = m.content || "";
-        if(shouldClamp(m.content || "")){
-          textDiv.classList.add("clamp");
-          const moreRow = document.createElement("div");
-          moreRow.className = "moreRow";
-          const btn = document.createElement("button");
-          btn.className = "moreBtn";
-          btn.textContent = "Show more";
-          btn.addEventListener("click", () => {
-            const isClamped = textDiv.classList.toggle("clamp");
-            btn.textContent = isClamped ? "Show more" : "Show less";
-          });
-          moreRow.appendChild(btn);
-          bubble.appendChild(textDiv);
-          bubble.appendChild(moreRow);
-        } else {
-          bubble.appendChild(textDiv);
-        }
+        bubble.textContent = m.content;
       }
+    } else {
+      const textDiv = document.createElement("div");
+      textDiv.textContent = m.content || "";
+      if(shouldClamp(m.content || "")){
+        textDiv.classList.add("clamp");
+        const moreRow = document.createElement("div");
+        moreRow.className = "moreRow";
+        const btn = document.createElement("button");
+        btn.className = "moreBtn";
+        btn.textContent = "Show more";
+        btn.addEventListener("click", () => {
+          const isClamped = textDiv.classList.toggle("clamp");
+          btn.textContent = isClamped ? "Show more" : "Show less";
+        });
+        moreRow.appendChild(btn);
+        bubble.appendChild(textDiv);
+        bubble.appendChild(moreRow);
+      } else {
+        bubble.appendChild(textDiv);
+      }
+    }
 
-      // meta row + menu
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      const name = m.role === "you" ? "You" : "WilliamBot";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const name = m.role === "you" ? "You" : "WilliamBot";
 
-      const conf = m.confidence || "";
-      const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
-      const confDotClass = conf ? conf : "";
+    const conf = m.confidence || "";
+    const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
+    const confDotClass = conf ? conf : "";
 
-      const right = document.createElement("div");
-      right.style.display = "flex";
-      right.style.alignItems = "center";
-      right.style.gap = "8px";
-      right.style.position = "relative";
+    const right = document.createElement("div");
+    right.style.display = "flex";
+    right.style.alignItems = "center";
+    right.style.gap = "8px";
+    right.style.position = "relative";
 
-      const confEl = document.createElement("span");
-      confEl.className = "confidence";
-      confEl.title = "Confidence (UI now; backend later)";
-      confEl.innerHTML = `
-        <span class="confDot ${confDotClass}"></span>
-        <span>${confLabel}</span>
-        <span style="opacity:.65">•</span>
-        <span>${escapeHtml(m.ts || nowTime())}</span>
-      `;
+    const confEl = document.createElement("span");
+    confEl.className = "confidence";
+    confEl.title = "Confidence (UI now; backend later)";
+    confEl.innerHTML = `
+      <span class="confDot ${confDotClass}"></span>
+      <span>${confLabel}</span>
+      <span style="opacity:.65">•</span>
+      <span>${escapeHtml(m.ts || nowTime())}</span>
+    `;
 
-      const menuBtn = document.createElement("button");
-      menuBtn.className = "menuBtn";
-      menuBtn.textContent = "⋯";
-      menuBtn.title = "Message actions";
+    const menuBtn = document.createElement("button");
+    menuBtn.className = "menuBtn";
+    menuBtn.textContent = "⋯";
+    menuBtn.title = "Message actions";
 
-      const menu = document.createElement("div");
-      menu.className = "menu";
-      menu.innerHTML = `
-        <div class="menuItem" data-act="copy">Copy</div>
-        <div class="menuItem" data-act="fork">Fork from here</div>
-      `;
-      // only show fork for bot messages or any? (allow either)
-      // keep it simple: allow fork from any message index
+    const menu = document.createElement("div");
+    menu.className = "menu";
+    menu.innerHTML = `
+      <div class="menuItem" data-act="copy">Copy</div>
+      <div class="menuItem" data-act="fork">Fork from here</div>
+    `;
 
-      menuBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const isOpen = menu.style.display === "block";
-        closeAllMenus();
-        menu.style.display = isOpen ? "none" : "block";
-      });
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = menu.style.display === "block";
+      closeAllMenus();
+      menu.style.display = isOpen ? "none" : "block";
+    });
 
-      menu.addEventListener("click", async (e) => {
-        const act = e.target && e.target.getAttribute && e.target.getAttribute("data-act");
-        if(!act) return;
-        closeAllMenus();
+    menu.addEventListener("click", async (e) => {
+      const act = e.target && e.target.getAttribute && e.target.getAttribute("data-act");
+      if(!act) return;
+      closeAllMenus();
 
-        if(act === "copy"){
-          try{
-            await navigator.clipboard.writeText(m.content || "");
-          } catch {
-            // fallback: ignore
-          }
+      if(act === "copy"){
+        try{ await navigator.clipboard.writeText(m.content || ""); } catch {}
+      }
+      if(act === "fork"){
+        if(!isWorkspaceOn()){
+          // keep forks a workspace feature (clean separation)
+          const note = { role:"bot", type:"text", confidence:"y", ts: nowTime(),
+            content:"Forking is available inside an active workspace session. Start a session first (Sessions → choose one)." };
+          renderMessage(note, history.length);
+          addToHistory(note);
+          return;
         }
+        forkFromIndex(indexInHistory);
+      }
+    });
 
-        if(act === "fork"){
-          forkFromIndex(indexInHistory);
-        }
-      });
+    right.appendChild(confEl);
+    right.appendChild(menuBtn);
+    right.appendChild(menu);
 
-      right.appendChild(confEl);
-      right.appendChild(menuBtn);
-      right.appendChild(menu);
+    meta.innerHTML = `<span>${escapeHtml(name)}</span>`;
+    meta.appendChild(right);
 
-      meta.innerHTML = `<span>${escapeHtml(name)}</span>`;
-      meta.appendChild(right);
+    bubbleWrap.appendChild(bubble);
+    bubbleWrap.appendChild(meta);
+    row.appendChild(bubbleWrap);
+    feed.appendChild(row);
+    feed.scrollTop = feed.scrollHeight;
+  }
 
-      bubbleWrap.appendChild(bubble);
-      bubbleWrap.appendChild(meta);
-      row.appendChild(bubbleWrap);
-      feed.appendChild(row);
-      feed.scrollTop = feed.scrollHeight;
-    }
+  document.addEventListener("click", () => closeAllMenus());
 
-    document.addEventListener("click", () => closeAllMenus());
+  // ====== THREAD STATE ======
+  let activeSession = getActiveSessionId();
+  let activeBranch = getActiveBranchId();
+  let history = [];
 
-    // ====== THREAD STATE ======
-    let activeSession = getActiveSessionId();
-    let activeBranch = getActiveBranchId();
-    let history = [];
+  function loadActiveThread(){
+    activeSession = getActiveSessionId();
+    activeBranch = getActiveBranchId();
+    history = loadHistory(activeSession, activeBranch);
+    feed.innerHTML = "";
+    hydrate();
+    setTopSub();
+  }
 
-    function loadActiveThread(){
-      activeSession = getActiveSessionId();
-      activeBranch = getActiveBranchId();
-      history = loadHistory(activeSession, activeBranch);
-      feed.innerHTML = "";
-      hydrate();
-      setTopSub();
-    }
+  function addToHistory(m){
+    history.push(m);
+    saveHistory(activeSession, activeBranch, history);
+  }
 
-    function addToHistory(m){
-      history.push(m);
-      saveHistory(activeSession, activeBranch, history);
-    }
+  function forkFromIndex(idx){
+    const sid = getActiveSessionId();
+    const branches = loadBranches(sid);
 
-    function forkFromIndex(idx){
-      // create a new branch with history up to idx (inclusive)
-      const sid = getActiveSessionId();
-      const branches = loadBranches(sid);
+    const forkId = "fork_" + Date.now();
+    const forkName = "Fork " + new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+    branches.push({ id: forkId, name: forkName, kind:"fork", created: nowStamp() });
+    saveBranches(sid, branches);
 
-      const forkId = "fork_" + Date.now();
-      const forkName = "Fork " + new Date().toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
-      branches.push({ id: forkId, name: forkName, kind:"fork", created: nowStamp() });
-      saveBranches(sid, branches);
+    const base = history.slice(0, idx + 1);
+    saveHistory(sid, forkId, base);
 
-      const base = history.slice(0, idx + 1);
-      saveHistory(sid, forkId, base);
+    setActiveBranchId(forkId);
+    loadActiveThread();
+    renderSessionLists();
+    hydrateWorkspaceForThread();
 
-      setActiveBranchId(forkId);
-      loadActiveThread();
-      renderSessionLists();
-      hydrateContextForThread();
+    const note = {
+      role:"bot",
+      type:"decision",
+      confidence:"y",
+      ts: nowTime(),
+      meta:{ title:"Fork created", tag:"Branch" },
+      content:`Forked from message #${idx + 1}. This branch preserves context up to that point. Continue with corrected assumptions here.`
+    };
+    renderMessage(note, history.length);
+    addToHistory(note);
+    hydrateWorkspaceForThread();
+  }
 
-      // add a system note in the fork
-      const note = {
+  // ====== CHAT FLOW ======
+  function hydrate(){
+    if(history.length === 0){
+      const intro = {
         role:"bot",
-        type:"decision",
+        type:"text",
         confidence:"y",
-        ts: nowTime(),
-        meta:{ title:"Fork created", tag:"Branch" },
-        content:`Forked from message #${idx + 1}. This branch preserves context up to that point. Continue with corrected assumptions here.`
-      };
-      renderMessage(note, history.length);
-      addToHistory(note);
-      hydrateContextForThread();
-    }
-
-    // ====== CHAT FLOW ======
-    function hydrate(){
-      if(history.length === 0){
-        const intro = {
-          role:"bot",
-          type:"text",
-          confidence:"y",
-          content:
+        content:
 `UI is live.
 
-What’s now improved:
-• Context drawer on mobile
-• Branching (fork from any message via ⋯)
-• Better tables + long output clamp
-• Decision / warning rendering
+This build is intentionally calm:
+• Chat never auto-spawns pricing tables
+• Workspace tools only appear inside an active session
+• Exit returns to chat-only
 
 Next (when PC arrives):
 1) Tailscale on PC + phone
 2) Run local backend (/health, /chat)
 3) Set API_BASE in this file`,
-          ts: nowTime()
-        };
-        renderMessage(intro, 0);
-        addToHistory(intro);
-        return;
-      }
-      history.forEach((m, i) => renderMessage(m, i));
+        ts: nowTime()
+      };
+      renderMessage(intro, 0);
+      addToHistory(intro);
+      return;
     }
+    history.forEach((m, i) => renderMessage(m, i));
+  }
 
-    function syncButtons(){
-      sendBtn.disabled = input.value.trim().length === 0;
-    }
+  function syncButtons(){
+    sendBtn.disabled = input.value.trim().length === 0;
+  }
 
-    function maybeHighStakes(text){
-      const t = text.toLowerCase();
-      return t.includes("change price") || t.includes("raise price") || t.includes("lower price") || t.includes("reprice");
-    }
+  function maybeHighStakes(text){
+    const t = text.toLowerCase();
+    return t.includes("change price") || t.includes("raise price") || t.includes("lower price") || t.includes("reprice");
+  }
 
-    function openHighStakesModal(example){
-      hsBody.innerHTML = `
-        <div style="color: rgba(243,239,230,.86); font-size: 13px;">
-          <div style="margin-bottom:8px;"><strong>Change:</strong> ${escapeHtml(example.change)}</div>
-          <div class="modalGrid">
-            <div class="modalCard">
-              <strong>Impact analysis</strong>
-              <ul>${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-            </div>
-            <div class="modalCard">
-              <strong>Risks identified</strong>
-              <ul>${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-            </div>
+  function openHighStakesModal(example){
+    hsBody.innerHTML = `
+      <div style="color: rgba(243,239,230,.86); font-size: 13px;">
+        <div style="margin-bottom:8px;"><strong>Change:</strong> ${escapeHtml(example.change)}</div>
+        <div class="modalGrid">
+          <div class="modalCard">
+            <strong>Impact analysis</strong>
+            <ul>${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
           </div>
-          <div style="margin-top:10px; color: rgba(243,239,230,.70);">
-            UI component today. Later, backend populates this from real data + assumptions.
+          <div class="modalCard">
+            <strong>Risks identified</strong>
+            <ul>${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
           </div>
         </div>
-      `;
-      hsModalBack.style.display = "flex";
-    }
-    function closeHighStakesModal(){ hsModalBack.style.display = "none"; }
+        <div style="margin-top:10px; color: rgba(243,239,230,.70);">
+          UI component today. Later, backend populates this from real data + assumptions.
+        </div>
+      </div>
+    `;
+    hsModalBack.style.display = "flex";
+  }
+  function closeHighStakesModal(){ hsModalBack.style.display = "none"; }
 
-    async function sendMessage(){
-      const text = input.value.trim();
-      if(!text) return;
+  function ensureEngineNotice(){
+    // prevent repeating the same offline notice every message
+    const recent = history.slice(-6).some(m => (m.role==="bot" && (m.content||"").includes("Engine is offline")));
+    if(recent) return;
+    const botMsg = {
+      role:"bot",
+      type:"text",
+      confidence:"y",
+      content:"Engine is offline (UI-only). Your chat still works as notes. When PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).",
+      ts: nowTime()
+    };
+    renderMessage(botMsg, history.length);
+    addToHistory(botMsg);
+  }
 
-      input.value = "";
-      syncButtons();
+  async function sendMessage(){
+    const text = input.value.trim();
+    if(!text) return;
 
-      const youMsg = { role:"you", type:"text", confidence:"g", content:text, ts: nowTime() };
-      renderMessage(youMsg, history.length);
-      addToHistory(youMsg);
-
-      if(maybeHighStakes(text)){
-        openHighStakesModal({
-          change: "Retail price $32 → $36",
-          impact: ["Margin: 42% → 48%", "Est. volume: −12%", "Net revenue: +3.2%"],
-          risks: ["Price exceeds competitor X", "Amazon Buy Box sensitivity"]
-        });
-      }
-
-      const ok = await pingBackend();
-      if(!ok){
-        const botMsg = {
-          role:"bot",
-          type:"text",
-          confidence:"y",
-          content:"Backend not connected yet (UI-only). When PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).",
-          ts: nowTime()
-        };
-        renderMessage(botMsg, history.length);
-        addToHistory(botMsg);
-
-        const tbl = {
-          role:"bot", type:"table", confidence:"y", ts: nowTime(),
-          content:
-`SKU  | MSRP | Channel | Notes
-8oz Butter | 66 | Shopify | Luxury anchor
-8oz Shampoo | ?? | Amazon | Pending COGS refresh
-8oz Conditioner | ?? | Amazon | Pending COGS refresh`
-        };
-        renderMessage(tbl, history.length);
-        addToHistory(tbl);
-
-        const decision = {
-          role:"bot", type:"decision", confidence:"y", ts: nowTime(),
-          meta:{ title:"Pricing guardrail", tag:"Review" },
-          content:
-`Do not finalize MSRP until:
-• Costs are synced (fresh COGS)
-• Amazon fee category is confirmed
-• Packaging + ship cost per unit are locked`
-        };
-        renderMessage(decision, history.length);
-        addToHistory(decision);
-
-        const warn = {
-          role:"bot", type:"warning", confidence:"r", ts: nowTime(),
-          content:"Warning: current assumptions include stale or estimated values. Do not commit pricing decisions yet."
-        };
-        renderMessage(warn, history.length);
-        addToHistory(warn);
-
-        hydrateContextForThread();
-        return;
-      }
-
-      // Real backend call (later)
-      try{
-        const payload = {
-          message: text,
-          mode: modeText.textContent,
-          session_id: activeSession,
-          branch_id: activeBranch,
-          history: history.map(m => ({
-            role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta, ts: m.ts
-          }))
-        };
-
-        const res = await fetch(API_BASE + CHAT_ENDPOINT, {
-          method:"POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if(!res.ok) throw new Error("Backend error " + res.status);
-        const data = await res.json();
-
-        // Expect backend to return structured messages later:
-        // { messages:[...], sync_status:{...}, context:{...} }
-        const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
-        const botMsg = { role:"bot", type:"text", confidence:"y", content: reply, ts: nowTime() };
-        renderMessage(botMsg, history.length);
-        addToHistory(botMsg);
-
-      } catch {
-        const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
-        const botMsg = { role:"bot", type:"warning", confidence:"r", content: msg, ts: nowTime() };
-        renderMessage(botMsg, history.length);
-        addToHistory(botMsg);
-        setDot(backendDot, "bad");
-        backendText.textContent = "Error";
-      }
-    }
-
-    // ====== DRAWERS ======
-    function openSessionsDrawer(){
-      sessionsDrawerBack.style.display = "flex";
-      sessionsDrawerBack.setAttribute("aria-hidden", "false");
-    }
-    function closeSessionsDrawer(){
-      sessionsDrawerBack.style.display = "none";
-      sessionsDrawerBack.setAttribute("aria-hidden", "true");
-    }
-    function openContextDrawer(){
-      contextDrawerBack.style.display = "flex";
-      contextDrawerBack.setAttribute("aria-hidden", "false");
-    }
-    function closeContextDrawer(){
-      contextDrawerBack.style.display = "none";
-      contextDrawerBack.setAttribute("aria-hidden", "true");
-    }
-
-    // ====== EVENTS ======
-    input.addEventListener("input", syncButtons);
-    input.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-    sendBtn.addEventListener("click", sendMessage);
-
-    modeBadge.addEventListener("click", cycleMode);
-
-    $("syncBadge").addEventListener("click", () => {
-      const cur = syncText.textContent;
-      if(cur.includes("Not connected")){
-        setSync("bad","Out of sync (12h)");
-      } else if(cur.includes("Out of sync")){
-        setSync("ok","Synced 3 min ago");
-      } else {
-        setSync("bad","Not connected");
-      }
-    });
-
-    // Sessions button behavior:
-    // - On desktop: toggle left panel
-    // - On mobile: open drawer
-    sessionsBtn.addEventListener("click", () => {
-      if(window.matchMedia("(max-width: 760px)").matches){
-        openSessionsDrawer();
-      } else {
-        leftPanel.classList.toggle("hidden");
-      }
-    });
-
-    // Context button behavior:
-    // - Desktop: toggle right panel (only if visible)
-    // - Tablet/mobile: open context drawer
-    contextBtn.addEventListener("click", () => {
-      if(isMobileLayout()){
-        openContextDrawer();
-      } else {
-        contextPanel.classList.toggle("hidden");
-      }
-    });
-
-    sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
-    sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
-
-    contextDrawerClose.addEventListener("click", closeContextDrawer);
-    contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
-
-    hsClose.addEventListener("click", closeHighStakesModal);
-    hsModalBack.addEventListener("click", (e) => { if(e.target === hsModalBack) closeHighStakesModal(); });
-
-    hsDiscuss.addEventListener("click", () => {
-      closeHighStakesModal();
-      const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Tell me what to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
-      renderMessage(msg, history.length); addToHistory(msg);
-      hydrateContextForThread();
-    });
-    hsCommit.addEventListener("click", () => {
-      closeHighStakesModal();
-      const msg = {
-        role:"bot",
-        type:"decision",
-        confidence:"y",
-        ts: nowTime(),
-        meta:{title:"Ledger commit (stub)", tag:"Committed"},
-        content:"Committed to ledger (UI stub). Later, this writes to your local ledger store with inputs + rationale + sources."
-      };
-      renderMessage(msg, history.length); addToHistory(msg);
-      hydrateContextForThread();
-    });
-
-    // ====== INIT ======
-    function ensureBranchesForAll(){
-      for(const s of sessions){
-        const b = loadBranches(s.id);
-        saveBranches(s.id, b);
-      }
-    }
-
-    ensureBranchesForAll();
-    renderSessionLists();
-    loadActiveThread();
-    hydrateContextForThread();
-
+    input.value = "";
     syncButtons();
-    pingBackend();
-    setSync("bad","Not connected");
 
-    window.addEventListener("resize", () => {
-      // keep context mirrored between desktop/drawer
-      hydrateContextForThread();
-    });
-  </script>
-</body>
-</html>
+    const youMsg = { role:"you", type:"text", confidence:"g", content:text, ts: nowTime() };
+    renderMessage(youMsg, history.length);
+    addToHistory(youMsg);
+
+    if(maybeHighStakes(text) && isWorkspaceOn()){
+      openHighStakesModal({
+        change: "Retail price $32 → $36",
+        impact: ["Margin: 42% → 48%", "Est. volume: −12%", "Net revenue: +3.2%"],
+        risks: ["Price exceeds competitor X", "Amazon Buy Box sensitivity"]
+      });
+    }
+
+    const ok = await pingBackend();
+    if(!ok){
+      // IMPORTANT: no more auto pricing widgets in chat
+      ensureEngineNotice();
+      hydrateWorkspaceForThread();
+      return;
+    }
+
+    // Real backend call (later)
+    try{
+      const payload = {
+        message: text,
+        mode: modeText.textContent,
+        session_id: isWorkspaceOn() ? activeSession : null,
+        branch_id: isWorkspaceOn() ? activeBranch : null,
+        history: history.map(m => ({
+          role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta, ts: m.ts
+        }))
+      };
+
+      const res = await fetch(API_BASE + CHAT_ENDPOINT, {
+        method:"POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if(!res.ok) throw new Error("Backend error " + res.status);
+      const data = await res.json();
+
+      const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
+      const botMsg = { role:"bot", type:"text", confidence:"y", content: reply, ts: nowTime() };
+      renderMessage(botMsg, history.length);
+      addToHistory(botMsg);
+
+      hydrateWorkspaceForThread();
+
+    } catch {
+      const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
+      const botMsg = { role:"bot", type:"warning", confidence:"r", content: msg, ts: nowTime() };
+      renderMessage(botMsg, history.length);
+      addToHistory(botMsg);
+      setDot(backendDot, "bad");
+      backendText.textContent = "Error";
+      hydrateWorkspaceForThread();
+    }
+  }
+
+  // ====== DRAWERS ======
+  function openSessionsDrawer(){
+    sessionsDrawerBack.style.display = "flex";
+    sessionsDrawerBack.setAttribute("aria-hidden", "false");
+  }
+  function closeSessionsDrawer(){
+    sessionsDrawerBack.style.display = "none";
+    sessionsDrawerBack.setAttribute("aria-hidden", "true");
+  }
+  function openContextDrawer(){
+    contextDrawerBack.style.display = "flex";
+    contextDrawerBack.setAttribute("aria-hidden", "false");
+  }
+  function closeContextDrawer(){
+    contextDrawerBack.style.display = "none";
+    contextDrawerBack.setAttribute("aria-hidden", "true");
+  }
+
+  // ====== EVENTS ======
+  input.addEventListener("input", syncButtons);
+  input.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  sendBtn.addEventListener("click", sendMessage);
+
+  modeBadge.addEventListener("click", cycleMode);
+
+  $("syncBadge").addEventListener("click", () => {
+    const cur = syncText.textContent;
+    if(cur.includes("Not connected")){
+      setSync("bad","Out of sync (12h)");
+    } else if(cur.includes("Out of sync")){
+      setSync("ok","Synced 3 min ago");
+    } else {
+      setSync("bad","Not connected");
+    }
+  });
+
+  // Sessions button behavior:
+  // - On desktop: toggle left panel
+  // - On mobile: open drawer
+  sessionsBtn.addEventListener("click", () => {
+    if(window.matchMedia("(max-width: 760px)").matches){
+      openSessionsDrawer();
+    } else {
+      leftPanel.classList.toggle("hidden");
+    }
+  });
+
+  // Workspace button behavior:
+  // - Desktop: toggle panel (only if workspace on)
+  // - Tablet/mobile: open drawer (only if workspace on)
+  contextBtn.addEventListener("click", () => {
+    if(!isWorkspaceOn()){
+      // calm hint instead of opening empty workspace
+      const note = { role:"bot", type:"text", confidence:"y", ts: nowTime(),
+        content:"Workspace is off. Start a session first (Sessions → choose Pricing / Formulation / Amazon)." };
+      renderMessage(note, history.length); addToHistory(note);
+      return;
+    }
+    if(isMobileLayout()){
+      openContextDrawer();
+    } else {
+      contextPanel.classList.toggle("hidden");
+    }
+  });
+
+  exitBtn.addEventListener("click", exitWorkspace);
+
+  sessionsDrawerClose.addEventListener("click", closeSessionsDrawer);
+  sessionsDrawerBack.addEventListener("click", (e) => { if(e.target === sessionsDrawerBack) closeSessionsDrawer(); });
+
+  contextDrawerClose.addEventListener("click", closeContextDrawer);
+  contextDrawerBack.addEventListener("click", (e) => { if(e.target === contextDrawerBack) closeContextDrawer(); });
+
+  hsClose.addEventListener("click", closeHighStakesModal);
+  hsModalBack.addEventListener("click", (e) => { if(e.target === hsModalBack) closeHighStakesModal(); });
+
+  hsDiscuss.addEventListener("click", () => {
+    closeHighStakesModal();
+    const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Tell me what to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
+    renderMessage(msg, history.length); addToHistory(msg);
+    hydrateWorkspaceForThread();
+  });
+  hsCommit.addEventListener("click", () => {
+    closeHighStakesModal();
+    const msg = {
+      role:"bot",
+      type:"decision",
+      confidence:"y",
+      ts: nowTime(),
+      meta:{title:"Ledger commit (stub)", tag:"Committed"},
+      content:"Committed to ledger (UI stub). Later, this writes to your local ledger store with inputs + rationale + sources."
+    };
+    renderMessage(msg, history.length); addToHistory(msg);
+    hydrateWorkspaceForThread();
+  });
+
+  // ====== INIT ======
+  function ensureBranchesForAll(){
+    for(const s of sessions){
+      const b = loadBranches(s.id);
+      saveBranches(s.id, b);
+    }
+  }
+
+  // First run defaults: chat-only, workspace off
+  if(localStorage.getItem(STORE.workspaceOn) === null){
+    localStorage.setItem(STORE.workspaceOn, "0");
+  }
+  if(localStorage.getItem(STORE.uiMode) === null){
+    localStorage.setItem(STORE.uiMode, "chat");
+  }
+
+  ensureBranchesForAll();
+  renderSessionLists();
+  loadActiveThread();
+
+  applyUiMode();             // apply chat/workspace visibility
+  hydrateWorkspaceForThread();
+
+  syncButtons();
+  pingBackend();
+  setSync("bad","Not connected");
+
+  window.addEventListener("resize", () => {
+    hydrateWorkspaceForThread();
+    applyUiMode();
+  });
+</script>
