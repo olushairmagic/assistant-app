@@ -8,36 +8,35 @@
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="theme-color" content="#0B0A08" />
-
-  <!-- iOS install support (no apple-touch-icon by request) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WilliamBot" />
 
   <style>
-    /* ====== CREAM + DEEP RED LUX THEME ====== */
+    /* ====== THEME: warm neutral base + restrained deep red accents ====== */
     :root{
-      /* Base */
-      --bg: #0b0a08;                /* espresso */
-      --bg2:#0f0d0a;                /* slightly lighter espresso */
-      --paper:#f3efe6;              /* warm cream */
-      --paper2:#ebe4d8;             /* warmer cream */
-      --ink:#15120d;                /* warm charcoal */
-      --muted:#5a5147;              /* warm gray */
+      --bg:#0b0a08;          /* espresso */
+      --bg2:#0f0d0a;
+      --cream:#f3efe6;       /* warm cream */
+      --cream2:#ebe4d8;
+      --ink:#15120d;         /* warm charcoal */
+      --muted:#5a5147;
       --line: rgba(21,18,13,.14);
 
-      /* Deep red accents (restrained) */
-      --red:#7a1114;                /* oxblood */
-      --red2:#a0141a;               /* brighter red (sparingly) */
-      --glow: rgba(122,17,20,.18);
+      --red:#7a1114;         /* oxblood */
+      --red2:#a0141a;
+      --amber:#b45309;
+      --green:#15803d;
 
-      /* Radius / shadow */
-      --r: 18px;
-      --r2: 14px;
+      --glass: rgba(15,13,10,.55);
+      --glass2: rgba(15,13,10,.40);
+      --border: rgba(243,239,230,.14);
+
+      --r:18px;
+      --r2:14px;
       --shadow: 0 18px 60px rgba(0,0,0,.35);
       --shadow2: 0 10px 30px rgba(0,0,0,.28);
 
-      /* Font */
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
 
@@ -50,38 +49,42 @@
         radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
         radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg2));
-      color: var(--paper);
+      color: var(--cream);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
 
+    /* ====== APP GRID ====== */
     .wrap{
-      min-height:100%;
+      height:100%;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
       display:flex;
       justify-content:center;
-      padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
     }
-
     .app{
       width:100%;
-      max-width: 1100px;
-      display:flex;
-      flex-direction:column;
+      max-width: 1280px;
+      height: 100%;
+      display:grid;
+      grid-template-columns: 280px 1fr 360px;
+      grid-template-rows: auto 1fr;
       gap: 12px;
     }
 
-    /* Header */
+    /* ====== TOP BAR ====== */
     header{
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.55);
+      grid-column: 1 / -1;
+      border: 1px solid var(--border);
+      background: var(--glass);
       backdrop-filter: blur(10px);
       border-radius: var(--r);
       box-shadow: var(--shadow2);
-      padding: 12px 12px;
+      padding: 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
+      gap: 12px;
+      min-width: 0;
     }
 
     .brand{
@@ -90,7 +93,6 @@
       gap: 10px;
       min-width: 0;
     }
-
     .logo{
       width: 38px;
       height: 38px;
@@ -100,27 +102,26 @@
       user-select:none;
       font-weight: 900;
       letter-spacing: .4px;
-      color: var(--paper);
+      color: var(--cream);
       border: 1px solid rgba(243,239,230,.16);
       background:
         radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
         linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
       box-shadow: 0 10px 22px rgba(122,17,20,.18);
     }
-
-    .title{
+    .brandText{
       display:flex;
       flex-direction:column;
-      line-height:1.06;
+      line-height: 1.06;
       min-width: 0;
     }
-    .title strong{
+    .brandText strong{
       font-size: 15.5px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .title span{
+    .brandText span{
       font-size: 12px;
       color: rgba(243,239,230,.68);
       white-space: nowrap;
@@ -128,93 +129,175 @@
       text-overflow: ellipsis;
     }
 
-    .hdr-right{
+    .statusRow{
       display:flex;
       align-items:center;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content:flex-end;
     }
 
-    .pill{
+    .badge{
       display:flex;
       align-items:center;
       gap: 8px;
       padding: 8px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.40);
-      color: rgba(243,239,230,.70);
+      border: 1px solid var(--border);
+      background: var(--glass2);
+      color: rgba(243,239,230,.80);
       font-size: 12px;
+      user-select:none;
+      max-width: 340px;
+      cursor: default;
     }
-
+    .badge.clickable{ cursor:pointer; }
+    .badge .label{
+      color: rgba(243,239,230,.62);
+      font-weight: 650;
+    }
     .dot{
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: #b45309; /* amber when unknown */
+      background: var(--amber);
       box-shadow: 0 0 0 4px rgba(180,83,9,.14);
+      flex: 0 0 auto;
     }
-    .dot.ok{
-      background: #15803d; /* green */
-      box-shadow: 0 0 0 4px rgba(21,128,61,.14);
-    }
-    .dot.bad{
-      background: #b91c1c; /* red */
-      box-shadow: 0 0 0 4px rgba(185,28,28,.16);
-    }
+    .dot.ok{ background: var(--green); box-shadow: 0 0 0 4px rgba(21,128,61,.14); }
+    .dot.bad{ background: #b91c1c; box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
 
-    .btn{
-      border: 1px solid rgba(243,239,230,.14);
+    .ghostBtn{
+      border: 1px solid var(--border);
       background: rgba(15,13,10,.40);
       color: rgba(243,239,230,.88);
       padding: 10px 12px;
       border-radius: 999px;
       cursor: pointer;
-      font-weight: 720;
+      font-weight: 740;
       font-size: 13px;
       transition: transform .06s ease, border-color .12s ease, background .12s ease;
     }
-    .btn:active{ transform: translateY(1px); }
-    .btn:hover{
+    .ghostBtn:active{ transform: translateY(1px); }
+    .ghostBtn:hover{
       border-color: rgba(243,239,230,.22);
       background: rgba(15,13,10,.55);
     }
-    .btn.primary{
-      border-color: rgba(122,17,20,.35);
-      background: rgba(122,17,20,.22);
-      box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
-    }
-    .btn.primary:hover{
-      background: rgba(122,17,20,.28);
+
+    /* ====== PANELS (SIDEBAR / CONTEXT) ====== */
+    .panel{
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
     }
 
-    /* Main chat surface */
-    main{
-      flex: 1;
-      min-height: 62vh;
+    .panelHeader{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .panelHeader strong{
+      font-size: 13px;
+      letter-spacing: .2px;
+      color: rgba(243,239,230,.92);
+    }
+    .panelHeader span{
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
+    }
+
+    .panelBody{
+      padding: 10px;
+      overflow:auto;
+      min-height: 0;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+
+    .item{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      border-radius: 14px;
+      padding: 10px;
+      cursor:pointer;
+      transition: border-color .12s ease, background .12s ease;
+    }
+    .item:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(15,13,10,.48);
+    }
+    .itemTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .itemTitle{
+      font-weight: 780;
+      font-size: 13px;
+      color: rgba(243,239,230,.92);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .itemMeta{
+      font-size: 12px;
+      color: rgba(243,239,230,.62);
+      margin-top: 6px;
+      line-height: 1.25;
+    }
+    .pillMini{
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      color: rgba(243,239,230,.70);
+      background: rgba(15,13,10,.35);
+      flex: 0 0 auto;
+    }
+
+    /* ====== MAIN CHAT SURFACE ====== */
+    .chat{
       border-radius: var(--r);
-      overflow: hidden;
+      border: 1px solid var(--border);
       box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
       background:
         radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
-      border: 1px solid rgba(243,239,230,.14);
-      display:flex;
-      flex-direction:column;
     }
 
-    /* Feed is warm “paper” */
     .feed{
       flex:1;
       overflow:auto;
-      padding: 16px 14px;
+      padding: 14px 12px;
       background:
         radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
+      min-height: 0;
     }
 
-    .row{ display:flex; margin: 10px 0; gap: 10px; }
+    .row{
+      display:flex;
+      margin: 10px 0;
+      gap: 10px;
+    }
     .row.you{ justify-content:flex-end; }
     .row.bot{ justify-content:flex-start; }
 
@@ -222,9 +305,10 @@
       display:flex;
       flex-direction:column;
       gap: 6px;
-      max-width: min(80ch, 92%);
+      max-width: min(86ch, 96%);
     }
 
+    /* Base bubble */
     .bubble{
       padding: 12px 12px;
       border-radius: var(--r2);
@@ -236,15 +320,16 @@
       word-wrap: break-word;
       line-height: 1.38;
       font-size: 14.6px;
+      position: relative;
     }
 
-    /* You bubble: warm paper with deep red edge */
+    /* You bubble: subtle red spine */
     .you .bubble{
       border-color: rgba(122,17,20,.25);
       box-shadow:
         0 10px 24px rgba(122,17,20,.10),
         0 0 0 1px rgba(122,17,20,.08) inset;
-      position: relative;
+      padding-left: 14px;
     }
     .you .bubble:before{
       content:"";
@@ -257,14 +342,46 @@
       background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
       opacity:.9;
     }
-    .you .bubble{
-      padding-left: 14px;
-    }
 
-    /* Bot bubble: cream but slightly cooler, subtle */
-    .bot .bubble{
-      background: rgba(243,239,230,.88);
-      border-color: rgba(21,18,13,.12);
+    /* Message Types */
+    .bubble.table{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13.5px;
+      overflow:auto;
+      max-width: 100%;
+    }
+    .bubble.warning{
+      border-color: rgba(122,17,20,.35);
+      background: rgba(243,239,230,.92);
+      box-shadow:
+        0 0 0 4px rgba(122,17,20,.10) inset,
+        0 10px 22px rgba(122,17,20,.10);
+    }
+    .bubble.decision{
+      border-color: rgba(21,18,13,.18);
+      background: rgba(243,239,230,.96);
+    }
+    .decisionHdr{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(21,18,13,.10);
+    }
+    .decisionHdr strong{
+      font-size: 13px;
+      letter-spacing: .2px;
+    }
+    .decisionTag{
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(122,17,20,.25);
+      background: rgba(122,17,20,.10);
+      color: rgba(21,18,13,.78);
+      font-weight: 750;
     }
 
     .meta{
@@ -274,7 +391,25 @@
       font-size: 11px;
       color: rgba(21,18,13,.65);
       padding: 0 2px;
+      align-items:center;
     }
+
+    .confidence{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      user-select:none;
+    }
+    .confDot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9ca3af;
+      box-shadow: 0 0 0 3px rgba(156,163,175,.18);
+    }
+    .confDot.g{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
+    .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
+    .confDot.r{ background: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
 
     /* Composer */
     .composer{
@@ -298,7 +433,6 @@
       color: rgba(243,239,230,.92);
       font-size: 14.6px;
       outline:none;
-      box-shadow: 0 0 0 0 rgba(0,0,0,0);
     }
     textarea::placeholder{ color: rgba(243,239,230,.55); }
     textarea:focus{
@@ -316,7 +450,7 @@
       font-weight: 820;
       cursor: pointer;
       box-shadow: 0 10px 26px rgba(122,17,20,.16);
-      transition: transform .06s ease, filter .12s ease, background .12s ease;
+      transition: transform .06s ease, filter .12s ease;
     }
     .send:hover{ filter: brightness(1.06); }
     .send:active{ transform: translateY(1px); }
@@ -326,23 +460,186 @@
       box-shadow: none;
     }
 
-    .footer{
-      padding: 10px 12px;
+    /* ====== CONTEXT PANEL SECTIONS ====== */
+    .section{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .section + .section{ margin-top: 10px; }
+
+    .sectionTitle{
       display:flex;
+      align-items:center;
       justify-content:space-between;
       gap: 10px;
+      margin-bottom: 8px;
+    }
+    .sectionTitle strong{
+      font-size: 12.5px;
+      color: rgba(243,239,230,.90);
+      letter-spacing: .2px;
+    }
+    .sectionTitle span{
       font-size: 12px;
-      color: rgba(243,239,230,.65);
-      border-top: 1px solid rgba(243,239,230,.14);
-      background: rgba(15,13,10,.35);
+      color: rgba(243,239,230,.62);
     }
 
-    /* Mobile tightening */
-    @media (max-width:520px){
-      .pill{ display:none; }
-      .send{ min-width: 86px; }
-      header{ padding: 12px; }
-      .feed{ padding: 14px 12px; }
+    .kv{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .kvRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(243,239,230,.12);
+    }
+    .kvRow:first-child{ border-top: none; padding-top: 0; }
+    .kvKey{
+      font-size: 12px;
+      color: rgba(243,239,230,.78);
+      line-height: 1.25;
+    }
+    .kvVal{
+      font-size: 12px;
+      color: rgba(243,239,230,.92);
+      font-weight: 760;
+      text-align:right;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+    .kvSub{
+      font-size: 11px;
+      color: rgba(243,239,230,.62);
+      margin-top: 2px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.30);
+      font-size: 11px;
+      color: rgba(243,239,230,.70);
+      margin: 4px 6px 0 0;
+    }
+    .chipDot{
+      width: 7px; height: 7px; border-radius:50%;
+      background: #9ca3af;
+    }
+
+    /* ====== MODAL (HIGH-STAKES DECISION REVIEW) ====== */
+    .modalBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 999;
+    }
+    .modal{
+      width: min(720px, 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(243,239,230,.18);
+      background: rgba(15,13,10,.85);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 22px 80px rgba(0,0,0,.50);
+      overflow:hidden;
+    }
+    .modalHdr{
+      padding: 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+    }
+    .modalHdr strong{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-size: 13px;
+      letter-spacing: .2px;
+      color: rgba(243,239,230,.92);
+    }
+    .warnMark{
+      width: 26px; height: 26px; border-radius: 10px;
+      display:grid; place-items:center;
+      border: 1px solid rgba(122,17,20,.35);
+      background: rgba(122,17,20,.18);
+      color: rgba(243,239,230,.92);
+      font-weight: 900;
+    }
+    .modalBody{
+      padding: 14px;
+      color: rgba(243,239,230,.86);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .modalGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .modalCard{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.45);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .modalCard strong{
+      font-size: 12px;
+      color: rgba(243,239,230,.90);
+    }
+    .modalCard ul{
+      margin: 8px 0 0 18px;
+      padding: 0;
+      color: rgba(243,239,230,.78);
+    }
+    .modalFtr{
+      padding: 12px 14px;
+      display:flex;
+      justify-content:flex-end;
+      gap: 10px;
+      border-top: 1px solid rgba(243,239,230,.14);
+    }
+    .modalBtn{
+      border-radius: 999px;
+      padding: 10px 12px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.40);
+      color: rgba(243,239,230,.88);
+      font-weight: 780;
+      cursor:pointer;
+    }
+    .modalBtn.primary{
+      border-color: rgba(122,17,20,.40);
+      background: rgba(122,17,20,.24);
+    }
+
+    /* ====== COLLAPSE RIGHT PANEL ====== */
+    .hidden{ display:none !important; }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 1080px){
+      .app{ grid-template-columns: 260px 1fr; grid-template-rows: auto 1fr; }
+      #contextPanel{ display:none; }
+    }
+    @media (max-width: 760px){
+      .app{ grid-template-columns: 1fr; }
+      #leftPanel{ display:none; }
+      .badge{ max-width: 100%; }
     }
   </style>
 </head>
@@ -351,94 +648,325 @@
   <div class="wrap">
     <div class="app">
 
+      <!-- TOP BAR -->
       <header>
         <div class="brand">
           <div class="logo">W</div>
-          <div class="title">
+          <div class="brandText">
             <strong>WilliamBot</strong>
-            <span>Private • Tailscale-only backend • Premium local assistant</span>
+            <span>Private business infrastructure • Chat-first • Local engine</span>
           </div>
         </div>
 
-        <div class="hdr-right">
-          <div class="pill" title="Backend connection status">
-            <span id="statusDot" class="dot"></span>
-            <span id="statusText">Backend: not checked</span>
+        <div class="statusRow">
+          <!-- MODE -->
+          <div class="badge clickable" id="modeBadge" title="Inference profile (UI-only today)">
+            <span class="label">Mode</span>
+            <span id="modeText">Financial</span>
           </div>
-          <button class="btn" id="btnClear">Clear</button>
-          <button class="btn primary" id="btnPing">Check</button>
+
+          <!-- SYNC -->
+          <div class="badge clickable" id="syncBadge" title="Data freshness (hook to Notion later)">
+            <span id="syncDot" class="dot"></span>
+            <span class="label">Notion</span>
+            <span id="syncText">Not connected</span>
+          </div>
+
+          <!-- BACKEND -->
+          <div class="badge" title="Local backend connection">
+            <span id="backendDot" class="dot"></span>
+            <span class="label">Engine</span>
+            <span id="backendText">UI only</span>
+          </div>
+
+          <button class="ghostBtn" id="toggleContextBtn">Context</button>
         </div>
       </header>
 
-      <main>
+      <!-- LEFT: SESSIONS / BRANCHES -->
+      <aside class="panel" id="leftPanel">
+        <div class="panelHeader">
+          <div>
+            <strong>Sessions</strong>
+            <div><span id="sessionCount">0</span><span> total</span></div>
+          </div>
+          <span id="activeSessionLabel">Active: —</span>
+        </div>
+
+        <div class="panelBody">
+          <div class="list" id="sessionList"></div>
+        </div>
+      </aside>
+
+      <!-- CENTER: CHAT -->
+      <main class="chat">
         <div class="feed" id="feed"></div>
 
         <div class="composer">
-          <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for new line)"></textarea>
+          <textarea id="input" placeholder="Ask, calculate, compare, simulate… (Enter to send, Shift+Enter new line)"></textarea>
           <button class="send" id="sendBtn" disabled>Send</button>
-        </div>
-
-        <div class="footer">
-          <span id="leftFoot">UI on williambot.net • Brain stays at home</span>
-          <span id="rightFoot">v0.2</span>
         </div>
       </main>
 
+      <!-- RIGHT: CONTEXT PANEL -->
+      <aside class="panel" id="contextPanel">
+        <div class="panelHeader">
+          <div>
+            <strong>Context</strong>
+            <div><span>Working state (UI now, real data later)</span></div>
+          </div>
+          <span id="ctxHint">Session-bound</span>
+        </div>
+
+        <div class="panelBody">
+          <!-- Working Assumptions -->
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Working assumptions</strong>
+              <span id="assumpStamp">—</span>
+            </div>
+            <div class="kv" id="assumpList"></div>
+          </div>
+
+          <!-- Active Sources -->
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Active sources</strong>
+              <span id="sourcesStamp">—</span>
+            </div>
+            <div id="sourcesList"></div>
+          </div>
+
+          <!-- Decision Ledger -->
+          <div class="section">
+            <div class="sectionTitle">
+              <strong>Decision ledger (preview)</strong>
+              <span id="ledgerStamp">—</span>
+            </div>
+            <div class="kv" id="ledgerList"></div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- HIGH-STAKES DECISION MODAL (stubbed UI component) -->
+  <div class="modalBack" id="hsModalBack" role="dialog" aria-modal="true" aria-label="High-stakes decision review">
+    <div class="modal">
+      <div class="modalHdr">
+        <strong><span class="warnMark">!</span> HIGH-STAKES DECISION</strong>
+        <button class="modalBtn" id="hsClose">Close</button>
+      </div>
+      <div class="modalBody" id="hsBody">
+        <!-- injected -->
+      </div>
+      <div class="modalFtr">
+        <button class="modalBtn" id="hsDiscuss">Discuss further</button>
+        <button class="modalBtn primary" id="hsCommit">Commit to ledger</button>
+      </div>
     </div>
   </div>
 
   <script>
     /**
-     * LOCAL-ONLY BACKEND (via Tailscale) — SET LATER
-     * Example:
-     *   const API_BASE = "http://100.101.102.103:8787";
-     * For now keep it blank; UI still works.
+     * BACKEND (set later to your Tailscale-only server)
+     * Example: const API_BASE = "http://100.x.x.x:8787";
      */
-    const API_BASE = ""; // <-- paste your Tailscale backend here later
+    const API_BASE = "";
     const CHAT_ENDPOINT = "/chat";
     const PING_ENDPOINT = "/health";
 
+    // ====== DOM ======
     const $ = (id) => document.getElementById(id);
     const feed = $("feed");
     const input = $("input");
     const sendBtn = $("sendBtn");
-    const btnClear = $("btnClear");
-    const btnPing = $("btnPing");
-    const statusDot = $("statusDot");
-    const statusText = $("statusText");
 
-    const STORAGE_KEY = "williambot_chat_v2";
+    const modeBadge = $("modeBadge");
+    const modeText = $("modeText");
+    const syncDot = $("syncDot");
+    const syncText = $("syncText");
+    const backendDot = $("backendDot");
+    const backendText = $("backendText");
+    const toggleContextBtn = $("toggleContextBtn");
+    const contextPanel = $("contextPanel");
 
+    const sessionList = $("sessionList");
+    const sessionCount = $("sessionCount");
+    const activeSessionLabel = $("activeSessionLabel");
+
+    const assumpList = $("assumpList");
+    const assumpStamp = $("assumpStamp");
+    const sourcesList = $("sourcesList");
+    const sourcesStamp = $("sourcesStamp");
+    const ledgerList = $("ledgerList");
+    const ledgerStamp = $("ledgerStamp");
+
+    // Modal
+    const hsModalBack = $("hsModalBack");
+    const hsBody = $("hsBody");
+    const hsClose = $("hsClose");
+    const hsDiscuss = $("hsDiscuss");
+    const hsCommit = $("hsCommit");
+
+    // ====== STORAGE ======
+    const STORE = {
+      sessions: "wb_sessions_v1",
+      activeSession: "wb_active_session_v1",
+      historyPrefix: "wb_history_"
+    };
+
+    // ====== UTILS ======
     function nowTime(){
       const d = new Date();
       return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
     }
-
-    function setStatus(state, text){
-      statusDot.classList.remove("ok","bad");
-      if(state === "ok") statusDot.classList.add("ok");
-      if(state === "bad") statusDot.classList.add("bad");
-      statusText.textContent = text;
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
     }
-
     function escapeHtml(s){
       return s.replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
     }
+    function setDot(dotEl, state){
+      dotEl.classList.remove("ok","bad");
+      if(state === "ok") dotEl.classList.add("ok");
+      if(state === "bad") dotEl.classList.add("bad");
+    }
 
-    function renderMessage(role, content, ts){
+    // ====== MODE (UI contract now; backend can auto-suggest later) ======
+    const MODES = ["Financial","Formulation","Compliance","Strategy"];
+    let modeIdx = 0;
+
+    function cycleMode(){
+      modeIdx = (modeIdx + 1) % MODES.length;
+      modeText.textContent = MODES[modeIdx];
+      // In the future: tell backend inference profile to switch
+      // fetch(API_BASE + "/mode", {method:"POST", ...})
+    }
+
+    // ====== SESSIONS ======
+    function loadSessions(){
+      try{
+        const raw = localStorage.getItem(STORE.sessions);
+        const data = raw ? JSON.parse(raw) : null;
+        if(Array.isArray(data) && data.length) return data;
+      } catch {}
+      // seed
+      return [
+        { id: "pricing", title: "Pricing & Margin Review", note: "Retail, wholesale, Amazon fees", updated: nowStamp(), lastDecision: "8 oz butter → $66" },
+        { id: "formulation", title: "Formulation Iteration", note: "Leave-in + shampoo constraints", updated: nowStamp(), lastDecision: "Fragrance load 4%" },
+        { id: "amazon", title: "Amazon Ops", note: "Listing + compliance + reviews", updated: nowStamp(), lastDecision: "Draft bullet points v2" }
+      ];
+    }
+    function saveSessions(list){
+      localStorage.setItem(STORE.sessions, JSON.stringify(list));
+    }
+    function getActiveSessionId(){
+      return localStorage.getItem(STORE.activeSession) || "pricing";
+    }
+    function setActiveSessionId(id){
+      localStorage.setItem(STORE.activeSession, id);
+    }
+
+    let sessions = loadSessions();
+    saveSessions(sessions);
+
+    function renderSessions(){
+      sessionList.innerHTML = "";
+      sessionCount.textContent = String(sessions.length);
+      const activeId = getActiveSessionId();
+      const active = sessions.find(s => s.id === activeId) || sessions[0];
+      activeSessionLabel.textContent = "Active: " + (active ? active.title : "—");
+
+      for(const s of sessions){
+        const div = document.createElement("div");
+        div.className = "item";
+        div.setAttribute("data-id", s.id);
+        div.innerHTML = `
+          <div class="itemTop">
+            <div class="itemTitle">${escapeHtml(s.title)}</div>
+            <span class="pillMini">${s.id === activeId ? "Active" : "Open"}</span>
+          </div>
+          <div class="itemMeta">
+            ${escapeHtml(s.note || "")}<br/>
+            <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span><br/>
+            <span style="color: rgba(243,239,230,.58)">Last decision: ${escapeHtml(s.lastDecision || "—")}</span>
+          </div>
+        `;
+        div.addEventListener("click", () => {
+          setActiveSessionId(s.id);
+          feed.innerHTML = "";
+          history = loadHistory(s.id);
+          hydrate();
+          renderSessions();
+          hydrateContextForSession(s.id);
+        });
+        sessionList.appendChild(div);
+      }
+    }
+
+    // ====== HISTORY (per-session) ======
+    function historyKey(sessionId){ return STORE.historyPrefix + sessionId; }
+
+    function loadHistory(sessionId){
+      try{
+        const raw = localStorage.getItem(historyKey(sessionId));
+        if(!raw) return [];
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data : [];
+      } catch { return []; }
+    }
+    function saveHistory(sessionId, hist){
+      localStorage.setItem(historyKey(sessionId), JSON.stringify(hist.slice(-200)));
+    }
+
+    // ====== MESSAGE RENDERING (types + confidence) ======
+    // message schema:
+    // { role:"you"|"bot", content:"...", ts:"", type:"text"|"table"|"decision"|"warning", confidence:"g"|"y"|"r", meta:{...} }
+    function renderMessage(m){
       const row = document.createElement("div");
-      row.className = "row " + (role === "you" ? "you" : "bot");
+      row.className = "row " + (m.role === "you" ? "you" : "bot");
 
       const bubbleWrap = document.createElement("div");
       bubbleWrap.className = "bubbleWrap";
 
       const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.innerHTML = escapeHtml(content);
+      const t = m.type || "text";
+      bubble.className = "bubble " + (t === "text" ? "" : t);
+
+      if(t === "decision"){
+        const title = (m.meta && m.meta.title) ? m.meta.title : "Decision";
+        const tag = (m.meta && m.meta.tag) ? m.meta.tag : "Review";
+        bubble.innerHTML = `
+          <div class="decisionHdr">
+            <strong>${escapeHtml(title)}</strong>
+            <span class="decisionTag">${escapeHtml(tag)}</span>
+          </div>
+          <div>${escapeHtml(m.content)}</div>
+        `;
+      } else {
+        bubble.textContent = m.content;
+      }
 
       const meta = document.createElement("div");
       meta.className = "meta";
-      meta.innerHTML = `<span>${role === "you" ? "You" : "WilliamBot"}</span><span>${ts || nowTime()}</span>`;
+      const name = m.role === "you" ? "You" : "WilliamBot";
+
+      const conf = m.confidence || ""; // g/y/r
+      const confLabel = conf === "g" ? "High" : conf === "y" ? "Medium" : conf === "r" ? "Low" : "—";
+      const confDotClass = conf ? conf : "";
+
+      meta.innerHTML = `
+        <span>${name}</span>
+        <span class="confidence" title="Confidence (UI now; backend will set later)">
+          <span class="confDot ${confDotClass}"></span>
+          <span>${confLabel}</span>
+          <span style="opacity:.65">•</span>
+          <span>${escapeHtml(m.ts || nowTime())}</span>
+        </span>
+      `;
 
       bubbleWrap.appendChild(bubble);
       bubbleWrap.appendChild(meta);
@@ -447,38 +975,169 @@
       feed.scrollTop = feed.scrollHeight;
     }
 
-    function loadHistory(){
+    // ====== CONTEXT PANEL (UI contract now; real state later) ======
+    function hydrateContextForSession(sessionId){
+      // These are stubs — you’ll replace with real state once backend + files exist.
+      const stub = {
+        pricing: {
+          assumptions: [
+            { k:"Channel focus", v:"Amazon + Shopify", sub:"Session scope", c:"g" },
+            { k:"Target margin", v:"≥ 70%", sub:"Guardrail", c:"g" },
+            { k:"Amazon referral fee", v:"15% (est.)", sub:"Verify per category", c:"y" },
+            { k:"COGS source", v:"Local sheet v1", sub:"Notion not connected", c:"r" }
+          ],
+          sources: [
+            { name:"/Financial", state:"mounted", c:"y" },
+            { name:"Products & SKUs.CSV", state:"local", c:"y" }
+          ],
+          ledger: [
+            { k:"Last committed", v:"8 oz butter MSRP $66", sub:"Pricing session", c:"g" },
+            { k:"Pending review", v:"Shampoo MSRP (TBD)", sub:"Needs fresh cost data", c:"y" }
+          ]
+        },
+        formulation: {
+          assumptions: [
+            { k:"Fragrance load", v:"4%", sub:"Brand standard", c:"g" },
+            { k:"Heat stability target", v:"SFC ≥ 28% @ 40°C", sub:"Shipping stability", c:"g" },
+            { k:"Preservation", v:"TBD", sub:"Requires testing", c:"r" }
+          ],
+          sources: [
+            { name:"/Formulas", state:"mounted", c:"y" },
+            { name:"Batch Logs", state:"local", c:"y" }
+          ],
+          ledger: [
+            { k:"Last committed", v:"Mica-friendly base selected", sub:"Strawberry Dream line", c:"g" }
+          ]
+        },
+        amazon: {
+          assumptions: [
+            { k:"Listing priority", v:"Title + bullets + images", sub:"Launch readiness", c:"g" },
+            { k:"Compliance risk", v:"Ingredient claims", sub:"Use Compliance mode", c:"y" }
+          ],
+          sources: [
+            { name:"/Amazon", state:"mounted", c:"y" }
+          ],
+          ledger: [
+            { k:"Last committed", v:"Draft bullets v2", sub:"Await final copy", c:"y" }
+          ]
+        }
+      };
+
+      const data = stub[sessionId] || stub.pricing;
+
+      assumpList.innerHTML = "";
+      sourcesList.innerHTML = "";
+      ledgerList.innerHTML = "";
+
+      assumpStamp.textContent = nowStamp();
+      sourcesStamp.textContent = nowStamp();
+      ledgerStamp.textContent = nowStamp();
+
+      // Assumptions list
+      for(const a of data.assumptions){
+        const row = document.createElement("div");
+        row.className = "kvRow";
+        const dot = a.c === "g" ? "g" : a.c === "y" ? "y" : "r";
+        row.innerHTML = `
+          <div>
+            <div class="kvKey">
+              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+              ${escapeHtml(a.k)}
+            </div>
+            <div class="kvSub">${escapeHtml(a.sub || "")}</div>
+          </div>
+          <div class="kvVal">${escapeHtml(a.v)}</div>
+        `;
+        assumpList.appendChild(row);
+      }
+
+      // Sources chips
+      for(const s of data.sources){
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        const d = document.createElement("span");
+        d.className = "chipDot";
+        d.style.background = (s.c === "g") ? "var(--green)" : (s.c === "y") ? "var(--amber)" : "#b91c1c";
+        chip.appendChild(d);
+        chip.appendChild(document.createTextNode(`${s.name} • ${s.state}`));
+        sourcesList.appendChild(chip);
+      }
+
+      // Ledger
+      for(const l of data.ledger){
+        const row = document.createElement("div");
+        row.className = "kvRow";
+        const dot = l.c === "g" ? "g" : l.c === "y" ? "y" : "r";
+        row.innerHTML = `
+          <div>
+            <div class="kvKey">
+              <span class="confDot ${dot}" style="transform: translateY(1px); display:inline-block; margin-right:6px;"></span>
+              ${escapeHtml(l.k)}
+            </div>
+            <div class="kvSub">${escapeHtml(l.sub || "")}</div>
+          </div>
+          <div class="kvVal">${escapeHtml(l.v)}</div>
+        `;
+        ledgerList.appendChild(row);
+      }
+    }
+
+    // ====== BACKEND STATUS (ping only; real wiring later) ======
+    async function pingBackend(){
+      if(!API_BASE){
+        setDot(backendDot, "bad");
+        backendText.textContent = "UI only";
+        return false;
+      }
       try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return [];
-        const data = JSON.parse(raw);
-        return Array.isArray(data) ? data : [];
-      } catch { return []; }
+        const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
+        if(!res.ok) throw new Error("bad");
+        setDot(backendDot, "ok");
+        backendText.textContent = "Connected";
+        return true;
+      } catch {
+        setDot(backendDot, "bad");
+        backendText.textContent = "Not reachable";
+        return false;
+      }
     }
 
-    function saveHistory(history){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-100)));
+    // ====== SYNC STATUS (UI-only now) ======
+    function setSync(state, text){
+      setDot(syncDot, state);
+      syncText.textContent = text;
     }
 
-    let history = loadHistory();
+    // ====== CHAT FLOW ======
+    let activeSession = getActiveSessionId();
+    let history = loadHistory(activeSession);
 
     function hydrate(){
       if(history.length === 0){
-        renderMessage("bot",
-`PWA is live.
+        renderMessage({
+          role:"bot",
+          type:"text",
+          confidence:"y",
+          content:
+`UI is live.
 
-Next:
-1) Install Tailscale (PC + phone)
-2) Run local backend (/health, /chat) on your PC
-3) Paste your Tailscale URL into API_BASE in index.html
+Next (when PC arrives):
+1) Tailscale on PC + phone
+2) Run local backend (/health, /chat)
+3) Set API_BASE in this file
 
-Until then, this UI stays clean and ready.`,
-          nowTime()
-        );
+This UI already supports:
+• sessions
+• context panel (assumptions/sources/ledger)
+• message types (tables/decisions/warnings)
+• confidence indicators
+• high-stakes review component (stubbed)`,
+          ts: nowTime()
+        });
         return;
       }
       for(const m of history){
-        renderMessage(m.role, m.content, m.ts);
+        renderMessage(m);
       }
     }
 
@@ -486,19 +1145,45 @@ Until then, this UI stays clean and ready.`,
       sendBtn.disabled = input.value.trim().length === 0;
     }
 
-    async function pingBackend(){
-      if(!API_BASE){
-        setStatus("bad", "Backend: API_BASE not set");
-        return;
-      }
-      setStatus(null, "Backend: checking…");
-      try{
-        const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
-        if(!res.ok) throw new Error("Bad status");
-        setStatus("ok", "Backend: connected");
-      } catch {
-        setStatus("bad", "Backend: not reachable");
-      }
+    function addToHistory(m){
+      history.push(m);
+      saveHistory(activeSession, history);
+    }
+
+    function maybeHighStakes(text){
+      // Simple stub trigger: if user writes "change price" show high-stakes modal UI
+      const t = text.toLowerCase();
+      return t.includes("change price") || t.includes("raise price") || t.includes("lower price") || t.includes("reprice");
+    }
+
+    function openHighStakesModal(example){
+      hsBody.innerHTML = `
+        <div style="color: rgba(243,239,230,.86); font-size: 13px;">
+          <div style="margin-bottom:8px;"><strong>Change:</strong> ${escapeHtml(example.change)}</div>
+          <div class="modalGrid">
+            <div class="modalCard">
+              <strong>Impact analysis</strong>
+              <ul>
+                ${example.impact.map(x => `<li>${escapeHtml(x)}</li>`).join("")}
+              </ul>
+            </div>
+            <div class="modalCard">
+              <strong>Risks identified</strong>
+              <ul>
+                ${example.risks.map(x => `<li>${escapeHtml(x)}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+          <div style="margin-top:10px; color: rgba(243,239,230,.70);">
+            This is a UI component today. Later, the backend will populate it from real data.
+          </div>
+        </div>
+      `;
+      hsModalBack.style.display = "flex";
+    }
+
+    function closeHighStakesModal(){
+      hsModalBack.style.display = "none";
     }
 
     async function sendMessage(){
@@ -508,24 +1193,71 @@ Until then, this UI stays clean and ready.`,
       input.value = "";
       syncButtons();
 
-      const ts = nowTime();
-      renderMessage("you", text, ts);
-      history.push({ role:"you", content:text, ts });
-      saveHistory(history);
+      // Render user
+      const youMsg = { role:"you", type:"text", confidence:"g", content:text, ts: nowTime() };
+      renderMessage(youMsg);
+      addToHistory(youMsg);
 
-      if(!API_BASE){
-        const reply = "UI is ready. When your PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).";
-        renderMessage("bot", reply, nowTime());
-        history.push({ role:"bot", content:reply, ts: nowTime() });
-        saveHistory(history);
-        setStatus("bad", "Backend: API_BASE not set");
+      // High-stakes UI trigger stub (no backend required)
+      if(maybeHighStakes(text)){
+        openHighStakesModal({
+          change: "Retail price $32 → $36",
+          impact: ["Margin: 42% → 48%", "Est. volume: −12%", "Net revenue: +3.2%"],
+          risks: ["Price exceeds competitor X", "Amazon Buy Box sensitivity"]
+        });
+      }
+
+      // If backend not configured, return “UI ready” behavior
+      const ok = await pingBackend();
+      if(!ok){
+        const reply =
+          "UI is ready. When your PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).";
+        const botMsg = { role:"bot", type:"text", confidence:"y", content:reply, ts: nowTime() };
+        renderMessage(botMsg);
+        addToHistory(botMsg);
+
+        // Example: show a structured table + decision block to prove UI components work
+        const tbl = {
+          role:"bot", type:"table", confidence:"y", ts: nowTime(),
+          content:
+`Example table block (UI component):
+SKU            MSRP   Channel   Notes
+8oz Butter      66    Shopify   Luxury anchor
+8oz Shampoo     ??    Amazon    Pending COGS refresh
+8oz Conditioner ??    Amazon    Pending COGS refresh`
+        };
+        renderMessage(tbl);
+        addToHistory(tbl);
+
+        const decision = {
+          role:"bot", type:"decision", confidence:"y", ts: nowTime(),
+          meta:{ title:"Pricing guardrail", tag:"Review" },
+          content:
+`Do not finalize MSRP until:
+• Notion costs are synced (fresh COGS)
+• Amazon fee category is confirmed
+• Unit shipping + packaging are locked`
+        };
+        renderMessage(decision);
+        addToHistory(decision);
+
+        const warn = {
+          role:"bot", type:"warning", confidence:"r", ts: nowTime(),
+          content:"Warning: current assumptions include stale or estimated values. Do not commit pricing decisions yet."
+        };
+        renderMessage(warn);
+        addToHistory(warn);
+
         return;
       }
 
+      // Real backend call (later)
       try{
         const payload = {
           message: text,
-          history: history.map(m => ({ role: m.role, content: m.content }))
+          mode: modeText.textContent,
+          session_id: activeSession,
+          history: history.map(m => ({ role: m.role, content: m.content, type: m.type, confidence: m.confidence, meta: m.meta }))
         };
 
         const res = await fetch(API_BASE + CHAT_ENDPOINT, {
@@ -535,24 +1267,26 @@ Until then, this UI stays clean and ready.`,
         });
 
         if(!res.ok) throw new Error("Backend error " + res.status);
-
         const data = await res.json();
+
+        // Expect backend to return structured messages later:
+        // { messages: [{type, content, confidence, meta...}, ...], sync_status: {...}, context: {...} }
         const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
-        renderMessage("bot", reply, nowTime());
-        history.push({ role:"bot", content:reply, ts: nowTime() });
-        saveHistory(history);
-        setStatus("ok", "Backend: connected");
+        const botMsg = { role:"bot", type:"text", confidence:"y", content: reply, ts: nowTime() };
+        renderMessage(botMsg);
+        addToHistory(botMsg);
 
       } catch {
         const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
-        renderMessage("bot", msg, nowTime());
-        history.push({ role:"bot", content:msg, ts: nowTime() });
-        saveHistory(history);
-        setStatus("bad", "Backend: error");
+        const botMsg = { role:"bot", type:"warning", confidence:"r", content: msg, ts: nowTime() };
+        renderMessage(botMsg);
+        addToHistory(botMsg);
+        setDot(backendDot, "bad");
+        backendText.textContent = "Error";
       }
     }
 
-    // Events
+    // ====== EVENTS ======
     input.addEventListener("input", syncButtons);
     input.addEventListener("keydown", (e) => {
       if(e.key === "Enter" && !e.shiftKey){
@@ -562,19 +1296,46 @@ Until then, this UI stays clean and ready.`,
     });
     sendBtn.addEventListener("click", sendMessage);
 
-    btnClear.addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      history = [];
-      feed.innerHTML = "";
-      renderMessage("bot", "Cleared. Fresh start.", nowTime());
-      setStatus(null, "Backend: not checked");
+    modeBadge.addEventListener("click", cycleMode);
+
+    toggleContextBtn.addEventListener("click", () => {
+      contextPanel.classList.toggle("hidden");
     });
 
-    btnPing.addEventListener("click", pingBackend);
+    $("syncBadge").addEventListener("click", () => {
+      // UI-only demonstration: cycle sync states
+      const cur = syncText.textContent;
+      if(cur.includes("Not connected")){
+        setSync("bad","Out of sync (12h)");
+      } else if(cur.includes("Out of sync")){
+        setSync("ok","Synced 3 min ago");
+      } else {
+        setSync("bad","Not connected");
+      }
+    });
 
-    // Init
+    hsClose.addEventListener("click", closeHighStakesModal);
+    hsDiscuss.addEventListener("click", () => {
+      closeHighStakesModal();
+      const msg = { role:"bot", type:"text", confidence:"y", ts: nowTime(), content:"Ok. Ask what you want to validate (COGS, fees, competitor price, Buy Box risk) and I’ll break it down." };
+      renderMessage(msg); addToHistory(msg);
+    });
+    hsCommit.addEventListener("click", () => {
+      closeHighStakesModal();
+      const msg = { role:"bot", type:"decision", confidence:"y", ts: nowTime(), meta:{title:"Ledger commit (stub)", tag:"Committed"}, content:"Committed to ledger (UI stub). Later, this will write to your local ledger store with inputs + rationale + sources." };
+      renderMessage(msg); addToHistory(msg);
+    });
+
+    // ====== INIT ======
+    renderSessions();
     hydrate();
+    hydrateContextForSession(activeSession);
+
     syncButtons();
+    pingBackend();
+
+    // Start with sync “not connected” (real Notion sync later)
+    setSync("bad","Not connected");
   </script>
 </body>
 </html>
