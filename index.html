@@ -2,61 +2,579 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WilliamBot</title>
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#0B0B0F" />
+  <meta name="theme-color" content="#0B0A08" />
 
-  <!-- iOS install support (no apple-touch-icon on purpose) -->
+  <!-- iOS install support (no apple-touch-icon by request) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WilliamBot" />
 
   <style>
-    :root { color-scheme: dark; }
-    body {
-      margin: 0;
-      font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial;
-      background: #0B0B0F;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-      padding: 24px;
+    /* ====== CREAM + DEEP RED LUX THEME ====== */
+    :root{
+      /* Base */
+      --bg: #0b0a08;                /* espresso */
+      --bg2:#0f0d0a;                /* slightly lighter espresso */
+      --paper:#f3efe6;              /* warm cream */
+      --paper2:#ebe4d8;             /* warmer cream */
+      --ink:#15120d;                /* warm charcoal */
+      --muted:#5a5147;              /* warm gray */
+      --line: rgba(21,18,13,.14);
+
+      /* Deep red accents (restrained) */
+      --red:#7a1114;                /* oxblood */
+      --red2:#a0141a;               /* brighter red (sparingly) */
+      --glow: rgba(122,17,20,.18);
+
+      /* Radius / shadow */
+      --r: 18px;
+      --r2: 14px;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --shadow2: 0 10px 30px rgba(0,0,0,.28);
+
+      /* Font */
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
-    .wrap { width: 100%; max-width: 720px; }
-    .card {
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 18px;
-      background: rgba(255,255,255,0.04);
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      background:
+        radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
+        radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--paper);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    h1 { margin: 0 0 8px; font-size: 22px; }
-    p { margin: 0; opacity: 0.85; line-height: 1.45; }
-    .hint {
-      margin-top: 14px;
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      justify-content:center;
+      padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .app{
+      width:100%;
+      max-width: 1100px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    /* Header */
+    header{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.55);
+      backdrop-filter: blur(10px);
+      border-radius: var(--r);
+      box-shadow: var(--shadow2);
+      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .logo{
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      user-select:none;
+      font-weight: 900;
+      letter-spacing: .4px;
+      color: var(--paper);
+      border: 1px solid rgba(243,239,230,.16);
+      background:
+        radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
+        linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
+      box-shadow: 0 10px 22px rgba(122,17,20,.18);
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      line-height:1.06;
+      min-width: 0;
+    }
+    .title strong{
+      font-size: 15.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .title span{
+      font-size: 12px;
+      color: rgba(243,239,230,.68);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hdr-right{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.40);
+      color: rgba(243,239,230,.70);
+      font-size: 12px;
+    }
+
+    .dot{
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #b45309; /* amber when unknown */
+      box-shadow: 0 0 0 4px rgba(180,83,9,.14);
+    }
+    .dot.ok{
+      background: #15803d; /* green */
+      box-shadow: 0 0 0 4px rgba(21,128,61,.14);
+    }
+    .dot.bad{
+      background: #b91c1c; /* red */
+      box-shadow: 0 0 0 4px rgba(185,28,28,.16);
+    }
+
+    .btn{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.40);
+      color: rgba(243,239,230,.88);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 720;
       font-size: 13px;
-      opacity: 0.65;
+      transition: transform .06s ease, border-color .12s ease, background .12s ease;
     }
-    code {
-      background: rgba(255,255,255,0.08);
-      padding: 2px 6px;
-      border-radius: 8px;
+    .btn:active{ transform: translateY(1px); }
+    .btn:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(15,13,10,.55);
+    }
+    .btn.primary{
+      border-color: rgba(122,17,20,.35);
+      background: rgba(122,17,20,.22);
+      box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
+    }
+    .btn.primary:hover{
+      background: rgba(122,17,20,.28);
+    }
+
+    /* Main chat surface */
+    main{
+      flex: 1;
+      min-height: 62vh;
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background:
+        radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+      border: 1px solid rgba(243,239,230,.14);
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Feed is warm “paper” */
+    .feed{
+      flex:1;
+      overflow:auto;
+      padding: 16px 14px;
+      background:
+        radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
+    }
+
+    .row{ display:flex; margin: 10px 0; gap: 10px; }
+    .row.you{ justify-content:flex-end; }
+    .row.bot{ justify-content:flex-start; }
+
+    .bubbleWrap{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      max-width: min(80ch, 92%);
+    }
+
+    .bubble{
+      padding: 12px 12px;
+      border-radius: var(--r2);
+      border: 1px solid var(--line);
+      background: rgba(243,239,230,.92);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.38;
+      font-size: 14.6px;
+    }
+
+    /* You bubble: warm paper with deep red edge */
+    .you .bubble{
+      border-color: rgba(122,17,20,.25);
+      box-shadow:
+        0 10px 24px rgba(122,17,20,.10),
+        0 0 0 1px rgba(122,17,20,.08) inset;
+      position: relative;
+    }
+    .you .bubble:before{
+      content:"";
+      position:absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
+      opacity:.9;
+    }
+    .you .bubble{
+      padding-left: 14px;
+    }
+
+    /* Bot bubble: cream but slightly cooler, subtle */
+    .bot .bubble{
+      background: rgba(243,239,230,.88);
+      border-color: rgba(21,18,13,.12);
+    }
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 11px;
+      color: rgba(21,18,13,.65);
+      padding: 0 2px;
+    }
+
+    /* Composer */
+    .composer{
+      padding: 12px;
+      border-top: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.45);
+      display:flex;
+      gap: 10px;
+      align-items:flex-end;
+    }
+
+    textarea{
+      flex:1;
+      resize:none;
+      min-height: 48px;
+      max-height: 160px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(243,239,230,.16);
+      background: rgba(11,10,8,.55);
+      color: rgba(243,239,230,.92);
+      font-size: 14.6px;
+      outline:none;
+      box-shadow: 0 0 0 0 rgba(0,0,0,0);
+    }
+    textarea::placeholder{ color: rgba(243,239,230,.55); }
+    textarea:focus{
+      border-color: rgba(122,17,20,.40);
+      box-shadow: 0 0 0 5px rgba(122,17,20,.16);
+    }
+
+    .send{
+      min-width: 96px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(122,17,20,.45);
+      background: linear-gradient(180deg, rgba(122,17,20,.32), rgba(122,17,20,.18));
+      color: rgba(243,239,230,.95);
+      font-weight: 820;
+      cursor: pointer;
+      box-shadow: 0 10px 26px rgba(122,17,20,.16);
+      transition: transform .06s ease, filter .12s ease, background .12s ease;
+    }
+    .send:hover{ filter: brightness(1.06); }
+    .send:active{ transform: translateY(1px); }
+    .send:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .footer{
+      padding: 10px 12px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: rgba(243,239,230,.65);
+      border-top: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+    }
+
+    /* Mobile tightening */
+    @media (max-width:520px){
+      .pill{ display:none; }
+      .send{ min-width: 86px; }
+      header{ padding: 12px; }
+      .feed{ padding: 14px 12px; }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>WilliamBot</h1>
-      <p>PWA is live. Next: chat UI + AI backend.</p>
-      <div class="hint">
-        Manifest: <code>/manifest.webmanifest</code> • Icon: <code>/icon-512.png</code>
-      </div>
+    <div class="app">
+
+      <header>
+        <div class="brand">
+          <div class="logo">W</div>
+          <div class="title">
+            <strong>WilliamBot</strong>
+            <span>Private • Tailscale-only backend • Premium local assistant</span>
+          </div>
+        </div>
+
+        <div class="hdr-right">
+          <div class="pill" title="Backend connection status">
+            <span id="statusDot" class="dot"></span>
+            <span id="statusText">Backend: not checked</span>
+          </div>
+          <button class="btn" id="btnClear">Clear</button>
+          <button class="btn primary" id="btnPing">Check</button>
+        </div>
+      </header>
+
+      <main>
+        <div class="feed" id="feed"></div>
+
+        <div class="composer">
+          <textarea id="input" placeholder="Type a message… (Enter to send, Shift+Enter for new line)"></textarea>
+          <button class="send" id="sendBtn" disabled>Send</button>
+        </div>
+
+        <div class="footer">
+          <span id="leftFoot">UI on williambot.net • Brain stays at home</span>
+          <span id="rightFoot">v0.2</span>
+        </div>
+      </main>
+
     </div>
   </div>
+
+  <script>
+    /**
+     * LOCAL-ONLY BACKEND (via Tailscale) — SET LATER
+     * Example:
+     *   const API_BASE = "http://100.101.102.103:8787";
+     * For now keep it blank; UI still works.
+     */
+    const API_BASE = ""; // <-- paste your Tailscale backend here later
+    const CHAT_ENDPOINT = "/chat";
+    const PING_ENDPOINT = "/health";
+
+    const $ = (id) => document.getElementById(id);
+    const feed = $("feed");
+    const input = $("input");
+    const sendBtn = $("sendBtn");
+    const btnClear = $("btnClear");
+    const btnPing = $("btnPing");
+    const statusDot = $("statusDot");
+    const statusText = $("statusText");
+
+    const STORAGE_KEY = "williambot_chat_v2";
+
+    function nowTime(){
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    }
+
+    function setStatus(state, text){
+      statusDot.classList.remove("ok","bad");
+      if(state === "ok") statusDot.classList.add("ok");
+      if(state === "bad") statusDot.classList.add("bad");
+      statusText.textContent = text;
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+    }
+
+    function renderMessage(role, content, ts){
+      const row = document.createElement("div");
+      row.className = "row " + (role === "you" ? "you" : "bot");
+
+      const bubbleWrap = document.createElement("div");
+      bubbleWrap.className = "bubbleWrap";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = escapeHtml(content);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `<span>${role === "you" ? "You" : "WilliamBot"}</span><span>${ts || nowTime()}</span>`;
+
+      bubbleWrap.appendChild(bubble);
+      bubbleWrap.appendChild(meta);
+      row.appendChild(bubbleWrap);
+      feed.appendChild(row);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function loadHistory(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return [];
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data : [];
+      } catch { return []; }
+    }
+
+    function saveHistory(history){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-100)));
+    }
+
+    let history = loadHistory();
+
+    function hydrate(){
+      if(history.length === 0){
+        renderMessage("bot",
+`PWA is live.
+
+Next:
+1) Install Tailscale (PC + phone)
+2) Run local backend (/health, /chat) on your PC
+3) Paste your Tailscale URL into API_BASE in index.html
+
+Until then, this UI stays clean and ready.`,
+          nowTime()
+        );
+        return;
+      }
+      for(const m of history){
+        renderMessage(m.role, m.content, m.ts);
+      }
+    }
+
+    function syncButtons(){
+      sendBtn.disabled = input.value.trim().length === 0;
+    }
+
+    async function pingBackend(){
+      if(!API_BASE){
+        setStatus("bad", "Backend: API_BASE not set");
+        return;
+      }
+      setStatus(null, "Backend: checking…");
+      try{
+        const res = await fetch(API_BASE + PING_ENDPOINT, { method:"GET" });
+        if(!res.ok) throw new Error("Bad status");
+        setStatus("ok", "Backend: connected");
+      } catch {
+        setStatus("bad", "Backend: not reachable");
+      }
+    }
+
+    async function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+
+      input.value = "";
+      syncButtons();
+
+      const ts = nowTime();
+      renderMessage("you", text, ts);
+      history.push({ role:"you", content:text, ts });
+      saveHistory(history);
+
+      if(!API_BASE){
+        const reply = "UI is ready. When your PC arrives, set API_BASE to your Tailscale server (example: http://100.x.x.x:8787).";
+        renderMessage("bot", reply, nowTime());
+        history.push({ role:"bot", content:reply, ts: nowTime() });
+        saveHistory(history);
+        setStatus("bad", "Backend: API_BASE not set");
+        return;
+      }
+
+      try{
+        const payload = {
+          message: text,
+          history: history.map(m => ({ role: m.role, content: m.content }))
+        };
+
+        const res = await fetch(API_BASE + CHAT_ENDPOINT, {
+          method:"POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if(!res.ok) throw new Error("Backend error " + res.status);
+
+        const data = await res.json();
+        const reply = (data && data.reply) ? String(data.reply) : "No reply field returned.";
+        renderMessage("bot", reply, nowTime());
+        history.push({ role:"bot", content:reply, ts: nowTime() });
+        saveHistory(history);
+        setStatus("ok", "Backend: connected");
+
+      } catch {
+        const msg = "Backend call failed. Check API_BASE, Tailscale, and your /chat endpoint.";
+        renderMessage("bot", msg, nowTime());
+        history.push({ role:"bot", content:msg, ts: nowTime() });
+        saveHistory(history);
+        setStatus("bad", "Backend: error");
+      }
+    }
+
+    // Events
+    input.addEventListener("input", syncButtons);
+    input.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    sendBtn.addEventListener("click", sendMessage);
+
+    btnClear.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      history = [];
+      feed.innerHTML = "";
+      renderMessage("bot", "Cleared. Fresh start.", nowTime());
+      setStatus(null, "Backend: not checked");
+    });
+
+    btnPing.addEventListener("click", pingBackend);
+
+    // Init
+    hydrate();
+    syncButtons();
+  </script>
 </body>
 </html>
