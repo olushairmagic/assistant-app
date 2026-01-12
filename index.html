@@ -65,7 +65,6 @@
       overflow-x:hidden;
     }
 
-    /* Reduce motion = kill it */
     @media (prefers-reduced-motion: reduce){
       *{
         transition: none !important;
@@ -762,7 +761,7 @@
         </div>
       </header>
 
-      <!-- LEFT: SESSIONS (desktop/tablet) -->
+      <!-- LEFT: SESSIONS -->
       <aside class="panel" id="leftPanel" aria-label="Sessions panel">
         <div class="panelHeader">
           <div>
@@ -799,7 +798,7 @@
         </div>
       </main>
 
-      <!-- RIGHT: WORKSPACE (desktop only; mobile uses drawer) -->
+      <!-- RIGHT: WORKSPACE -->
       <aside class="panel" id="workspacePanel" aria-label="Workspace panel">
         <div class="panelHeader">
           <div>
@@ -886,7 +885,6 @@
       // -------------------- DOM helpers --------------------
       const $ = (id) => document.getElementById(id);
 
-      // Safer HTML escape (includes apostrophe)
       const escapeHtml = (s) =>
         String(s).replace(/[&<>"']/g, c => ({
           "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -901,7 +899,7 @@
         return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
       }
       function uid(){
-        return "s_" + Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
+        return Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
       }
       function setDot(el, state){
         el.classList.remove("ok","bad");
@@ -912,25 +910,67 @@
         try { return JSON.parse(json); } catch { return fallback; }
       }
 
+      // -------------------- Router --------------------
+      // Supported:
+      //   #/biz
+      //   #/school
+      //   #/biz/session/<id>
+      //   #/school/session/<id>
+      function parseHash(){
+        const raw = (location.hash || "").replace(/^#/, "");
+        const parts = raw.split("/").filter(Boolean);
+        if(parts.length === 0) return { group: null, sessionId: null };
+
+        const group = (parts[0] === "biz") ? "business" : (parts[0] === "school") ? "school" : null;
+        if(!group) return { group: null, sessionId: null };
+
+        if(parts[1] === "session" && parts[2]) return { group, sessionId: parts[2] };
+        return { group, sessionId: null };
+      }
+
+      function setHashForGroup(group){
+        const g = (group === "business") ? "biz" : "school";
+        if(location.hash !== "#/" + g) location.hash = "#/" + g;
+      }
+
+      function setHashForSession(group, sid){
+        const g = (group === "business") ? "biz" : "school";
+        location.hash = "#/" + g + "/session/" + encodeURIComponent(sid);
+      }
+
       // -------------------- Storage --------------------
       const STORE = {
         sessions: "wb_sessions_v7",
-        historyPrefix: "wb_history_v7_",
 
-        activeGroup: "wb_active_group_v7",                   // "business" | "school"
+        // NEW: group-scoped keys
+        historyPrefixBiz: "wb_history_v7_biz_",
+        historyPrefixSchool: "wb_history_v7_school_",
+        profilePrefixBiz: "wb_profile_v7_biz_",
+        profilePrefixSchool: "wb_profile_v7_school_",
+
+        // Old v7 keys (ungrouped) — migrate if present
+        legacyHistoryPrefix: "wb_history_v7_",
+        legacyProfilePrefix: "wb_profile_v7_",
+
+        activeGroup: "wb_active_group_v7",
         activeBiz: "wb_active_session_business_v7",
-        activeSchool: "wb_active_session_school_v7",
-
-        // migrate old keys if present
-        legacySessions: "wb_sessions_v5",
-        legacyHistoryPrefix: "wb_history_v5_",
-        legacyActiveSession: "wb_active_session_v5",
-
-        profilePrefix: "wb_profile_v7_"                      // per-session profile
+        activeSchool: "wb_active_session_school_v7"
       };
-      const historyKey = (sid) => STORE.historyPrefix + sid;
-      const legacyHistoryKey = (sid) => STORE.legacyHistoryPrefix + sid;
-      const profileKey = (sid) => STORE.profilePrefix + sid;
+
+      function historyKey(group, sid){
+        const p = (group === "business") ? STORE.historyPrefixBiz : STORE.historyPrefixSchool;
+        return p + sid;
+      }
+      function legacyHistoryKey(sid){
+        return STORE.legacyHistoryPrefix + sid;
+      }
+      function profileKey(group, sid){
+        const p = (group === "business") ? STORE.profilePrefixBiz : STORE.profilePrefixSchool;
+        return p + sid;
+      }
+      function legacyProfileKey(sid){
+        return STORE.legacyProfilePrefix + sid;
+      }
 
       // -------------------- Default sessions --------------------
       function defaultSessions(){
@@ -947,7 +987,7 @@
             ]
           },
           {
-            id: "math107",
+            id: "school_math107",
             group: "school",
             title: "UMGC — MATH 107 (College Algebra)",
             note: "Syllabus PDF • homework help • study plan",
@@ -955,7 +995,7 @@
             files: [{ name: "MATH_107_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }]
           },
           {
-            id: "hist125",
+            id: "school_hist125",
             group: "school",
             title: "UMGC — HIST 125 (Technological Transformations)",
             note: "Syllabus PDF • readings • discussion prep",
@@ -965,28 +1005,7 @@
         ];
       }
 
-      function migrateLegacyDataIfNeeded(){
-        // If v7 already exists, don't touch anything.
-        const hasV7 = !!localStorage.getItem(STORE.sessions);
-        if(hasV7) return;
-
-        const legacy = safeParse(localStorage.getItem(STORE.legacySessions), null);
-        if(Array.isArray(legacy) && legacy.length){
-          // Migrate sessions + histories
-          localStorage.setItem(STORE.sessions, JSON.stringify(legacy));
-          for(const s of legacy){
-            const h = safeParse(localStorage.getItem(legacyHistoryKey(s.id)), null);
-            if(Array.isArray(h)) localStorage.setItem(historyKey(s.id), JSON.stringify(h));
-          }
-          return;
-        }
-
-        // Fresh install
-        localStorage.setItem(STORE.sessions, JSON.stringify(defaultSessions()));
-      }
-
       function loadSessions(){
-        migrateLegacyDataIfNeeded();
         const raw = localStorage.getItem(STORE.sessions);
         const parsed = safeParse(raw, null);
         if(Array.isArray(parsed) && parsed.length) return parsed;
@@ -995,19 +1014,69 @@
         localStorage.setItem(STORE.sessions, JSON.stringify(s));
         return s;
       }
+
       function saveSessions(sessions){
         localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
       }
-      function loadHistory(sid){
-        const raw = localStorage.getItem(historyKey(sid));
-        const parsed = safeParse(raw, []);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-      function saveHistory(sid, hist){
-        localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-600)));
+
+      function loadHistory(session){
+        const k = historyKey(session.group, session.id);
+        const raw = localStorage.getItem(k);
+        const parsed = safeParse(raw, null);
+        if(Array.isArray(parsed)) return parsed;
+
+        // Auto-migrate from old ungrouped key if present
+        const legacy = safeParse(localStorage.getItem(legacyHistoryKey(session.id)), null);
+        if(Array.isArray(legacy)){
+          localStorage.setItem(k, JSON.stringify(legacy));
+          try { localStorage.removeItem(legacyHistoryKey(session.id)); } catch {}
+          return legacy;
+        }
+        return [];
       }
 
-      // -------------------- Group + Active session (per group) --------------------
+      function saveHistory(session, hist){
+        localStorage.setItem(historyKey(session.group, session.id), JSON.stringify(hist.slice(-600)));
+      }
+
+      const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
+      const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
+
+      function profileListForSession(session){
+        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
+      }
+
+      function getProfileForSession(session){
+        const k = profileKey(session.group, session.id);
+        const stored = localStorage.getItem(k);
+        const list = profileListForSession(session);
+        if(stored && list.includes(stored)) return stored;
+
+        // Migrate old ungrouped profile key if present
+        const legacy = localStorage.getItem(legacyProfileKey(session.id));
+        if(legacy && list.includes(legacy)){
+          localStorage.setItem(k, legacy);
+          try { localStorage.removeItem(legacyProfileKey(session.id)); } catch {}
+          return legacy;
+        }
+
+        return (session.group === "business") ? "Financial" : "Study";
+      }
+
+      function setProfileForSession(session, profile){
+        localStorage.setItem(profileKey(session.group, session.id), profile);
+        $("profileText").textContent = profile;
+      }
+
+      function cycleProfileForSession(session){
+        const list = profileListForSession(session);
+        const cur = getProfileForSession(session);
+        const idx = Math.max(0, list.indexOf(cur));
+        const next = list[(idx + 1) % list.length];
+        setProfileForSession(session, next);
+      }
+
+      // -------------------- Group + active session tracking --------------------
       function getActiveGroup(){
         return localStorage.getItem(STORE.activeGroup) || "business";
       }
@@ -1021,55 +1090,6 @@
       function setActiveSessionIdForGroup(group, id){
         const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
         localStorage.setItem(key, id);
-      }
-      function sessionsByGroup(group){
-        return sessions.filter(s => s.group === group);
-      }
-      function firstSessionId(group){
-        const list = sessionsByGroup(group);
-        return list.length ? list[0].id : "";
-      }
-      function getActiveSessionId(){
-        const g = getActiveGroup();
-        return getActiveSessionIdForGroup(g) || "";
-      }
-
-      // migrate old single active session key into per-group model
-      function migrateLegacyActiveIfNeeded(){
-        const legacy = localStorage.getItem(STORE.legacyActiveSession);
-        if(!legacy) return;
-
-        const found = sessions.find(s => s.id === legacy);
-        if(found){
-          setActiveSessionIdForGroup(found.group, found.id);
-          setActiveGroup(found.group);
-        }
-        try{ localStorage.removeItem(STORE.legacyActiveSession); } catch {}
-      }
-
-      // -------------------- Profiles (PER SESSION) --------------------
-      const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
-      const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
-
-      function profileListForSession(session){
-        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
-      }
-      function getProfileForSession(session){
-        const stored = localStorage.getItem(profileKey(session.id));
-        const list = profileListForSession(session);
-        if(stored && list.includes(stored)) return stored;
-        return (session.group === "business") ? "Financial" : "Study";
-      }
-      function setProfileForSession(session, profile){
-        localStorage.setItem(profileKey(session.id), profile);
-        $("profileText").textContent = profile;
-      }
-      function cycleProfileForSession(session){
-        const list = profileListForSession(session);
-        const cur = getProfileForSession(session);
-        const idx = Math.max(0, list.indexOf(cur));
-        const next = list[(idx + 1) % list.length];
-        setProfileForSession(session, next);
       }
 
       // -------------------- UI elements --------------------
@@ -1112,9 +1132,21 @@
 
       let history = [];
 
+      function sessionsByGroup(group){
+        return sessions.filter(s => s.group === group);
+      }
+      function firstSessionId(group){
+        const list = sessionsByGroup(group);
+        return list.length ? list[0].id : "";
+      }
+
       function currentSession(){
-        const sid = getActiveSessionId();
-        return sessions.find(s => s.id === sid) || null;
+        const r = parseHash();
+        const group = r.group || getActiveGroup();
+        const sidFromHash = r.sessionId ? decodeURIComponent(r.sessionId) : null;
+
+        const sid = sidFromHash || getActiveSessionIdForGroup(group) || "";
+        return sessions.find(s => s.id === sid && s.group === group) || null;
       }
 
       function setCategoryUI(group){
@@ -1131,7 +1163,6 @@
         topSub.textContent = "Session: " + (s ? s.title : "—");
       }
 
-      // -------------------- Session rendering --------------------
       function setTabsUI(group){
         tabBiz.classList.toggle("active", group === "business");
         tabSchool.classList.toggle("active", group === "school");
@@ -1194,7 +1225,9 @@
       }
 
       function renderSessions(){
-        const group = getActiveGroup();
+        const r = parseHash();
+        const group = r.group || getActiveGroup();
+
         setTabsUI(group);
         setCategoryUI(group);
 
@@ -1211,44 +1244,66 @@
         if(cs) $("profileText").textContent = getProfileForSession(cs);
       }
 
-      // -------------------- Activation + Group switching --------------------
-      function activateSession(id, opts){
+      // -------------------- Activation + navigation --------------------
+      function ensureGroupHasActive(group){
+        const cur = getActiveSessionIdForGroup(group);
+        const ok = cur && sessions.some(s => s.id === cur && s.group === group);
+        if(!ok){
+          const pick = firstSessionId(group);
+          if(pick) setActiveSessionIdForGroup(group, pick);
+        }
+      }
+
+      function activateGroup(group){
+        setActiveGroup(group);
+        ensureGroupHasActive(group);
+
+        // route drives everything
+        setHashForGroup(group);
+      }
+
+      function activateSessionById(group, id, opts){
         opts = opts || {};
-        const s = sessions.find(x => x.id === id);
+        const s = sessions.find(x => x.id === id && x.group === group);
         if(!s) return;
 
-        setActiveGroup(s.group);
-        setActiveSessionIdForGroup(s.group, s.id);
+        setActiveGroup(group);
+        setActiveSessionIdForGroup(group, id);
 
-        $("profileText").textContent = getProfileForSession(s);
-
-        loadThread();
-        hydrateWorkspace();
-        renderSessions();
+        // route to session
+        setHashForSession(group, id);
 
         if(!opts.keepDrawersOpen) closeDrawer("sessions");
       }
 
-      function activateSessionForGroup(group){
-        const last = getActiveSessionIdForGroup(group);
-        const exists = last && sessions.some(s => s.id === last && s.group === group);
-        const pick = exists ? last : firstSessionId(group);
-
+      // When hash changes, we hydrate state from it (single source of truth)
+      function handleRoute(){
+        const r = parseHash();
+        const group = r.group || getActiveGroup();
         setActiveGroup(group);
+        ensureGroupHasActive(group);
 
-        if(pick){
-          activateSession(pick, { keepDrawersOpen: true });
-        } else {
-          loadThreadEmpty(group);
-          hydrateWorkspaceEmpty(group);
-          renderSessions();
+        if(r.sessionId){
+          const sid = decodeURIComponent(r.sessionId);
+          if(sessions.some(s => s.id === sid && s.group === group)){
+            setActiveSessionIdForGroup(group, sid);
+          } else {
+            // fallback to group home if invalid session
+            setHashForGroup(group);
+            return;
+          }
         }
+
+        loadThread();
+        hydrateWorkspace();
+        renderSessions();
+        syncSendButton();
       }
 
       // -------------------- CRUD sessions --------------------
       function createSession(group){
         const isBiz = group === "business";
-        const newId = uid();
+        const newId = (isBiz ? "biz_" : "school_") + uid();
 
         const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
         const note  = isBiz ? "Pricing • ops • planning" : "Study plan • assignments • notes";
@@ -1258,10 +1313,11 @@
         sessions = [sess, ...sessions];
         saveSessions(sessions);
 
-        saveHistory(newId, [introForSession(sess)]);
-        localStorage.setItem(profileKey(newId), isBiz ? "Financial" : "Study");
+        // intro + profile (group-scoped keys)
+        saveHistory(sess, [introForSession(sess)]);
+        localStorage.setItem(profileKey(sess.group, sess.id), isBiz ? "Financial" : "Study");
 
-        activateSession(newId);
+        activateSessionById(group, newId);
       }
 
       function renameSession(id){
@@ -1283,7 +1339,7 @@
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        const protectedIds = new Set(["biz_main","math107","hist125"]);
+        const protectedIds = new Set(["biz_main","school_math107","school_hist125"]);
         if(protectedIds.has(id)){
           alert("That session is protected (default). Create new ones and delete those instead.");
           return;
@@ -1296,21 +1352,17 @@
         sessions = sessions.filter(x => x.id !== id);
         saveSessions(sessions);
 
-        try{ localStorage.removeItem(historyKey(id)); } catch {}
-        try{ localStorage.removeItem(profileKey(id)); } catch {}
+        try{ localStorage.removeItem(historyKey(group, id)); } catch {}
+        try{ localStorage.removeItem(profileKey(group, id)); } catch {}
 
         const activeInGroup = getActiveSessionIdForGroup(group);
         if(activeInGroup === id){
           const fallback = firstSessionId(group);
-          if(fallback) {
+          if(fallback){
             setActiveSessionIdForGroup(group, fallback);
-            if(getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen:true });
+            setHashForSession(group, fallback);
           } else {
-            if(getActiveGroup() === group){
-              loadThreadEmpty(group);
-              hydrateWorkspaceEmpty(group);
-              renderSessions();
-            }
+            setHashForGroup(group);
           }
         } else {
           renderSessions();
@@ -1361,7 +1413,6 @@
         row.appendChild(wrap);
         feed.appendChild(row);
 
-        // Keep latest visible without “jumping” too hard
         feed.scrollTop = feed.scrollHeight;
       }
 
@@ -1412,15 +1463,15 @@ Try:
         contextWarn.textContent = "";
 
         if(!cs){
-          loadThreadEmpty(getActiveGroup());
+          loadThreadEmpty(parseHash().group || getActiveGroup());
           return;
         }
 
-        history = loadHistory(cs.id);
+        history = loadHistory(cs);
         if(history.length === 0){
           const intro = introForSession(cs);
           history.push(intro);
-          saveHistory(cs.id, history);
+          saveHistory(cs, history);
         }
 
         for(const m of history) renderMessage(m);
@@ -1448,14 +1499,13 @@ Try:
         const cs = currentSession();
         if(!cs) return;
         history.push(m);
-        saveHistory(cs.id, history);
+        saveHistory(cs, history);
       }
 
       function syncSendButton(){
         sendBtn.disabled = input.value.trim().length === 0 || !currentSession();
       }
 
-      // Auto-resize textarea (simple, no libs)
       function autoSizeTextarea(){
         input.style.height = "auto";
         input.style.height = Math.min(input.scrollHeight, 220) + "px";
@@ -1697,16 +1747,14 @@ Pick next:
       function hydrateWorkspace(){
         const cs = currentSession();
         if(!cs){
-          hydrateWorkspaceEmpty(getActiveGroup());
+          hydrateWorkspaceEmpty(parseHash().group || getActiveGroup());
           return;
         }
-
         const html = workspaceTemplate(cs);
         workspaceBody.innerHTML = html;
         drawerWorkspaceBody.innerHTML = html;
       }
 
-      // One delegated handler (no re-binding per render)
       function onWorkspaceClick(e){
         const btn = e.target.closest("[data-ws]");
         if(!btn) return;
@@ -1853,7 +1901,7 @@ Backend will generate structured notes:
 
         const switchTo = (g) => {
           closeDrawer("all");
-          activateSessionForGroup(g);
+          activateGroup(g); // sets hash
         };
 
         tabBiz.addEventListener("click", () => switchTo("business"));
@@ -1861,8 +1909,8 @@ Backend will generate structured notes:
         drawerTabBiz.addEventListener("click", () => switchTo("business"));
         drawerTabSchool.addEventListener("click", () => switchTo("school"));
 
-        $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
-        $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
+        $("newSessionBtn").addEventListener("click", () => createSession(parseHash().group || getActiveGroup()));
+        $("drawerNewSession").addEventListener("click", () => createSession(parseHash().group || getActiveGroup()));
 
         function sessionActionHandler(e){
           const btn = e.target.closest("[data-act]");
@@ -1871,7 +1919,10 @@ Backend will generate structured notes:
           const id = btn.getAttribute("data-id");
           if(!id) return;
 
-          if(act === "activate") activateSession(id);
+          const s = sessions.find(x => x.id === id);
+          if(!s) return;
+
+          if(act === "activate") activateSessionById(s.group, s.id);
           if(act === "rename") renameSession(id);
           if(act === "delete") deleteSession(id);
         }
@@ -1918,6 +1969,9 @@ Backend will generate structured notes:
         window.addEventListener("keydown", (e) => {
           if(e.key === "Escape") closeDrawer("all");
         });
+
+        // Route listener
+        window.addEventListener("hashchange", handleRoute);
       }
 
       // -------------------- Init --------------------
@@ -1931,24 +1985,19 @@ Backend will generate structured notes:
         setDot(engineDot, "bad");
         $("engineText").textContent = "UI only";
 
-        migrateLegacyActiveIfNeeded();
+        // Ensure each group has an active session set
+        ensureGroupHasActive("business");
+        ensureGroupHasActive("school");
 
-        const g = getActiveGroup();
-        setActiveGroup((g === "school" || g === "business") ? g : "business");
-
-        for(const group of ["business","school"]){
-          const cur = getActiveSessionIdForGroup(group);
-          const ok = cur && sessions.some(s => s.id === cur && s.group === group);
-          if(!ok){
-            const pick = firstSessionId(group);
-            if(pick) setActiveSessionIdForGroup(group, pick);
-          }
+        // If no hash route provided, set based on stored active group
+        const r = parseHash();
+        if(!r.group){
+          setHashForGroup(getActiveGroup());
+          return; // handleRoute will run on hashchange
         }
 
-        activateSessionForGroup(getActiveGroup());
-
         wireEvents();
-        syncSendButton();
+        handleRoute();
         autoSizeTextarea();
       }
 
