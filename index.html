@@ -65,6 +65,7 @@
       overflow-x:hidden;
     }
 
+    /* Reduce motion = kill it */
     @media (prefers-reduced-motion: reduce){
       *{
         transition: none !important;
@@ -295,6 +296,7 @@
       display:flex;
       gap:8px;
       margin-top:10px;
+      flex-wrap: wrap;
     }
     .seg{
       flex:1;
@@ -310,6 +312,7 @@
       text-align:center;
       transition: border-color var(--tMed) ease, background var(--tMed) ease;
       white-space: nowrap;
+      min-width: 110px;
     }
     .seg.active{
       border-color: rgba(122,17,20,.45);
@@ -486,10 +489,11 @@
       display:flex;
       gap: var(--s2);
       align-items:flex-end;
+      flex-wrap: wrap;
     }
 
     textarea{
-      flex:1;
+      flex:1 1 280px;
       resize:none;
       min-height: 48px;
       max-height: 220px;
@@ -530,6 +534,7 @@
       cursor: pointer;
       box-shadow: 0 10px 26px rgba(122,17,20,.16);
       transition: filter var(--tFast) ease;
+      flex: 0 0 auto;
     }
     .send:hover{ filter: brightness(1.06); }
     .send:disabled{
@@ -537,6 +542,23 @@
       cursor: not-allowed;
       box-shadow: none;
       filter: none;
+    }
+
+    .miniSelect{
+      border-radius: 16px;
+      border: 1px solid rgba(243,239,230,.16);
+      background: rgba(11,10,8,.55);
+      color: rgba(243,239,230,.92);
+      padding: 12px 10px;
+      font-size: 13px;
+      outline:none;
+      height: 48px;
+      flex: 0 0 auto;
+      min-width: 220px;
+    }
+    .miniSelect:focus{
+      border-color: rgba(122,17,20,.40);
+      box-shadow: 0 0 0 5px rgba(122,17,20,.16);
     }
 
     .section{
@@ -714,6 +736,8 @@
         gap: 10px;
       }
       #topSub{ max-width: 42ch; }
+      .miniSelect{ min-width: 100%; }
+      textarea{ flex-basis: 100%; }
     }
   </style>
 </head>
@@ -744,6 +768,12 @@
             <span id="profileText">Study</span>
           </div>
 
+          <!-- NEW: Session default model -->
+          <div class="badge clickable" id="modelBadge" title="Default model for this session (click to cycle)" role="button" tabindex="0">
+            <span class="label">Model</span>
+            <span id="modelText">Auto</span>
+          </div>
+
           <div class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)" role="button" tabindex="0">
             <span id="notionDot" class="dot bad" aria-hidden="true"></span>
             <span class="label">Notion</span>
@@ -761,7 +791,7 @@
         </div>
       </header>
 
-      <!-- LEFT: SESSIONS -->
+      <!-- LEFT: SESSIONS (desktop/tablet) -->
       <aside class="panel" id="leftPanel" aria-label="Sessions panel">
         <div class="panelHeader">
           <div>
@@ -790,15 +820,32 @@
 
         <div class="composer">
           <div class="warn" id="contextWarn"></div>
+
+          <!-- NEW: Scope warning for cross-session -->
+          <div class="warn" id="scopeWarn"></div>
+
           <div class="composerRow">
             <label class="srOnly" for="input">Message</label>
             <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
+
+            <!-- NEW: Per-message model override -->
+            <label class="srOnly" for="msgModel">Message model</label>
+            <select class="miniSelect" id="msgModel" title="Model for this message (optional override)">
+              <option value="">Use session default</option>
+            </select>
+
+            <!-- NEW: Context scope toggle -->
+            <div class="segRow" style="margin:0; flex: 0 0 auto;" role="tablist" aria-label="Context scope">
+              <button class="seg active" id="scopeSession" role="tab" aria-selected="true" title="Only use this session's messages/files">Session only</button>
+              <button class="seg" id="scopeAll" role="tab" aria-selected="false" title="Allow searching across all sessions (manual, risky)">All sessions</button>
+            </div>
+
             <button class="send" id="sendBtn" disabled>Send</button>
           </div>
         </div>
       </main>
 
-      <!-- RIGHT: WORKSPACE -->
+      <!-- RIGHT: WORKSPACE (desktop only; mobile uses drawer) -->
       <aside class="panel" id="workspacePanel" aria-label="Workspace panel">
         <div class="panelHeader">
           <div>
@@ -899,7 +946,7 @@
         return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
       }
       function uid(){
-        return Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
+        return "s_" + Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
       }
       function setDot(el, state){
         el.classList.remove("ok","bad");
@@ -910,67 +957,41 @@
         try { return JSON.parse(json); } catch { return fallback; }
       }
 
-      // -------------------- Router --------------------
-      // Supported:
-      //   #/biz
-      //   #/school
-      //   #/biz/session/<id>
-      //   #/school/session/<id>
-      function parseHash(){
-        const raw = (location.hash || "").replace(/^#/, "");
-        const parts = raw.split("/").filter(Boolean);
-        if(parts.length === 0) return { group: null, sessionId: null };
-
-        const group = (parts[0] === "biz") ? "business" : (parts[0] === "school") ? "school" : null;
-        if(!group) return { group: null, sessionId: null };
-
-        if(parts[1] === "session" && parts[2]) return { group, sessionId: parts[2] };
-        return { group, sessionId: null };
-      }
-
-      function setHashForGroup(group){
-        const g = (group === "business") ? "biz" : "school";
-        if(location.hash !== "#/" + g) location.hash = "#/" + g;
-      }
-
-      function setHashForSession(group, sid){
-        const g = (group === "business") ? "biz" : "school";
-        location.hash = "#/" + g + "/session/" + encodeURIComponent(sid);
-      }
+      // -------------------- Models --------------------
+      const MODELS = [
+        { id: "auto",      name: "Auto (router)" },
+        { id: "qwen32b",   name: "Qwen 2.5 32B" },
+        { id: "qwen72b",   name: "Qwen 2.5 72B" },
+        { id: "llama70b",  name: "Llama 3.3 70B" },
+        { id: "r1",        name: "DeepSeek R1 70B" },
+        { id: "minimax",   name: "MiniMax M2 (coding)" }
+      ];
+      const modelName = (id) => (MODELS.find(m => m.id === id)?.name) || "Unknown";
 
       // -------------------- Storage --------------------
       const STORE = {
         sessions: "wb_sessions_v7",
+        historyPrefix: "wb_history_v7_",
 
-        // NEW: group-scoped keys
-        historyPrefixBiz: "wb_history_v7_biz_",
-        historyPrefixSchool: "wb_history_v7_school_",
-        profilePrefixBiz: "wb_profile_v7_biz_",
-        profilePrefixSchool: "wb_profile_v7_school_",
-
-        // Old v7 keys (ungrouped) — migrate if present
-        legacyHistoryPrefix: "wb_history_v7_",
-        legacyProfilePrefix: "wb_profile_v7_",
-
-        activeGroup: "wb_active_group_v7",
+        activeGroup: "wb_active_group_v7",                   // "business" | "school"
         activeBiz: "wb_active_session_business_v7",
-        activeSchool: "wb_active_session_school_v7"
-      };
+        activeSchool: "wb_active_session_school_v7",
 
-      function historyKey(group, sid){
-        const p = (group === "business") ? STORE.historyPrefixBiz : STORE.historyPrefixSchool;
-        return p + sid;
-      }
-      function legacyHistoryKey(sid){
-        return STORE.legacyHistoryPrefix + sid;
-      }
-      function profileKey(group, sid){
-        const p = (group === "business") ? STORE.profilePrefixBiz : STORE.profilePrefixSchool;
-        return p + sid;
-      }
-      function legacyProfileKey(sid){
-        return STORE.legacyProfilePrefix + sid;
-      }
+        legacySessions: "wb_sessions_v5",
+        legacyHistoryPrefix: "wb_history_v5_",
+        legacyActiveSession: "wb_active_session_v5",
+
+        profilePrefix: "wb_profile_v7_",                     // per-session profile
+
+        // NEW:
+        modelPrefix: "wb_model_v1_",                         // per-session default modelId
+        scopePrefix: "wb_scope_v1_"                          // per-session default scope ("session" | "all")
+      };
+      const historyKey = (sid) => STORE.historyPrefix + sid;
+      const legacyHistoryKey = (sid) => STORE.legacyHistoryPrefix + sid;
+      const profileKey = (sid) => STORE.profilePrefix + sid;
+      const modelKey = (sid) => STORE.modelPrefix + sid;
+      const scopeKey = (sid) => STORE.scopePrefix + sid;
 
       // -------------------- Default sessions --------------------
       function defaultSessions(){
@@ -987,7 +1008,7 @@
             ]
           },
           {
-            id: "school_math107",
+            id: "math107",
             group: "school",
             title: "UMGC — MATH 107 (College Algebra)",
             note: "Syllabus PDF • homework help • study plan",
@@ -995,7 +1016,7 @@
             files: [{ name: "MATH_107_...Spring_2026.pdf", desc: "Syllabus (uploaded)" }]
           },
           {
-            id: "school_hist125",
+            id: "hist125",
             group: "school",
             title: "UMGC — HIST 125 (Technological Transformations)",
             note: "Syllabus PDF • readings • discussion prep",
@@ -1005,7 +1026,25 @@
         ];
       }
 
+      function migrateLegacyDataIfNeeded(){
+        const hasV7 = !!localStorage.getItem(STORE.sessions);
+        if(hasV7) return;
+
+        const legacy = safeParse(localStorage.getItem(STORE.legacySessions), null);
+        if(Array.isArray(legacy) && legacy.length){
+          localStorage.setItem(STORE.sessions, JSON.stringify(legacy));
+          for(const s of legacy){
+            const h = safeParse(localStorage.getItem(legacyHistoryKey(s.id)), null);
+            if(Array.isArray(h)) localStorage.setItem(historyKey(s.id), JSON.stringify(h));
+          }
+          return;
+        }
+
+        localStorage.setItem(STORE.sessions, JSON.stringify(defaultSessions()));
+      }
+
       function loadSessions(){
+        migrateLegacyDataIfNeeded();
         const raw = localStorage.getItem(STORE.sessions);
         const parsed = safeParse(raw, null);
         if(Array.isArray(parsed) && parsed.length) return parsed;
@@ -1014,69 +1053,19 @@
         localStorage.setItem(STORE.sessions, JSON.stringify(s));
         return s;
       }
-
       function saveSessions(sessions){
         localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
       }
-
-      function loadHistory(session){
-        const k = historyKey(session.group, session.id);
-        const raw = localStorage.getItem(k);
-        const parsed = safeParse(raw, null);
-        if(Array.isArray(parsed)) return parsed;
-
-        // Auto-migrate from old ungrouped key if present
-        const legacy = safeParse(localStorage.getItem(legacyHistoryKey(session.id)), null);
-        if(Array.isArray(legacy)){
-          localStorage.setItem(k, JSON.stringify(legacy));
-          try { localStorage.removeItem(legacyHistoryKey(session.id)); } catch {}
-          return legacy;
-        }
-        return [];
+      function loadHistory(sid){
+        const raw = localStorage.getItem(historyKey(sid));
+        const parsed = safeParse(raw, []);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      function saveHistory(sid, hist){
+        localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-600)));
       }
 
-      function saveHistory(session, hist){
-        localStorage.setItem(historyKey(session.group, session.id), JSON.stringify(hist.slice(-600)));
-      }
-
-      const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
-      const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
-
-      function profileListForSession(session){
-        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
-      }
-
-      function getProfileForSession(session){
-        const k = profileKey(session.group, session.id);
-        const stored = localStorage.getItem(k);
-        const list = profileListForSession(session);
-        if(stored && list.includes(stored)) return stored;
-
-        // Migrate old ungrouped profile key if present
-        const legacy = localStorage.getItem(legacyProfileKey(session.id));
-        if(legacy && list.includes(legacy)){
-          localStorage.setItem(k, legacy);
-          try { localStorage.removeItem(legacyProfileKey(session.id)); } catch {}
-          return legacy;
-        }
-
-        return (session.group === "business") ? "Financial" : "Study";
-      }
-
-      function setProfileForSession(session, profile){
-        localStorage.setItem(profileKey(session.group, session.id), profile);
-        $("profileText").textContent = profile;
-      }
-
-      function cycleProfileForSession(session){
-        const list = profileListForSession(session);
-        const cur = getProfileForSession(session);
-        const idx = Math.max(0, list.indexOf(cur));
-        const next = list[(idx + 1) % list.length];
-        setProfileForSession(session, next);
-      }
-
-      // -------------------- Group + active session tracking --------------------
+      // -------------------- Group + Active session (per group) --------------------
       function getActiveGroup(){
         return localStorage.getItem(STORE.activeGroup) || "business";
       }
@@ -1090,6 +1079,89 @@
       function setActiveSessionIdForGroup(group, id){
         const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
         localStorage.setItem(key, id);
+      }
+      function sessionsByGroup(group){
+        return sessions.filter(s => s.group === group);
+      }
+      function firstSessionId(group){
+        const list = sessionsByGroup(group);
+        return list.length ? list[0].id : "";
+      }
+      function getActiveSessionId(){
+        const g = getActiveGroup();
+        return getActiveSessionIdForGroup(g) || "";
+      }
+
+      function migrateLegacyActiveIfNeeded(){
+        const legacy = localStorage.getItem(STORE.legacyActiveSession);
+        if(!legacy) return;
+
+        const found = sessions.find(s => s.id === legacy);
+        if(found){
+          setActiveSessionIdForGroup(found.group, found.id);
+          setActiveGroup(found.group);
+        }
+        try{ localStorage.removeItem(STORE.legacyActiveSession); } catch {}
+      }
+
+      // -------------------- Profiles (PER SESSION) --------------------
+      const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
+      const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
+
+      function profileListForSession(session){
+        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
+      }
+      function getProfileForSession(session){
+        const stored = localStorage.getItem(profileKey(session.id));
+        const list = profileListForSession(session);
+        if(stored && list.includes(stored)) return stored;
+        return (session.group === "business") ? "Financial" : "Study";
+      }
+      function setProfileForSession(session, profile){
+        localStorage.setItem(profileKey(session.id), profile);
+        $("profileText").textContent = profile;
+      }
+      function cycleProfileForSession(session){
+        const list = profileListForSession(session);
+        const cur = getProfileForSession(session);
+        const idx = Math.max(0, list.indexOf(cur));
+        const next = list[(idx + 1) % list.length];
+        setProfileForSession(session, next);
+      }
+
+      // -------------------- Models (PER SESSION default) --------------------
+      function defaultModelForSession(session){
+        // Defaults you can change:
+        if(session.group === "business") return "qwen72b";
+        return "r1";
+      }
+      function getModelForSession(session){
+        const stored = localStorage.getItem(modelKey(session.id));
+        if(stored && MODELS.some(m => m.id === stored)) return stored;
+        return defaultModelForSession(session);
+      }
+      function setModelForSession(session, modelId){
+        localStorage.setItem(modelKey(session.id), modelId);
+        $("modelText").textContent = modelName(modelId);
+      }
+      function cycleModelForSession(session){
+        const cur = getModelForSession(session);
+        const idx = Math.max(0, MODELS.findIndex(m => m.id === cur));
+        const next = MODELS[(idx + 1) % MODELS.length].id;
+        setModelForSession(session, next);
+      }
+
+      // -------------------- Scope (PER SESSION default) --------------------
+      function defaultScopeForSession(){
+        return "session"; // safest
+      }
+      function getScopeForSession(session){
+        const stored = localStorage.getItem(scopeKey(session.id));
+        if(stored === "session" || stored === "all") return stored;
+        return defaultScopeForSession(session);
+      }
+      function setScopeForSession(session, scope){
+        localStorage.setItem(scopeKey(session.id), scope);
       }
 
       // -------------------- UI elements --------------------
@@ -1125,28 +1197,22 @@
       const chatShell = $("chatShell");
 
       const contextWarn = $("contextWarn");
+      const scopeWarn = $("scopeWarn");
+
+      const msgModel = $("msgModel");
+      const scopeSessionBtn = $("scopeSession");
+      const scopeAllBtn = $("scopeAll");
 
       // -------------------- State --------------------
       let sessions = loadSessions();
       saveSessions(sessions);
 
       let history = [];
-
-      function sessionsByGroup(group){
-        return sessions.filter(s => s.group === group);
-      }
-      function firstSessionId(group){
-        const list = sessionsByGroup(group);
-        return list.length ? list[0].id : "";
-      }
+      let currentScope = "session"; // runtime; synced from per-session default
 
       function currentSession(){
-        const r = parseHash();
-        const group = r.group || getActiveGroup();
-        const sidFromHash = r.sessionId ? decodeURIComponent(r.sessionId) : null;
-
-        const sid = sidFromHash || getActiveSessionIdForGroup(group) || "";
-        return sessions.find(s => s.id === sid && s.group === group) || null;
+        const sid = getActiveSessionId();
+        return sessions.find(s => s.id === sid) || null;
       }
 
       function setCategoryUI(group){
@@ -1163,6 +1229,52 @@
         topSub.textContent = "Session: " + (s ? s.title : "—");
       }
 
+      function hydrateModelUI(){
+        const s = currentSession();
+        if(!s) return;
+
+        $("modelText").textContent = modelName(getModelForSession(s));
+
+        // Populate per-message override list (once per session switch)
+        msgModel.innerHTML = `<option value="">Use session default</option>` +
+          MODELS.map(m => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join("");
+
+        // Restore scope default for this session into UI
+        currentScope = getScopeForSession(s);
+        setScopeButtons(currentScope);
+
+        scopeWarn.style.display = "none";
+        scopeWarn.textContent = "";
+      }
+
+      function setScopeButtons(scope){
+        const isSession = scope === "session";
+        scopeSessionBtn.classList.toggle("active", isSession);
+        scopeAllBtn.classList.toggle("active", !isSession);
+
+        scopeSessionBtn.setAttribute("aria-selected", isSession ? "true" : "false");
+        scopeAllBtn.setAttribute("aria-selected", !isSession ? "true" : "false");
+
+        // keep style consistent with category
+        scopeSessionBtn.classList.remove("schoolActive");
+        scopeAllBtn.classList.remove("schoolActive");
+        if(getActiveGroup() === "school"){
+          if(isSession) scopeSessionBtn.classList.add("schoolActive");
+          else scopeAllBtn.classList.add("schoolActive");
+        }
+
+        // warn only when All sessions
+        if(!isSession){
+          scopeWarn.innerHTML =
+            `<strong>Scope warning:</strong> "All sessions" can mix business/school context. Use only when you explicitly want cross-session search.`;
+          scopeWarn.style.display = "block";
+        } else {
+          scopeWarn.style.display = "none";
+          scopeWarn.textContent = "";
+        }
+      }
+
+      // -------------------- Session rendering --------------------
       function setTabsUI(group){
         tabBiz.classList.toggle("active", group === "business");
         tabSchool.classList.toggle("active", group === "school");
@@ -1225,9 +1337,7 @@
       }
 
       function renderSessions(){
-        const r = parseHash();
-        const group = r.group || getActiveGroup();
-
+        const group = getActiveGroup();
         setTabsUI(group);
         setCategoryUI(group);
 
@@ -1241,69 +1351,52 @@
 
         setTopSubText();
 
-        if(cs) $("profileText").textContent = getProfileForSession(cs);
-      }
-
-      // -------------------- Activation + navigation --------------------
-      function ensureGroupHasActive(group){
-        const cur = getActiveSessionIdForGroup(group);
-        const ok = cur && sessions.some(s => s.id === cur && s.group === group);
-        if(!ok){
-          const pick = firstSessionId(group);
-          if(pick) setActiveSessionIdForGroup(group, pick);
+        if(cs){
+          $("profileText").textContent = getProfileForSession(cs);
+          $("modelText").textContent = modelName(getModelForSession(cs));
         }
       }
 
-      function activateGroup(group){
-        setActiveGroup(group);
-        ensureGroupHasActive(group);
-
-        // route drives everything
-        setHashForGroup(group);
-      }
-
-      function activateSessionById(group, id, opts){
+      // -------------------- Activation + Group switching --------------------
+      function activateSession(id, opts){
         opts = opts || {};
-        const s = sessions.find(x => x.id === id && x.group === group);
+        const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        setActiveGroup(group);
-        setActiveSessionIdForGroup(group, id);
+        setActiveGroup(s.group);
+        setActiveSessionIdForGroup(s.group, s.id);
 
-        // route to session
-        setHashForSession(group, id);
+        $("profileText").textContent = getProfileForSession(s);
+        $("modelText").textContent = modelName(getModelForSession(s));
+
+        loadThread();
+        hydrateWorkspace();
+        hydrateModelUI();
+        renderSessions();
 
         if(!opts.keepDrawersOpen) closeDrawer("sessions");
       }
 
-      // When hash changes, we hydrate state from it (single source of truth)
-      function handleRoute(){
-        const r = parseHash();
-        const group = r.group || getActiveGroup();
+      function activateSessionForGroup(group){
+        const last = getActiveSessionIdForGroup(group);
+        const exists = last && sessions.some(s => s.id === last && s.group === group);
+        const pick = exists ? last : firstSessionId(group);
+
         setActiveGroup(group);
-        ensureGroupHasActive(group);
 
-        if(r.sessionId){
-          const sid = decodeURIComponent(r.sessionId);
-          if(sessions.some(s => s.id === sid && s.group === group)){
-            setActiveSessionIdForGroup(group, sid);
-          } else {
-            // fallback to group home if invalid session
-            setHashForGroup(group);
-            return;
-          }
+        if(pick){
+          activateSession(pick, { keepDrawersOpen: true });
+        } else {
+          loadThreadEmpty(group);
+          hydrateWorkspaceEmpty(group);
+          renderSessions();
         }
-
-        loadThread();
-        hydrateWorkspace();
-        renderSessions();
-        syncSendButton();
       }
 
       // -------------------- CRUD sessions --------------------
       function createSession(group){
         const isBiz = group === "business";
-        const newId = (isBiz ? "biz_" : "school_") + uid();
+        const newId = uid();
 
         const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
         const note  = isBiz ? "Pricing • ops • planning" : "Study plan • assignments • notes";
@@ -1313,11 +1406,14 @@
         sessions = [sess, ...sessions];
         saveSessions(sessions);
 
-        // intro + profile (group-scoped keys)
-        saveHistory(sess, [introForSession(sess)]);
-        localStorage.setItem(profileKey(sess.group, sess.id), isBiz ? "Financial" : "Study");
+        saveHistory(newId, [introForSession(sess)]);
+        localStorage.setItem(profileKey(newId), isBiz ? "Financial" : "Study");
 
-        activateSessionById(group, newId);
+        // Defaults:
+        localStorage.setItem(modelKey(newId), defaultModelForSession(sess));
+        localStorage.setItem(scopeKey(newId), "session");
+
+        activateSession(newId);
       }
 
       function renameSession(id){
@@ -1339,7 +1435,7 @@
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        const protectedIds = new Set(["biz_main","school_math107","school_hist125"]);
+        const protectedIds = new Set(["biz_main","math107","hist125"]);
         if(protectedIds.has(id)){
           alert("That session is protected (default). Create new ones and delete those instead.");
           return;
@@ -1352,17 +1448,23 @@
         sessions = sessions.filter(x => x.id !== id);
         saveSessions(sessions);
 
-        try{ localStorage.removeItem(historyKey(group, id)); } catch {}
-        try{ localStorage.removeItem(profileKey(group, id)); } catch {}
+        try{ localStorage.removeItem(historyKey(id)); } catch {}
+        try{ localStorage.removeItem(profileKey(id)); } catch {}
+        try{ localStorage.removeItem(modelKey(id)); } catch {}
+        try{ localStorage.removeItem(scopeKey(id)); } catch {}
 
         const activeInGroup = getActiveSessionIdForGroup(group);
         if(activeInGroup === id){
           const fallback = firstSessionId(group);
-          if(fallback){
+          if(fallback) {
             setActiveSessionIdForGroup(group, fallback);
-            setHashForSession(group, fallback);
+            if(getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen:true });
           } else {
-            setHashForGroup(group);
+            if(getActiveGroup() === group){
+              loadThreadEmpty(group);
+              hydrateWorkspaceEmpty(group);
+              renderSessions();
+            }
           }
         } else {
           renderSessions();
@@ -1417,6 +1519,7 @@
       }
 
       function introForSession(session){
+        const m = getModelForSession(session);
         if(session.group === "business"){
           return {
             role:"bot",
@@ -1424,6 +1527,10 @@
             ts: nowTime(),
             content:
 `Business session loaded.
+
+Defaults:
+• Model: ${modelName(m)}
+• Scope: Session only (safe)
 
 When backend connects:
 • COGS-aware pricing & margin math
@@ -1444,6 +1551,10 @@ Try:
           content:
 `Class session loaded.
 
+Defaults:
+• Model: ${modelName(m)}
+• Scope: Session only (safe)
+
 When backend connects:
 • Read syllabus PDF and extract deadlines + grading
 • Build weekly plan + checklists
@@ -1463,15 +1574,15 @@ Try:
         contextWarn.textContent = "";
 
         if(!cs){
-          loadThreadEmpty(parseHash().group || getActiveGroup());
+          loadThreadEmpty(getActiveGroup());
           return;
         }
 
-        history = loadHistory(cs);
+        history = loadHistory(cs.id);
         if(history.length === 0){
           const intro = introForSession(cs);
           history.push(intro);
-          saveHistory(cs, history);
+          saveHistory(cs.id, history);
         }
 
         for(const m of history) renderMessage(m);
@@ -1499,7 +1610,7 @@ Try:
         const cs = currentSession();
         if(!cs) return;
         history.push(m);
-        saveHistory(cs, history);
+        saveHistory(cs.id, history);
       }
 
       function syncSendButton(){
@@ -1539,6 +1650,20 @@ Try:
         contextWarn.textContent = "";
       }
 
+      // -------------------- Backend payload (placeholder) --------------------
+      function buildRequestPayload({ session, text, resolvedModelId, scope }){
+        return {
+          sessionId: session.id,
+          group: session.group,
+          profile: getProfileForSession(session),
+          modelId: resolvedModelId,
+          scope: scope, // "session" | "all"
+          message: text,
+          // Future:
+          // context: { historyIds, fileIds, ragTopK, ... }
+        };
+      }
+
       function sendMessage(){
         const cs = currentSession();
         if(!cs) return;
@@ -1548,11 +1673,24 @@ Try:
 
         maybeWarnAboutContext(text);
 
+        // Resolve per-message model override
+        const override = msgModel.value || "";
+        const resolvedModelId = override ? override : getModelForSession(cs);
+
+        // Resolve scope from buttons (runtime variable)
+        const scope = currentScope;
+
         input.value = "";
         autoSizeTextarea();
         syncSendButton();
 
-        const youMsg = { role:"you", confidence:"g", ts: nowTime(), content: text };
+        const youMsg = {
+          role:"you",
+          confidence:"g",
+          ts: nowTime(),
+          content: text,
+          meta: { modelId: resolvedModelId, scope }
+        };
         renderMessage(youMsg);
         addToHistory(youMsg);
 
@@ -1560,38 +1698,32 @@ Try:
         saveSessions(sessions);
         renderSessions();
 
-        let reply;
-        if(cs.group === "business"){
-          reply =
+        const payload = buildRequestPayload({ session: cs, text, resolvedModelId, scope });
+
+        // UI-only reply (shows routing + scope)
+        let reply =
 `UI-only mode (backend not connected).
 
-When backend is live, I will:
-• compute margins step-by-step
-• use your real COGS/fees/shipping
-• store decisions in a ledger
-
-Pick next:
-1) MSRP guardrails
-2) MSRP inputs list
-3) Decision ledger format`;
-        } else {
-          reply =
-`UI-only mode (backend not connected).
+Routing:
+• Model: ${modelName(payload.modelId)}
+• Scope: ${payload.scope === "all" ? "All sessions (manual)" : "Session only"}
 
 When backend is live, I will:
-• parse the syllabus PDF
-• extract deadlines + grading
-• build a weekly plan
+• rebuild context from the correct session (and only that session unless scope=all)
+• compute/answer using the selected model
+• log decisions and sources
 
 Pick next:
-1) Weekly plan
-2) Deadlines checklist
-3) Concept help`;
-        }
+1) Wire local backend endpoint
+2) Add RAG index (docs → embeddings → retrieval)
+3) Add global search with hard filters + warnings`;
 
         const botMsg = { role:"bot", confidence:"y", ts: nowTime(), content: reply };
         renderMessage(botMsg);
         addToHistory(botMsg);
+
+        // Reset per-message model override back to "Use session default" after send
+        msgModel.value = "";
       }
 
       // -------------------- Workspace --------------------
@@ -1644,13 +1776,14 @@ Pick next:
           ? [
               { k:"Target gross margin", v:"≥ 70%", sub:"Luxury guardrail", c:"g" },
               { k:"Channels", v:"Amazon + Shopify", sub:"Different fees, same COGS base", c:"g" },
-              { k:"Fee risk", v:"Verify category", sub:"Amazon referral/fulfillment vary", c:"y" },
-              { k:"COGS freshness", v:"Notion not connected", sub:"Avoid locking MSRP without data", c:"r" }
+              { k:"Model default", v: modelName(getModelForSession(session)), sub:"Change via Model badge", c:"y" },
+              { k:"Context scope", v: (getScopeForSession(session) === "all" ? "All sessions" : "Session only"), sub:"Best practice: Session only", c:"y" }
             ]
           : [
               { k:"Syllabus", v:"Mounted (PDF)", sub:"Use for deadlines + grading policy", c:"g" },
               { k:"Weekly plan", v:"Build cadence", sub:"Make it automatic later", c:"y" },
-              { k:"Notes", v:"Structured", sub:"Definitions • examples • self-test", c:"g" }
+              { k:"Model default", v: modelName(getModelForSession(session)), sub:"Change via Model badge", c:"y" },
+              { k:"Context scope", v: (getScopeForSession(session) === "all" ? "All sessions" : "Session only"), sub:"Best practice: Session only", c:"y" }
             ];
 
         const assRows = assumptions.map(a => `
@@ -1695,6 +1828,7 @@ Pick next:
             <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
               <button class="miniBtn" data-ws="ragAdd">Add document</button>
               <button class="miniBtn" data-ws="ragReindex">Re-index</button>
+              <button class="miniBtn" data-ws="searchAll">Search all sessions (warn)</button>
             </div>
           </div>
         `;
@@ -1747,9 +1881,10 @@ Pick next:
       function hydrateWorkspace(){
         const cs = currentSession();
         if(!cs){
-          hydrateWorkspaceEmpty(parseHash().group || getActiveGroup());
+          hydrateWorkspaceEmpty(getActiveGroup());
           return;
         }
+
         const html = workspaceTemplate(cs);
         workspaceBody.innerHTML = html;
         drawerWorkspaceBody.innerHTML = html;
@@ -1764,6 +1899,10 @@ Pick next:
         if(!s) return;
 
         const canned = (function(){
+          if(act === "searchAll"){
+            return `Search all sessions: when backend is live, this will run a global search with hard filters + a warning banner.`;
+          }
+
           if(s.group === "business"){
             if(act === "guardrails") return
 `Pricing guardrails (UI preview):
@@ -1813,6 +1952,7 @@ Backend will generate structured notes:
 • common mistakes
 • quick quiz questions`;
           }
+
           if(act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
           if(act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
           if(act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
@@ -1874,11 +2014,9 @@ Backend will generate structured notes:
 
       // -------------------- Events --------------------
       function wireEvents(){
-        // Workspace click delegation
         workspaceBody.addEventListener("click", onWorkspaceClick);
         drawerWorkspaceBody.addEventListener("click", onWorkspaceClick);
 
-        // input
         input.addEventListener("input", () => {
           syncSendButton();
           autoSizeTextarea();
@@ -1899,9 +2037,21 @@ Backend will generate structured notes:
 
         sendBtn.addEventListener("click", sendMessage);
 
+        // Scope toggle
+        function setScope(scope){
+          const s = currentSession();
+          if(!s) return;
+          currentScope = scope;
+          setScopeForSession(s, scope);   // make it sticky per session
+          setScopeButtons(scope);
+          hydrateWorkspace();
+        }
+        scopeSessionBtn.addEventListener("click", () => setScope("session"));
+        scopeAllBtn.addEventListener("click", () => setScope("all"));
+
         const switchTo = (g) => {
           closeDrawer("all");
-          activateGroup(g); // sets hash
+          activateSessionForGroup(g);
         };
 
         tabBiz.addEventListener("click", () => switchTo("business"));
@@ -1909,8 +2059,8 @@ Backend will generate structured notes:
         drawerTabBiz.addEventListener("click", () => switchTo("business"));
         drawerTabSchool.addEventListener("click", () => switchTo("school"));
 
-        $("newSessionBtn").addEventListener("click", () => createSession(parseHash().group || getActiveGroup()));
-        $("drawerNewSession").addEventListener("click", () => createSession(parseHash().group || getActiveGroup()));
+        $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
+        $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
 
         function sessionActionHandler(e){
           const btn = e.target.closest("[data-act]");
@@ -1919,17 +2069,13 @@ Backend will generate structured notes:
           const id = btn.getAttribute("data-id");
           if(!id) return;
 
-          const s = sessions.find(x => x.id === id);
-          if(!s) return;
-
-          if(act === "activate") activateSessionById(s.group, s.id);
+          if(act === "activate") activateSession(id);
           if(act === "rename") renameSession(id);
           if(act === "delete") deleteSession(id);
         }
         sessionList.addEventListener("click", sessionActionHandler);
         drawerSessionList.addEventListener("click", sessionActionHandler);
 
-        // keyboard-accessible badges
         function clickOnEnterSpace(el, fn){
           el.addEventListener("keydown", (e) => {
             if(e.key === "Enter" || e.key === " "){
@@ -1946,6 +2092,15 @@ Backend will generate structured notes:
           hydrateWorkspace();
         });
         clickOnEnterSpace($("profileBadge"), () => $("profileBadge").click());
+
+        // NEW: Model badge cycles session-default model
+        $("modelBadge").addEventListener("click", () => {
+          const cs = currentSession();
+          if(!cs) return;
+          cycleModelForSession(cs);
+          hydrateWorkspace();
+        });
+        clickOnEnterSpace($("modelBadge"), () => $("modelBadge").click());
 
         $("notionBadge").addEventListener("click", () => {
           const cur = $("notionText").textContent || "";
@@ -1969,9 +2124,6 @@ Backend will generate structured notes:
         window.addEventListener("keydown", (e) => {
           if(e.key === "Escape") closeDrawer("all");
         });
-
-        // Route listener
-        window.addEventListener("hashchange", handleRoute);
       }
 
       // -------------------- Init --------------------
@@ -1985,19 +2137,24 @@ Backend will generate structured notes:
         setDot(engineDot, "bad");
         $("engineText").textContent = "UI only";
 
-        // Ensure each group has an active session set
-        ensureGroupHasActive("business");
-        ensureGroupHasActive("school");
+        migrateLegacyActiveIfNeeded();
 
-        // If no hash route provided, set based on stored active group
-        const r = parseHash();
-        if(!r.group){
-          setHashForGroup(getActiveGroup());
-          return; // handleRoute will run on hashchange
+        const g = getActiveGroup();
+        setActiveGroup((g === "school" || g === "business") ? g : "business");
+
+        for(const group of ["business","school"]){
+          const cur = getActiveSessionIdForGroup(group);
+          const ok = cur && sessions.some(s => s.id === cur && s.group === group);
+          if(!ok){
+            const pick = firstSessionId(group);
+            if(pick) setActiveSessionIdForGroup(group, pick);
+          }
         }
 
+        activateSessionForGroup(getActiveGroup());
+
         wireEvents();
-        handleRoute();
+        syncSendButton();
         autoSizeTextarea();
       }
 
