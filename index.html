@@ -21,11 +21,14 @@
       --ink:#1b1813;
 
       --border: rgba(243,239,230,.14);
+      --border2: rgba(243,239,230,.20);
 
-      --accent:#7a1114;     /* Business (burgundy) */
+      --accent:#7a1114;
       --accent2:#a0141a;
-      --school:#1e40af;     /* School (slate-blue) */
+      --school:#1e40af;
       --school2:#2563eb;
+      --personal:#0f766e;
+      --personal2:#14b8a6;
 
       --green:#15803d;
       --amber:#b45309;
@@ -37,6 +40,15 @@
       --shadow2: 0 10px 30px rgba(0,0,0,.28);
 
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+
+      --s1: 6px;
+      --s2: 10px;
+      --s3: 12px;
+      --s4: 14px;
+      --s5: 16px;
+
+      --tFast: 90ms;
+      --tMed: 120ms;
     }
 
     *{ box-sizing:border-box; }
@@ -53,14 +65,28 @@
       overflow-x:hidden;
     }
 
+    @media (prefers-reduced-motion: reduce){
+      *{
+        transition: none !important;
+        animation: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
     .hidden { display:none !important; }
     .srOnly{
       position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
     }
 
+    :focus-visible{
+      outline: 3px solid rgba(243,239,230,.42);
+      outline-offset: 2px;
+      border-radius: 10px;
+    }
+
     .wrap{
       height:100%;
-      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+      padding: var(--s3) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom));
       display:flex;
       justify-content:center;
     }
@@ -71,7 +97,7 @@
       display:grid;
       grid-template-columns: 300px 1fr 360px;
       grid-template-rows: auto 1fr;
-      gap: 12px;
+      gap: var(--s3);
       min-width: 0;
     }
 
@@ -82,17 +108,18 @@
       backdrop-filter: blur(10px);
       border-radius: var(--r);
       box-shadow: var(--shadow2);
-      padding: 12px;
+      padding: var(--s3);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      gap: var(--s3);
       min-width: 0;
     }
+
     .brand{
       display:flex;
       align-items:center;
-      gap: 10px;
+      gap: var(--s2);
       min-width: 0;
     }
     .logo{
@@ -110,6 +137,7 @@
         radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
         linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
       box-shadow: 0 10px 22px rgba(122,17,20,.18);
+      flex: 0 0 auto;
     }
     .brandText{
       display:flex;
@@ -125,11 +153,10 @@
       text-overflow: ellipsis;
     }
 
-    /* NEW: category badge that tells the truth */
     .catRow{
       display:flex;
       align-items:center;
-      gap: 8px;
+      gap: var(--s2);
       min-width: 0;
     }
     .catBadge{
@@ -155,6 +182,7 @@
     }
     .catBadge.biz .miniDot{ background: var(--accent2); box-shadow: 0 0 0 3px rgba(122,17,20,.16); }
     .catBadge.school .miniDot{ background: var(--school2); box-shadow: 0 0 0 3px rgba(37,99,235,.16); }
+    .catBadge.personal .miniDot{ background: var(--personal2); box-shadow: 0 0 0 3px rgba(20,184,166,.16); }
 
     #topSub{
       font-size: 12px;
@@ -163,12 +191,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       min-width: 0;
+      max-width: 64ch;
     }
 
     .statusRow{
       display:flex;
       align-items:center;
-      gap: 10px;
+      gap: var(--s2);
       flex-wrap: wrap;
       justify-content:flex-end;
     }
@@ -181,17 +210,23 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(20,17,13,.55);
-      color: rgba(243,239,230,.80);
+      color: rgba(243,239,230,.82);
       font-size: 12px;
       user-select:none;
       white-space: nowrap;
       max-width: 100%;
+      transition: background var(--tMed) ease, border-color var(--tMed) ease;
     }
     .badge.clickable{ cursor:pointer; }
+    .badge:hover{
+      border-color: var(--border2);
+      background: rgba(20,17,13,.66);
+    }
     .badge .label{
       color: rgba(243,239,230,.62);
       font-weight: 650;
     }
+
     .dot{
       width: 9px;
       height: 9px;
@@ -206,18 +241,17 @@
     .ghostBtn{
       border: 1px solid var(--border);
       background: rgba(20,17,13,.45);
-      color: rgba(243,239,230,.88);
+      color: rgba(243,239,230,.90);
       padding: 10px 12px;
       border-radius: 999px;
       cursor: pointer;
       font-weight: 740;
       font-size: 13px;
-      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      transition: background var(--tMed) ease, border-color var(--tMed) ease;
       user-select:none;
     }
-    .ghostBtn:active{ transform: translateY(1px); }
     .ghostBtn:hover{
-      border-color: rgba(243,239,230,.22);
+      border-color: var(--border2);
       background: rgba(20,17,13,.62);
     }
 
@@ -234,12 +268,12 @@
       min-width: 0;
     }
     .panelHeader{
-      padding: 12px;
+      padding: var(--s3);
       border-bottom: 1px solid rgba(243,239,230,.14);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
+      gap: var(--s2);
     }
     .panelHeader strong{
       font-size: 13px;
@@ -253,7 +287,7 @@
       margin-top:4px;
     }
     .panelBody{
-      padding: 10px;
+      padding: var(--s2);
       overflow:auto;
       min-height: 0;
     }
@@ -262,20 +296,22 @@
       display:flex;
       gap:8px;
       margin-top:10px;
+      flex-wrap: wrap;
     }
     .seg{
       flex:1;
+      min-width: 86px;
       padding: 10px 10px;
       border-radius: 999px;
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(15,13,10,.35);
-      color: rgba(243,239,230,.80);
+      color: rgba(243,239,230,.82);
       font-weight: 820;
       font-size: 12px;
       cursor:pointer;
       user-select:none;
       text-align:center;
-      transition: border-color .12s ease, background .12s ease;
+      transition: border-color var(--tMed) ease, background var(--tMed) ease;
       white-space: nowrap;
     }
     .seg.active{
@@ -284,11 +320,15 @@
       color: rgba(243,239,230,.92);
       box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
     }
-    /* NEW: school tab active treatment */
     .seg.schoolActive{
       border-color: rgba(37,99,235,.45);
       background: rgba(37,99,235,.16);
       box-shadow: 0 0 0 4px rgba(37,99,235,.10) inset;
+    }
+    .seg.personalActive{
+      border-color: rgba(20,184,166,.45);
+      background: rgba(20,184,166,.14);
+      box-shadow: 0 0 0 4px rgba(20,184,166,.10) inset;
     }
 
     .list{ display:flex; flex-direction:column; gap: 8px; margin-top:10px; }
@@ -298,13 +338,17 @@
       border-radius: 14px;
       padding: 10px;
       cursor:pointer;
-      transition: border-color .12s ease, background .12s ease, transform .06s ease;
+      transition: border-color var(--tMed) ease, background var(--tMed) ease;
     }
     .item:hover{
       border-color: rgba(243,239,230,.22);
       background: rgba(15,13,10,.48);
     }
-    .item:active{ transform: translateY(1px); }
+    .item.active{
+      border-color: rgba(243,239,230,.26);
+      background: rgba(243,239,230,.06);
+      box-shadow: 0 0 0 3px rgba(243,239,230,.06) inset;
+    }
     .itemTop{
       display:flex;
       align-items:center;
@@ -325,7 +369,7 @@
       padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid rgba(243,239,230,.14);
-      color: rgba(243,239,230,.70);
+      color: rgba(243,239,230,.72);
       background: rgba(15,13,10,.35);
       flex: 0 0 auto;
       user-select:none;
@@ -353,7 +397,6 @@
       min-height: 0;
       min-width: 0;
     }
-    /* NEW: chat background differs by category (subtle) */
     .chat.bizBg{
       background:
         radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
@@ -362,6 +405,11 @@
     .chat.schoolBg{
       background:
         radial-gradient(900px 600px at 30% 0%, rgba(37,99,235,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+    }
+    .chat.personalBg{
+      background:
+        radial-gradient(900px 600px at 30% 0%, rgba(20,184,166,.10), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
     }
 
@@ -373,10 +421,13 @@
         radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
         linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
       min-height: 0;
+      scroll-behavior: smooth;
     }
+
     .row{ display:flex; margin: 10px 0; gap: 10px; }
     .row.you{ justify-content:flex-end; }
     .row.bot{ justify-content:flex-start; }
+
     .bubbleWrap{
       display:flex;
       flex-direction:column;
@@ -437,23 +488,79 @@
     .confDot.r{ background: var(--red); box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
 
     .composer{
-      padding: 12px;
+      padding: var(--s3);
       border-top: 1px solid rgba(243,239,230,.14);
       background: rgba(20,17,13,.52);
       display:flex;
       flex-direction:column;
-      gap: 10px;
+      gap: var(--s2);
     }
+
+    /* Attach chips row */
+    .chipsRow{
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.30);
+      color: rgba(243,239,230,.86);
+      font-size: 12px;
+      user-select:none;
+      max-width: 100%;
+    }
+    .chip strong{
+      font-weight: 860;
+      color: rgba(243,239,230,.92);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 44ch;
+    }
+    .chipBtn{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(20,17,13,.45);
+      color: rgba(243,239,230,.92);
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 820;
+      font-size: 12px;
+      user-select:none;
+    }
+    .chipBtn:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(20,17,13,.62);
+    }
+    .chipX{
+      border: none;
+      background: transparent;
+      color: rgba(243,239,230,.72);
+      cursor:pointer;
+      font-weight: 900;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .chipX:hover{ color: rgba(243,239,230,.92); }
+
     .composerRow{
       display:flex;
-      gap: 10px;
+      gap: var(--s2);
       align-items:flex-end;
     }
+
     textarea{
       flex:1;
       resize:none;
       min-height: 48px;
-      max-height: 180px;
+      max-height: 220px;
       padding: 12px 12px;
       border-radius: 16px;
       border: 1px solid rgba(243,239,230,.16);
@@ -468,7 +575,6 @@
       box-shadow: 0 0 0 5px rgba(122,17,20,.16);
     }
 
-    /* NEW: context warning (non-blocking) */
     .warn{
       display:none;
       border: 1px solid rgba(180,83,9,.35);
@@ -491,14 +597,14 @@
       font-weight: 850;
       cursor: pointer;
       box-shadow: 0 10px 26px rgba(122,17,20,.16);
-      transition: transform .06s ease, filter .12s ease;
+      transition: filter var(--tFast) ease;
     }
     .send:hover{ filter: brightness(1.06); }
-    .send:active{ transform: translateY(1px); }
     .send:disabled{
       opacity: .55;
       cursor: not-allowed;
       box-shadow: none;
+      filter: none;
     }
 
     .section{
@@ -577,19 +683,22 @@
       padding: 7px 10px;
       border: 1px solid rgba(243,239,230,.14);
       background: rgba(20,17,13,.45);
-      color: rgba(243,239,230,.88);
+      color: rgba(243,239,230,.90);
       font-weight: 820;
       cursor:pointer;
       user-select:none;
       font-size: 12px;
-      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      transition: background var(--tMed) ease, border-color var(--tMed) ease;
       white-space: nowrap;
     }
     .miniBtn:hover{ border-color: rgba(243,239,230,.22); background: rgba(20,17,13,.62); }
-    .miniBtn:active{ transform: translateY(1px); }
     .miniBtn.danger{
       border-color: rgba(185,28,28,.35);
       background: rgba(185,28,28,.12);
+    }
+    .miniBtn.danger:hover{
+      border-color: rgba(185,28,28,.55);
+      background: rgba(185,28,28,.18);
     }
 
     .fatal{
@@ -643,10 +752,12 @@
       border-right: 1px solid rgba(243,239,230,.14);
       box-shadow: 0 22px 80px rgba(0,0,0,.55);
       transform: translateX(-110%);
-      transition: transform .18s ease;
+      transition: transform var(--tMed) ease;
       z-index: 9100;
       padding: 12px;
       overflow:auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .drawer.right{
       right: 0;
@@ -666,6 +777,11 @@
       .app{ grid-template-columns: 1fr; }
       #leftPanel{ display:none; }
       #workspacePanel{ display:none; }
+      header{
+        padding: 10px;
+        gap: 10px;
+      }
+      #topSub{ max-width: 42ch; }
     }
   </style>
 </head>
@@ -677,12 +793,12 @@
       <!-- TOP -->
       <header>
         <div class="brand">
-          <div class="logo">W</div>
+          <div class="logo" aria-hidden="true">W</div>
           <div class="brandText">
             <div class="catRow">
               <strong>WilliamBot</strong>
-              <span class="catBadge biz" id="catBadge">
-                <span class="miniDot"></span>
+              <span class="catBadge biz" id="catBadge" aria-label="Active category">
+                <span class="miniDot" aria-hidden="true"></span>
                 <span id="catText">Business</span>
               </span>
             </div>
@@ -690,31 +806,31 @@
           </div>
         </div>
 
-        <div class="statusRow">
-          <div class="badge clickable" id="profileBadge" title="Profile is stored per session">
+        <div class="statusRow" aria-label="Status">
+          <div class="badge clickable" id="profileBadge" title="Profile is stored per session" role="button" tabindex="0">
             <span class="label">Profile</span>
             <span id="profileText">Study</span>
           </div>
 
-          <div class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)">
-            <span id="notionDot" class="dot bad"></span>
+          <div class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)" role="button" tabindex="0">
+            <span id="notionDot" class="dot bad" aria-hidden="true"></span>
             <span class="label">Notion</span>
             <span id="notionText">Not connected</span>
           </div>
 
           <div class="badge" title="Local backend connection">
-            <span id="engineDot" class="dot bad"></span>
+            <span id="engineDot" class="dot bad" aria-hidden="true"></span>
             <span class="label">Engine</span>
             <span id="engineText">UI only</span>
           </div>
 
-          <button class="ghostBtn" id="openSessions">Sessions</button>
-          <button class="ghostBtn" id="openWorkspace">Workspace</button>
+          <button class="ghostBtn" id="openSessions" aria-haspopup="dialog">Sessions</button>
+          <button class="ghostBtn" id="openWorkspace" aria-haspopup="dialog">Workspace</button>
         </div>
       </header>
 
       <!-- LEFT: SESSIONS (desktop/tablet) -->
-      <aside class="panel" id="leftPanel">
+      <aside class="panel" id="leftPanel" aria-label="Sessions panel">
         <div class="panelHeader">
           <div>
             <strong>Sessions</strong>
@@ -723,6 +839,7 @@
             <div class="segRow" role="tablist" aria-label="Session groups">
               <button class="seg active" id="tabBiz" role="tab" aria-selected="true">Business</button>
               <button class="seg" id="tabSchool" role="tab" aria-selected="false">School</button>
+              <button class="seg" id="tabPersonal" role="tab" aria-selected="false">Personal</button>
             </div>
           </div>
 
@@ -737,12 +854,20 @@
       </aside>
 
       <!-- CENTER: CHAT -->
-      <main class="chat bizBg" id="chatShell">
-        <div class="feed" id="feed" aria-live="polite"></div>
+      <main class="chat bizBg" id="chatShell" aria-label="Chat">
+        <div class="feed" id="feed" aria-live="polite" aria-relevant="additions text"></div>
 
         <div class="composer">
           <div class="warn" id="contextWarn"></div>
+
+          <!-- Attach chips row -->
+          <div class="chipsRow" id="chipsRow" style="display:none;">
+            <button class="chipBtn" id="attachBtn" title="Attach context for the next message">Attach</button>
+            <div id="chipList" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+          </div>
+
           <div class="composerRow">
+            <label class="srOnly" for="input">Message</label>
             <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
             <button class="send" id="sendBtn" disabled>Send</button>
           </div>
@@ -750,7 +875,7 @@
       </main>
 
       <!-- RIGHT: WORKSPACE (desktop only; mobile uses drawer) -->
-      <aside class="panel" id="workspacePanel">
+      <aside class="panel" id="workspacePanel" aria-label="Workspace panel">
         <div class="panelHeader">
           <div>
             <strong>Workspace</strong>
@@ -767,7 +892,7 @@
   <!-- Mobile drawers -->
   <div class="drawerBackdrop" id="drawerBackdrop"></div>
 
-  <div class="drawer" id="sessionsDrawer" aria-hidden="true">
+  <div class="drawer" id="sessionsDrawer" aria-hidden="true" role="dialog" aria-label="Sessions drawer">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
       <strong>Sessions</strong>
       <button class="miniBtn" id="closeSessionsDrawer">Close</button>
@@ -776,6 +901,7 @@
     <div class="segRow" style="margin-top:12px;">
       <button class="seg active" id="drawerTabBiz">Business</button>
       <button class="seg" id="drawerTabSchool">School</button>
+      <button class="seg" id="drawerTabPersonal">Personal</button>
     </div>
 
     <div class="rowBtns" style="margin-top:10px;">
@@ -785,7 +911,7 @@
     <div class="list" id="drawerSessionList" style="margin-top:12px;"></div>
   </div>
 
-  <div class="drawer right" id="workspaceDrawer" aria-hidden="true">
+  <div class="drawer right" id="workspaceDrawer" aria-hidden="true" role="dialog" aria-label="Workspace drawer">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
       <strong>Workspace</strong>
       <button class="miniBtn" id="closeWorkspaceDrawer">Close</button>
@@ -793,9 +919,28 @@
     <div id="drawerWorkspaceBody" style="margin-top:12px;"></div>
   </div>
 
+  <!-- Attach Context Drawer (right side) -->
+  <div class="drawer right" id="attachDrawer" aria-hidden="true" role="dialog" aria-label="Attach context drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <strong>Attach Context</strong>
+      <button class="miniBtn" id="closeAttachDrawer">Close</button>
+    </div>
+    <div style="margin-top:10px; color: rgba(243,239,230,.75); font-size:12px; line-height:1.35;">
+      Personal can attach from Business + School. Attachments apply to the <strong>next message only</strong> and then auto-clear.
+    </div>
+
+    <div class="section" style="margin-top:12px;">
+      <div class="sectionTitle">
+        <strong>Available sessions</strong>
+        <span>Business + School</span>
+      </div>
+      <div class="list" id="attachSessionList"></div>
+    </div>
+  </div>
+
   <!-- Fatal overlay -->
   <div class="fatal" id="fatal">
-    <div class="fatalCard">
+    <div class="fatalCard" role="dialog" aria-label="Crash report">
       <strong>WilliamBot UI crashed (no silent white screen).</strong>
       <div style="margin-top:6px; color: rgba(243,239,230,.75); font-size:12px;">
         Copy the error, refresh, and you’re back.
@@ -812,7 +957,7 @@
     (function(){
       "use strict";
 
-      // -------------------- Safety: show errors instead of blank/white --------------------
+      // -------------------- Crash safety --------------------
       const fatalEl = document.getElementById("fatal");
       const fatalText = document.getElementById("fatalText");
       const fatalCopy = document.getElementById("fatalCopy");
@@ -835,8 +980,11 @@
 
       // -------------------- DOM helpers --------------------
       const $ = (id) => document.getElementById(id);
+
       const escapeHtml = (s) =>
-        String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+        String(s).replace(/[&<>"']/g, c => ({
+          "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+        }[c]));
 
       function stamp(){
         const d = new Date();
@@ -859,19 +1007,16 @@
       }
 
       // -------------------- Storage --------------------
-      // Keep your existing sessions/history keys for continuity; add v6 keys for the fixes.
       const STORE = {
-        sessions: "wb_sessions_v5",
-        historyPrefix: "wb_history_v5_",
+        sessions: "wb_sessions_v8",
+        historyPrefix: "wb_history_v8_",
 
-        activeGroup: "wb_active_group_v6",                   // "business" | "school"
-        activeBiz: "wb_active_session_business_v6",
-        activeSchool: "wb_active_session_school_v6",
+        activeGroup: "wb_active_group_v8",                   // "business" | "school" | "personal"
+        activeBiz: "wb_active_session_business_v8",
+        activeSchool: "wb_active_session_school_v8",
+        activePersonal: "wb_active_session_personal_v8",
 
-        // Back-compat (older single active session key)
-        legacyActiveSession: "wb_active_session_v5",
-
-        profilePrefix: "wb_profile_v6_"                      // per-session profile
+        profilePrefix: "wb_profile_v8_"                      // per-session profile
       };
       const historyKey = (sid) => STORE.historyPrefix + sid;
       const profileKey = (sid) => STORE.profilePrefix + sid;
@@ -879,6 +1024,14 @@
       // -------------------- Default sessions --------------------
       function defaultSessions(){
         return [
+          {
+            id: "personal_main",
+            group: "personal",
+            title: "Personal — Main",
+            note: "Normal chat • planning • pull from Business/School when needed",
+            updated: stamp(),
+            files: []
+          },
           {
             id: "biz_main",
             group: "business",
@@ -921,84 +1074,56 @@
       function saveSessions(sessions){
         localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
       }
-
       function loadHistory(sid){
         const raw = localStorage.getItem(historyKey(sid));
         const parsed = safeParse(raw, []);
         return Array.isArray(parsed) ? parsed : [];
       }
       function saveHistory(sid, hist){
-        localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-500)));
+        localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-800)));
       }
 
       // -------------------- Group + Active session (per group) --------------------
       function getActiveGroup(){
-        return localStorage.getItem(STORE.activeGroup) || "business";
+        return localStorage.getItem(STORE.activeGroup) || "personal";
       }
       function setActiveGroup(g){
         localStorage.setItem(STORE.activeGroup, g);
       }
-
+      function keyForGroup(group){
+        if(group === "business") return STORE.activeBiz;
+        if(group === "school") return STORE.activeSchool;
+        return STORE.activePersonal;
+      }
       function getActiveSessionIdForGroup(group){
-        const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
-        return localStorage.getItem(key) || "";
+        return localStorage.getItem(keyForGroup(group)) || "";
       }
       function setActiveSessionIdForGroup(group, id){
-        const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
-        localStorage.setItem(key, id);
-      }
-
-      function sessionsByGroup(group){
-        return sessions.filter(s => s.group === group);
-      }
-      function firstSessionId(group){
-        const list = sessionsByGroup(group);
-        return list.length ? list[0].id : "";
-      }
-
-      // This app now defines "active session" as "active session for active group"
-      function getActiveSessionId(){
-        const g = getActiveGroup();
-        return getActiveSessionIdForGroup(g) || "";
-      }
-
-      // Back-compat migration: if user has legacy active session, map it to its group once.
-      function migrateLegacyActiveIfNeeded(){
-        const legacy = localStorage.getItem(STORE.legacyActiveSession);
-        if(!legacy) return;
-
-        const found = sessions.find(s => s.id === legacy);
-        if(found){
-          setActiveSessionIdForGroup(found.group, found.id);
-          setActiveGroup(found.group);
-        }
-
-        // one-way migration (keep legacy key? remove to prevent future ambiguity)
-        try{ localStorage.removeItem(STORE.legacyActiveSession); } catch {}
+        localStorage.setItem(keyForGroup(group), id);
       }
 
       // -------------------- Profiles (PER SESSION) --------------------
       const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
       const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
+      const PROFILE_PERSONAL = ["General", "Planning", "Life", "Fitness"];
 
       function profileListForSession(session){
-        return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
+        if(session.group === "business") return PROFILE_BUS;
+        if(session.group === "school") return PROFILE_SCHOOL;
+        return PROFILE_PERSONAL;
       }
-
       function getProfileForSession(session){
         const stored = localStorage.getItem(profileKey(session.id));
         const list = profileListForSession(session);
         if(stored && list.includes(stored)) return stored;
-
-        // default per category
-        return (session.group === "business") ? "Financial" : "Study";
+        if(session.group === "business") return "Financial";
+        if(session.group === "school") return "Study";
+        return "General";
       }
-
       function setProfileForSession(session, profile){
         localStorage.setItem(profileKey(session.id), profile);
         $("profileText").textContent = profile;
       }
-
       function cycleProfileForSession(session){
         const list = profileListForSession(session);
         const cur = getProfileForSession(session);
@@ -1019,18 +1144,24 @@
 
       const tabBiz = $("tabBiz");
       const tabSchool = $("tabSchool");
+      const tabPersonal = $("tabPersonal");
+
       const drawerTabBiz = $("drawerTabBiz");
       const drawerTabSchool = $("drawerTabSchool");
+      const drawerTabPersonal = $("drawerTabPersonal");
 
       const backdrop = $("drawerBackdrop");
       const sessionsDrawer = $("sessionsDrawer");
       const workspaceDrawer = $("workspaceDrawer");
+      const attachDrawer = $("attachDrawer");
+
       const drawerSessionList = $("drawerSessionList");
-      const drawerWorkspaceBody = $("drawerWorkspaceBody");
+      const attachSessionList = $("attachSessionList");
 
       const wsHint = $("wsHint");
       const wsSubtitle = $("wsSubtitle");
       const workspaceBody = $("workspaceBody");
+      const drawerWorkspaceBody = $("drawerWorkspaceBody");
 
       const notionDot = $("notionDot");
       const engineDot = $("engineDot");
@@ -1041,26 +1172,51 @@
 
       const contextWarn = $("contextWarn");
 
+      // Attach UI
+      const chipsRow = $("chipsRow");
+      const chipList = $("chipList");
+      const attachBtn = $("attachBtn");
+
       // -------------------- State --------------------
       let sessions = loadSessions();
       saveSessions(sessions);
 
       let history = [];
 
+      // Next-message attachments (AUTO-CLEAR after send)
+      // rule: only allowed in Personal, and only sessions from Business + School
+      let nextAttachments = []; // array of session IDs
+
+      function sessionsByGroup(group){
+        return sessions.filter(s => s.group === group);
+      }
+      function firstSessionId(group){
+        const list = sessionsByGroup(group);
+        return list.length ? list[0].id : "";
+      }
+
       function currentSession(){
-        const sid = getActiveSessionId();
+        const sid = getActiveSessionIdForGroup(getActiveGroup());
         return sessions.find(s => s.id === sid) || null;
       }
 
       function setCategoryUI(group){
-        // header badge
-        catBadge.classList.toggle("biz", group === "business");
-        catBadge.classList.toggle("school", group === "school");
-        catText.textContent = (group === "business") ? "Business" : "School";
+        catBadge.classList.remove("biz","school","personal");
+        chatShell.classList.remove("bizBg","schoolBg","personalBg");
 
-        // chat background
-        chatShell.classList.toggle("bizBg", group === "business");
-        chatShell.classList.toggle("schoolBg", group === "school");
+        if(group === "business"){
+          catBadge.classList.add("biz");
+          chatShell.classList.add("bizBg");
+          catText.textContent = "Business";
+        } else if(group === "school"){
+          catBadge.classList.add("school");
+          chatShell.classList.add("schoolBg");
+          catText.textContent = "School";
+        } else {
+          catBadge.classList.add("personal");
+          chatShell.classList.add("personalBg");
+          catText.textContent = "Personal";
+        }
       }
 
       function setTopSubText(){
@@ -1068,36 +1224,47 @@
         topSub.textContent = "Session: " + (s ? s.title : "—");
       }
 
-      // -------------------- Session rendering --------------------
       function setTabsUI(group){
-        // desktop
         tabBiz.classList.toggle("active", group === "business");
         tabSchool.classList.toggle("active", group === "school");
+        tabPersonal.classList.toggle("active", group === "personal");
+
         tabBiz.setAttribute("aria-selected", group === "business" ? "true" : "false");
         tabSchool.setAttribute("aria-selected", group === "school" ? "true" : "false");
+        tabPersonal.setAttribute("aria-selected", group === "personal" ? "true" : "false");
 
-        // ensure school tab uses school styling when active
-        tabBiz.classList.remove("schoolActive");
-        tabSchool.classList.remove("schoolActive");
+        tabBiz.classList.remove("schoolActive","personalActive");
+        tabSchool.classList.remove("schoolActive","personalActive");
+        tabPersonal.classList.remove("schoolActive","personalActive");
+
         if(group === "school") tabSchool.classList.add("schoolActive");
+        if(group === "personal") tabPersonal.classList.add("personalActive");
 
-        // drawer
         drawerTabBiz.classList.toggle("active", group === "business");
         drawerTabSchool.classList.toggle("active", group === "school");
-        drawerTabBiz.classList.remove("schoolActive");
-        drawerTabSchool.classList.remove("schoolActive");
+        drawerTabPersonal.classList.toggle("active", group === "personal");
+
+        drawerTabBiz.classList.remove("schoolActive","personalActive");
+        drawerTabSchool.classList.remove("schoolActive","personalActive");
+        drawerTabPersonal.classList.remove("schoolActive","personalActive");
+
         if(group === "school") drawerTabSchool.classList.add("schoolActive");
+        if(group === "personal") drawerTabPersonal.classList.add("personalActive");
       }
 
       function sessionPillText(s){
-        const active = currentSession() && s.id === currentSession().id;
+        const cs = currentSession();
+        const active = cs && s.id === cs.id;
         if(active) return "Active";
-        return (s.group === "school") ? "Class" : "Business";
+        if(s.group === "school") return "Class";
+        if(s.group === "personal") return "Personal";
+        return "Business";
       }
 
       function renderSessionListInto(el, group){
         el.innerHTML = "";
         const filtered = sessionsByGroup(group);
+        const cs = currentSession();
 
         if(filtered.length === 0){
           const empty = document.createElement("div");
@@ -1110,7 +1277,7 @@
 
         for(const s of filtered){
           const div = document.createElement("div");
-          div.className = "item";
+          div.className = "item" + ((cs && s.id === cs.id) ? " active" : "");
           div.innerHTML = `
             <div class="itemTop">
               <div class="itemTitle">${escapeHtml(s.title)}</div>
@@ -1131,6 +1298,39 @@
         }
       }
 
+      function renderAttachChips(){
+        const cs = currentSession();
+        if(!cs){
+          chipsRow.style.display = "none";
+          return;
+        }
+
+        // Attach UI visible only in Personal
+        if(cs.group !== "personal"){
+          chipsRow.style.display = "none";
+          nextAttachments = [];
+          chipList.innerHTML = "";
+          return;
+        }
+
+        chipsRow.style.display = "flex";
+        chipList.innerHTML = "";
+
+        for(const sid of nextAttachments){
+          const s = sessions.find(x => x.id === sid);
+          if(!s) continue;
+
+          const chip = document.createElement("div");
+          chip.className = "chip";
+          chip.innerHTML = `
+            <span style="opacity:.75;">Attached:</span>
+            <strong title="${escapeHtml(s.title)}">${escapeHtml(s.title)}</strong>
+            <button class="chipX" data-chip-x="${escapeHtml(sid)}" aria-label="Remove attachment">×</button>
+          `;
+          chipList.appendChild(chip);
+        }
+      }
+
       function renderSessions(){
         const group = getActiveGroup();
         setTabsUI(group);
@@ -1146,21 +1346,25 @@
 
         setTopSubText();
 
-        // Profile label always matches active session
         if(cs) $("profileText").textContent = getProfileForSession(cs);
+
+        renderAttachChips();
       }
 
-      // -------------------- Activation + Group switching (fixes DeepSeek leak #1/#2) --------------------
+      // -------------------- Activation + Group switching --------------------
       function activateSession(id, opts){
         opts = opts || {};
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        // Set group + per-group active session
         setActiveGroup(s.group);
         setActiveSessionIdForGroup(s.group, s.id);
 
-        // Update profile label from per-session storage
+        // When leaving personal, clear attachments
+        if(s.group !== "personal"){
+          nextAttachments = [];
+        }
+
         $("profileText").textContent = getProfileForSession(s);
 
         loadThread();
@@ -1171,7 +1375,6 @@
       }
 
       function activateSessionForGroup(group){
-        // Choose last used in that group, else first available
         const last = getActiveSessionIdForGroup(group);
         const exists = last && sessions.some(s => s.id === last && s.group === group);
         const pick = exists ? last : firstSessionId(group);
@@ -1181,7 +1384,6 @@
         if(pick){
           activateSession(pick, { keepDrawersOpen: true });
         } else {
-          // no sessions in that group: explicit empty state
           loadThreadEmpty(group);
           hydrateWorkspaceEmpty(group);
           renderSessions();
@@ -1190,20 +1392,27 @@
 
       // -------------------- CRUD sessions --------------------
       function createSession(group){
-        const isBiz = group === "business";
         const newId = uid();
 
-        const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
-        const note  = isBiz ? "Pricing • ops • planning" : "Study plan • assignments • notes";
+        let title, note;
+        if(group === "business"){
+          title = "Business — New Session";
+          note = "Pricing • ops • planning";
+        } else if(group === "school"){
+          title = "UMGC — New Class Session";
+          note = "Study plan • assignments • notes";
+        } else {
+          title = "Personal — New Session";
+          note = "Normal chat • planning";
+        }
 
         const sess = { id: newId, group, title, note, updated: stamp(), files: [] };
 
         sessions = [sess, ...sessions];
         saveSessions(sessions);
 
-        // seed intro thread + default profile
         saveHistory(newId, [introForSession(sess)]);
-        localStorage.setItem(profileKey(newId), isBiz ? "Financial" : "Study");
+        localStorage.setItem(profileKey(newId), getProfileForSession(sess));
 
         activateSession(newId);
       }
@@ -1227,7 +1436,7 @@
         const s = sessions.find(x => x.id === id);
         if(!s) return;
 
-        const protectedIds = new Set(["biz_main","math107","hist125"]);
+        const protectedIds = new Set(["biz_main","math107","hist125","personal_main"]);
         if(protectedIds.has(id)){
           alert("That session is protected (default). Create new ones and delete those instead.");
           return;
@@ -1243,7 +1452,9 @@
         try{ localStorage.removeItem(historyKey(id)); } catch {}
         try{ localStorage.removeItem(profileKey(id)); } catch {}
 
-        // If deleted active for that group, choose another in same group
+        // Remove from attachments if present
+        nextAttachments = nextAttachments.filter(x => x !== id);
+
         const activeInGroup = getActiveSessionIdForGroup(group);
         if(activeInGroup === id){
           const fallback = firstSessionId(group);
@@ -1251,7 +1462,6 @@
             setActiveSessionIdForGroup(group, fallback);
             if(getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen:true });
           } else {
-            // group now empty
             if(getActiveGroup() === group){
               loadThreadEmpty(group);
               hydrateWorkspaceEmpty(group);
@@ -1302,10 +1512,24 @@
         meta.appendChild(conf);
 
         wrap.appendChild(bubble);
+
+        // If the user message had attachments, show a tiny line under bubble
+        if(m.role === "you" && Array.isArray(m.attachments) && m.attachments.length){
+          const att = document.createElement("div");
+          att.style.fontSize = "11px";
+          att.style.opacity = ".72";
+          att.style.marginTop = "6px";
+          att.textContent = "Attached: " + m.attachments
+            .map(sid => (sessions.find(x => x.id === sid)?.title || sid))
+            .join(" • ");
+          wrap.appendChild(att);
+        }
+
         wrap.appendChild(meta);
 
         row.appendChild(wrap);
         feed.appendChild(row);
+
         feed.scrollTop = feed.scrollHeight;
       }
 
@@ -1318,16 +1542,35 @@
             content:
 `Business session loaded.
 
-What this will do when backend connects:
+When backend connects:
 • COGS-aware pricing & margin math
 • Channel fees (Amazon/Shopify) + shipping + overhead allocation
-• Decision ledger so pricing changes are traceable
-• RAG for your product specs, invoices, policies
+• Decision ledger for traceable pricing changes
+• RAG for product specs, invoices, policies
 
-Try prompts:
-- "Build pricing guardrails for luxury hair care"
-- "What inputs do you need to lock MSRP?"
+Try:
+- "Build pricing guardrails"
+- "List inputs needed to lock MSRP"
 - "Create a decision ledger template"`
+          };
+        }
+        if(session.group === "school"){
+          return {
+            role:"bot",
+            confidence:"y",
+            ts: nowTime(),
+            content:
+`Class session loaded.
+
+When backend connects:
+• Read syllabus PDF and extract deadlines + grading
+• Build weekly plan + checklists
+• Explain concepts and help structure drafts
+
+Try:
+- "Summarize grading breakdown"
+- "Extract deadlines into a checklist"
+- "Explain this topic like I'm new"`
           };
         }
         return {
@@ -1335,17 +1578,16 @@ Try prompts:
           confidence:"y",
           ts: nowTime(),
           content:
-`Class session loaded.
+`Personal session loaded.
 
-What this will do when backend connects:
-• Read syllabus PDF and extract deadlines + grading
-• Build a weekly plan and checklists
-• Explain concepts and help you structure drafts
+Rules:
+• Personal can attach context from Business + School
+• Attachments apply to the next message only (auto-clear)
+• No automatic cross-session mixing
 
-Try prompts:
-- "Summarize grading breakdown"
-- "Extract deadlines into a checklist"
-- "Explain this topic like I'm new"`
+Try:
+- "Attach Business and remind me what we decided last time"
+- "Attach School and list my next deadlines"`
         };
       }
 
@@ -1382,7 +1624,9 @@ Try prompts:
           content:
 (group === "business")
 ? "No Business sessions exist yet. Tap **New** to create one."
-: "No School sessions exist yet. Tap **New session** to create one."
+: (group === "school")
+? "No School sessions exist yet. Tap **New session** to create one."
+: "No Personal sessions exist yet. Tap **New session** to create one."
         };
         renderMessage(msg);
         history = [];
@@ -1399,7 +1643,12 @@ Try prompts:
         sendBtn.disabled = input.value.trim().length === 0 || !currentSession();
       }
 
-      // -------------------- Context safeguards (DeepSeek #7) --------------------
+      function autoSizeTextarea(){
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 220) + "px";
+      }
+
+      // -------------------- Context safeguards --------------------
       const SCHOOL_HINTS = ["syllabus","assignment","homework","quiz","discussion post","apa","citation","umgc","grade","module","week"];
       const BIZ_HINTS = ["cogs","margin","msrp","sku","shopify","amazon","fba","fbm","overhead","fees","pricing","profit","inventory","supplier"];
 
@@ -1407,21 +1656,25 @@ Try prompts:
         const cs = currentSession();
         if(!cs) return;
 
-        const t = String(text || "").toLowerCase();
+        // No warning in Personal. Personal is allowed to talk about anything.
+        if(cs.group === "personal"){
+          contextWarn.style.display = "none";
+          contextWarn.textContent = "";
+          return;
+        }
 
+        const t = String(text || "").toLowerCase();
         const looksSchool = SCHOOL_HINTS.some(k => t.includes(k));
         const looksBiz = BIZ_HINTS.some(k => t.includes(k));
 
-        // Business session but text looks school
         if(cs.group === "business" && looksSchool && !looksBiz){
-          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like School content, but you’re in a Business session. If that’s a mistake, switch to the School tab.`;
+          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like School content, but you’re in a Business session. Switch tabs if that’s accidental.`;
           contextWarn.style.display = "block";
           return;
         }
 
-        // School session but text looks business
         if(cs.group === "school" && looksBiz && !looksSchool){
-          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like Business content, but you’re in a School session. If that’s a mistake, switch to the Business tab.`;
+          contextWarn.innerHTML = `<strong>Context check:</strong> This looks like Business content, but you’re in a School session. Switch tabs if that’s accidental.`;
           contextWarn.style.display = "block";
           return;
         }
@@ -1430,6 +1683,82 @@ Try prompts:
         contextWarn.textContent = "";
       }
 
+      // -------------------- Attach Context logic --------------------
+      function canUseAttach(){
+        const cs = currentSession();
+        return !!cs && cs.group === "personal";
+      }
+
+      function allowedAttachSessions(){
+        // Smart restriction: Personal can attach ONLY from Business + School
+        return sessions
+          .filter(s => (s.group === "business" || s.group === "school"))
+          .sort((a,b) => (a.group === b.group)
+            ? String(a.title).localeCompare(String(b.title))
+            : String(a.group).localeCompare(String(b.group)));
+      }
+
+      function openAttachDrawer(){
+        if(!canUseAttach()) return;
+
+        attachSessionList.innerHTML = "";
+        const avail = allowedAttachSessions();
+        if(avail.length === 0){
+          attachSessionList.innerHTML = `<div style="color: rgba(243,239,230,.62); font-size:12px;">No Business/School sessions available.</div>`;
+          openDrawer("attach");
+          return;
+        }
+
+        for(const s of avail){
+          const already = nextAttachments.includes(s.id);
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <div class="itemTop">
+              <div class="itemTitle">${escapeHtml(s.title)}</div>
+              <span class="pillMini">${escapeHtml(s.group === "school" ? "School" : "Business")}</span>
+            </div>
+            <div class="itemMeta">${escapeHtml(s.note || "")}</div>
+            <div class="rowBtns">
+              <button class="miniBtn" data-attach-add="${escapeHtml(s.id)}">${already ? "Attached" : "Attach"}</button>
+            </div>
+          `;
+          attachSessionList.appendChild(div);
+        }
+
+        openDrawer("attach");
+      }
+
+      function attachSession(sid){
+        if(!canUseAttach()) return;
+
+        const s = sessions.find(x => x.id === sid);
+        if(!s) return;
+
+        // enforce rule
+        if(!(s.group === "business" || s.group === "school")) return;
+
+        // allow multiple, but you can keep it 1 if you want
+        if(!nextAttachments.includes(sid)){
+          nextAttachments.push(sid);
+        }
+
+        renderAttachChips();
+        // refresh attach list to show "Attached"
+        openAttachDrawer();
+      }
+
+      function removeAttachment(sid){
+        nextAttachments = nextAttachments.filter(x => x !== sid);
+        renderAttachChips();
+      }
+
+      function clearAttachments(){
+        nextAttachments = [];
+        renderAttachChips();
+      }
+
+      // -------------------- Send message (with auto-clear attachments) --------------------
       function sendMessage(){
         const cs = currentSession();
         if(!cs) return;
@@ -1440,16 +1769,32 @@ Try prompts:
         maybeWarnAboutContext(text);
 
         input.value = "";
+        autoSizeTextarea();
         syncSendButton();
 
-        const youMsg = { role:"you", confidence:"g", ts: nowTime(), content: text };
+        // record attachments ONLY for this outgoing message
+        const attachmentsForThisMsg = (cs.group === "personal") ? nextAttachments.slice() : [];
+
+        const youMsg = {
+          role:"you",
+          confidence:"g",
+          ts: nowTime(),
+          content: text,
+          attachments: attachmentsForThisMsg
+        };
         renderMessage(youMsg);
         addToHistory(youMsg);
+
+        // AUTO-CLEAR after send (your requirement)
+        if(cs.group === "personal"){
+          clearAttachments();
+        }
 
         cs.updated = stamp();
         saveSessions(sessions);
         renderSessions();
 
+        // UI-only canned reply
         let reply;
         if(cs.group === "business"){
           reply =
@@ -1460,11 +1805,11 @@ When backend is live, I will:
 • use your real COGS/fees/shipping
 • store decisions in a ledger
 
-Tell me which one you want next:
+Pick next:
 1) MSRP guardrails
-2) Margin calculator inputs
+2) MSRP inputs list
 3) Decision ledger format`;
-        } else {
+        } else if(cs.group === "school"){
           reply =
 `UI-only mode (backend not connected).
 
@@ -1473,10 +1818,21 @@ When backend is live, I will:
 • extract deadlines + grading
 • build a weekly plan
 
-Tell me what you want next:
+Pick next:
 1) Weekly plan
 2) Deadlines checklist
 3) Concept help`;
+        } else {
+          reply =
+`UI-only mode (backend not connected).
+
+Personal rules enforced:
+• Attachments were applied to that one message (if any)
+• They auto-cleared after send
+• No cross-session mixing unless you attach
+
+Try:
+- Click Attach, pick a Business/School session, then ask your question.`;
         }
 
         const botMsg = { role:"bot", confidence:"y", ts: nowTime(), content: reply };
@@ -1486,7 +1842,6 @@ Tell me what you want next:
 
       // -------------------- Workspace --------------------
       function categoryFiles(group){
-        // Flatten: [{sessionTitle, sessionId, name, desc}]
         const out = [];
         for(const s of sessionsByGroup(group)){
           const files = Array.isArray(s.files) ? s.files : [];
@@ -1504,10 +1859,11 @@ Tell me what you want next:
 
       function workspaceTemplate(session){
         const isBiz = session.group === "business";
-        const group = session.group;
+        const isSchool = session.group === "school";
+        const isPersonal = session.group === "personal";
 
         wsHint.textContent = session.id.toUpperCase();
-        wsSubtitle.textContent = (isBiz ? "Business state" : "Class state") + " • " + stamp();
+        wsSubtitle.textContent = (isBiz ? "Business state" : isSchool ? "Class state" : "Personal state") + " • " + stamp();
 
         const files = session.files || [];
         const fileRows = files.map(f => `
@@ -1520,28 +1876,23 @@ Tell me what you want next:
           </div>
         `).join("");
 
-        const allFiles = categoryFiles(group);
-        const allFileRows = allFiles.length ? allFiles.map(f => `
-          <div class="fileChip">
-            <div>
-              <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
-              <small>${escapeHtml(f.sessionTitle)} • ${escapeHtml(f.desc)}</small>
-            </div>
-            <button class="miniBtn" data-ws="open">Open</button>
-          </div>
-        `).join("") : `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files in this category yet.</div>`;
-
         const assumptions = isBiz
           ? [
               { k:"Target gross margin", v:"≥ 70%", sub:"Luxury guardrail", c:"g" },
               { k:"Channels", v:"Amazon + Shopify", sub:"Different fees, same COGS base", c:"g" },
               { k:"Fee risk", v:"Verify category", sub:"Amazon referral/fulfillment vary", c:"y" },
-              { k:"COGS freshness", v:"Notion not connected", sub:"Avoid locking MSRP w/out data", c:"r" }
+              { k:"COGS freshness", v:"Notion not connected", sub:"Avoid locking MSRP without data", c:"r" }
             ]
-          : [
+          : isSchool
+          ? [
               { k:"Syllabus", v:"Mounted (PDF)", sub:"Use for deadlines + grading policy", c:"g" },
               { k:"Weekly plan", v:"Build cadence", sub:"Make it automatic later", c:"y" },
               { k:"Notes", v:"Structured", sub:"Definitions • examples • self-test", c:"g" }
+            ]
+          : [
+              { k:"Scope", v:"General", sub:"Personal can talk about anything", c:"g" },
+              { k:"Attachments", v:"Manual only", sub:"Attach Business/School per message", c:"g" },
+              { k:"Auto-clear", v:"Enabled", sub:"Attachments clear after send", c:"g" }
             ];
 
         const assRows = assumptions.map(a => `
@@ -1565,11 +1916,16 @@ Tell me what you want next:
             <button class="miniBtn" data-ws="inputs">MSRP inputs list</button>
             <button class="miniBtn" data-ws="ledger">Decision ledger</button>
           </div>
-        ` : `
+        ` : isSchool ? `
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="miniBtn" data-ws="plan">Weekly plan</button>
             <button class="miniBtn" data-ws="deadlines">Extract deadlines</button>
             <button class="miniBtn" data-ws="notes">Study notes</button>
+          </div>
+        ` : `
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="miniBtn" data-ws="personalTips">Personal tips</button>
+            <button class="miniBtn" data-ws="attachHelp">Attach context help</button>
           </div>
         `;
 
@@ -1580,7 +1936,7 @@ Tell me what you want next:
               <span>Local-only</span>
             </div>
             <div style="color: rgba(243,239,230,.72); font-size:12px; line-height:1.35;">
-              This is where your syllabi, notes, invoices, product specs, and policies live for retrieval.
+              Where syllabi, notes, invoices, specs, and policies live for retrieval.
               <br/>UI today; backend will index files later.
             </div>
             <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
@@ -1615,11 +1971,19 @@ Tell me what you want next:
 
           <div class="section">
             <div class="sectionTitle">
-              <strong>All files (${escapeHtml(group)})</strong>
-              <span>${allFiles.length} total</span>
+              <strong>All files (${escapeHtml(session.group)})</strong>
+              <span>${categoryFiles(session.group).length} total</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
-              ${allFileRows}
+              ${(categoryFiles(session.group).length ? categoryFiles(session.group).map(f => `
+                <div class="fileChip">
+                  <div>
+                    <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
+                    <small>${escapeHtml(f.sessionTitle)} • ${escapeHtml(f.desc)}</small>
+                  </div>
+                  <button class="miniBtn" data-ws="open">Open</button>
+                </div>
+              `).join("") : `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files in this category yet.</div>`)}
             </div>
           </div>
 
@@ -1645,24 +2009,25 @@ Tell me what you want next:
         const html = workspaceTemplate(cs);
         workspaceBody.innerHTML = html;
         drawerWorkspaceBody.innerHTML = html;
+      }
 
-        const handler = (e) => {
-          const btn = e.target.closest("[data-ws]");
-          if(!btn) return;
-          const act = btn.getAttribute("data-ws");
+      function onWorkspaceClick(e){
+        const btn = e.target.closest("[data-ws]");
+        if(!btn) return;
 
-          const s = currentSession();
-          if(!s) return;
+        const act = btn.getAttribute("data-ws");
+        const s = currentSession();
+        if(!s) return;
 
-          const canned = (function(){
-            if(s.group === "business"){
-              if(act === "guardrails") return
+        const canned = (function(){
+          if(s.group === "business"){
+            if(act === "guardrails") return
 `Pricing guardrails (UI preview):
-• Don’t lock MSRP until: COGS + packaging + shipping + fees are verified.
+• Don’t lock MSRP until COGS + packaging + shipping + fees are verified.
 • Keep gross margin floor ≥ 70% (luxury guardrail).
 • Separate prices by channel (Amazon fees vs Shopify).
-• Log every price change in a decision ledger (why + inputs + risk).`;
-              if(act === "inputs") return
+• Log every price change in a decision ledger.`;
+            if(act === "inputs") return
 `MSRP inputs list (UI preview):
 1) Unit ingredient cost (COGS)
 2) Packaging unit cost (jar/bottle + label + shrink + box)
@@ -1671,58 +2036,66 @@ Tell me what you want next:
 5) Returns + damage reserve
 6) Overhead allocation per unit (fixed costs / volume assumption)
 7) Target margin floor + promo buffer`;
-              if(act === "ledger") return
+            if(act === "ledger") return
 `Decision ledger template (UI preview):
 • Date/time
 • SKU + channel
 • Old price → new price
 • Inputs used (COGS, fees, ship, overhead)
 • Margin impact (before/after)
-• Reason (what changed)
+• Reason
 • Risks + mitigations
 • Sources (links/files)`;
-            } else {
-              if(act === "plan") return
+          } else if(s.group === "school"){
+            if(act === "plan") return
 `Weekly plan (UI preview):
 • Mon: read/watch + outline
 • Tue: practice/problems/notes
 • Wed: draft discussion/assignment
 • Thu: revise + self-test
-• Fri: final polish + submit
-Backend later will auto-pull deadlines from syllabus.`;
-              if(act === "deadlines") return
+• Fri: final polish + submit`;
+            if(act === "deadlines") return
 `Deadlines extraction (backend hook):
 Backend will parse the syllabus PDF and generate:
 • assignment list
 • due dates
 • grading weights
 • reminders`;
-              if(act === "notes") return
+            if(act === "notes") return
 `Study notes (backend hook):
 Backend will generate structured notes:
 • key terms
 • examples
 • common mistakes
 • quick quiz questions`;
-            }
-            if(act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
-            if(act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
-            if(act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
-            return "UI-only action.";
-          })();
+          } else {
+            if(act === "personalTips") return
+`Personal session tips:
+• Keep this as your hub for normal chat.
+• Attach Business/School only when you need it.
+• Auto-clear is on to prevent accidental mixing.`;
+            if(act === "attachHelp") return
+`Attach Context:
+• Click Attach (Personal only)
+• Pick a Business/School session
+• Ask your question
+• Attachments auto-clear after send`;
+          }
 
-          const msg = { role:"bot", confidence:"y", ts: nowTime(), content: canned };
-          renderMessage(msg);
-          addToHistory(msg);
-        };
+          if(act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
+          if(act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
+          if(act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
+          return "UI-only action.";
+        })();
 
-        workspaceBody.onclick = handler;
-        drawerWorkspaceBody.onclick = handler;
+        const msg = { role:"bot", confidence:"y", ts: nowTime(), content: canned };
+        renderMessage(msg);
+        addToHistory(msg);
       }
 
       function hydrateWorkspaceEmpty(group){
         wsHint.textContent = "—";
-        wsSubtitle.textContent = (group === "business" ? "Business state" : "Class state") + " • " + stamp();
+        wsSubtitle.textContent = (group === "business" ? "Business state" : group === "school" ? "Class state" : "Personal state") + " • " + stamp();
 
         const html = `
           <div class="section">
@@ -1731,7 +2104,7 @@ Backend will generate structured notes:
               <span>${escapeHtml(group)}</span>
             </div>
             <div style="color: rgba(243,239,230,.78); font-size:12.5px; line-height:1.35;">
-              Create a ${group === "business" ? "Business" : "School"} session to activate the workspace.
+              Create a ${group === "business" ? "Business" : group === "school" ? "School" : "Personal"} session to activate the workspace.
             </div>
           </div>
         `;
@@ -1741,161 +2114,4 @@ Backend will generate structured notes:
 
       // -------------------- Drawers --------------------
       function openDrawer(which){
-        backdrop.classList.add("open");
-        if(which === "sessions"){
-          sessionsDrawer.classList.add("open");
-          sessionsDrawer.setAttribute("aria-hidden","false");
-        } else {
-          workspaceDrawer.classList.add("open");
-          workspaceDrawer.setAttribute("aria-hidden","false");
-        }
-      }
-      function closeDrawer(which){
-        if(which === "sessions"){
-          sessionsDrawer.classList.remove("open");
-          sessionsDrawer.setAttribute("aria-hidden","true");
-        } else if(which === "workspace"){
-          workspaceDrawer.classList.remove("open");
-          workspaceDrawer.setAttribute("aria-hidden","true");
-        } else {
-          sessionsDrawer.classList.remove("open");
-          workspaceDrawer.classList.remove("open");
-          sessionsDrawer.setAttribute("aria-hidden","true");
-          workspaceDrawer.setAttribute("aria-hidden","true");
-        }
-
-        const anyOpen = sessionsDrawer.classList.contains("open") || workspaceDrawer.classList.contains("open");
-        if(!anyOpen) backdrop.classList.remove("open");
-      }
-
-      // -------------------- Events --------------------
-      function wireEvents(){
-        input.addEventListener("input", () => {
-          syncSendButton();
-          maybeWarnAboutContext(input.value);
-        });
-
-        input.addEventListener("keydown", (e) => {
-          if(e.key === "Enter" && !e.shiftKey){
-            e.preventDefault();
-            sendMessage();
-          }
-        });
-
-        sendBtn.addEventListener("click", sendMessage);
-
-        // Tabs now SWITCH GROUP AND ACTIVATE A SESSION (fixes DeepSeek #1/#2)
-        const switchTo = (g) => {
-          closeDrawer("all");          // reduce weirdness on mobile
-          activateSessionForGroup(g);
-        };
-
-        tabBiz.addEventListener("click", () => switchTo("business"));
-        tabSchool.addEventListener("click", () => switchTo("school"));
-        drawerTabBiz.addEventListener("click", () => switchTo("business"));
-        drawerTabSchool.addEventListener("click", () => switchTo("school"));
-
-        // New session
-        $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
-        $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
-
-        // Session list actions
-        function sessionActionHandler(e){
-          const btn = e.target.closest("[data-act]");
-          if(!btn) return;
-          const act = btn.getAttribute("data-act");
-          const id = btn.getAttribute("data-id");
-          if(!id) return;
-
-          if(act === "activate") activateSession(id);
-          if(act === "rename") renameSession(id);
-          if(act === "delete") deleteSession(id);
-        }
-        sessionList.addEventListener("click", sessionActionHandler);
-        drawerSessionList.addEventListener("click", sessionActionHandler);
-
-        // Profile cycle (PER SESSION)
-        $("profileBadge").addEventListener("click", () => {
-          const cs = currentSession();
-          if(!cs) return;
-          cycleProfileForSession(cs);
-          hydrateWorkspace();
-        });
-
-        // Notion badge demo (just UI)
-        $("notionBadge").addEventListener("click", () => {
-          const cur = $("notionText").textContent || "";
-          if(cur.includes("Not connected")){
-            setDot(notionDot,"bad"); $("notionText").textContent = "Out of sync (12h)";
-          } else if(cur.includes("Out of sync")){
-            setDot(notionDot,"ok"); $("notionText").textContent = "Synced 3 min ago";
-          } else {
-            setDot(notionDot,"bad"); $("notionText").textContent = "Not connected";
-          }
-        });
-
-        // Drawers open/close
-        $("openSessions").addEventListener("click", () => openDrawer("sessions"));
-        $("openWorkspace").addEventListener("click", () => openDrawer("workspace"));
-
-        $("closeSessionsDrawer").addEventListener("click", () => closeDrawer("sessions"));
-        $("closeWorkspaceDrawer").addEventListener("click", () => closeDrawer("workspace"));
-
-        backdrop.addEventListener("click", () => closeDrawer("all"));
-        window.addEventListener("keydown", (e) => {
-          if(e.key === "Escape") closeDrawer("all");
-        });
-      }
-
-      // -------------------- Init --------------------
-      let didInit = false;
-      function init(){
-        if(didInit) return;
-        didInit = true;
-
-        // baseline badges
-        setDot(notionDot, "bad");
-        $("notionText").textContent = "Not connected";
-        setDot(engineDot, "bad");
-        $("engineText").textContent = "UI only";
-
-        // migrate legacy active session into per-group model
-        migrateLegacyActiveIfNeeded();
-
-        // Ensure active group exists
-        const g = getActiveGroup();
-        setActiveGroup((g === "school" || g === "business") ? g : "business");
-
-        // Ensure per-group active sessions are valid
-        for(const group of ["business","school"]){
-          const cur = getActiveSessionIdForGroup(group);
-          const ok = cur && sessions.some(s => s.id === cur && s.group === group);
-          if(!ok){
-            const pick = firstSessionId(group);
-            if(pick) setActiveSessionIdForGroup(group, pick);
-          }
-        }
-
-        // Activate current group session (this is the real fix)
-        activateSessionForGroup(getActiveGroup());
-
-        // Wire events once
-        wireEvents();
-
-        // Button state
-        syncSendButton();
-      }
-
-      try{
-        if(document.readyState === "loading"){
-          document.addEventListener("DOMContentLoaded", init, { once:true });
-        } else {
-          init();
-        }
-      } catch (e){
-        showFatal(e);
-      }
-    })();
-  </script>
-</body>
-</html>
+        backdrop.classList.add
