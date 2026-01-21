@@ -13,118 +13,112 @@
   <meta name="apple-mobile-web-app-title" content="WilliamBot" />
 
   <style>
-    :root {
-      --bg: #0b0a08;
-      --bg2: #12100c;
-      --cream: #f3efe6;
-      --ink: #1b1813;
-      --border: rgba(243, 239, 230, .14);
-      --accent: #7a1114; /* Business (burgundy) */
-      --accent2: #a0141a;
-      --school: #1e40af; /* School (slate-blue) */
-      --school2: #2563eb;
-      --green: #15803d;
-      --amber: #b45309;
-      --red: #b91c1c;
-      --r: 18px;
-      --r2: 14px;
-      --shadow: 0 18px 60px rgba(0, 0, 0, .35);
-      --shadow2: 0 10px 30px rgba(0, 0, 0, .28);
+    :root{
+      --bg:#0b0a08;
+      --bg2:#12100c;
+
+      --cream:#f3efe6;
+      --ink:#1b1813;
+
+      --border: rgba(243,239,230,.14);
+
+      --accent:#7a1114;     /* Business (burgundy) */
+      --accent2:#a0141a;
+      --school:#1e40af;     /* School (slate-blue) */
+      --school2:#2563eb;
+
+      --green:#15803d;
+      --amber:#b45309;
+      --red:#b91c1c;
+
+      --r:18px;
+      --r2:14px;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --shadow2: 0 10px 30px rgba(0,0,0,.28);
+
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; }
+    body{
       font-family: var(--font);
       background:
-        radial-gradient(900px 600px at 18% 10%, rgba(122, 17, 20, .20), transparent 55%),
-        radial-gradient(800px 500px at 90% 28%, rgba(243, 239, 230, .10), transparent 60%),
+        radial-gradient(900px 600px at 18% 10%, rgba(122,17,20,.20), transparent 55%),
+        radial-gradient(800px 500px at 90% 28%, rgba(243,239,230,.10), transparent 60%),
         linear-gradient(180deg, var(--bg), var(--bg2));
       color: var(--cream);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow-x: hidden;
+      overflow-x:hidden;
     }
 
-    .hidden { display: none !important; }
-    .srOnly {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
+    .hidden { display:none !important; }
+    .srOnly{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
     }
 
-    .wrap {
-      height: 100%;
+    .wrap{
+      height:100%;
       padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: center;
+      display:flex;
+      justify-content:center;
     }
-
-    .app {
-      width: 100%;
+    .app{
+      width:100%;
       max-width: 1280px;
       height: 100%;
-      display: grid;
+      display:grid;
       grid-template-columns: 300px 1fr 360px;
       grid-template-rows: auto 1fr;
       gap: 12px;
       min-width: 0;
     }
 
-    header {
+    header{
       grid-column: 1 / -1;
       border: 1px solid var(--border);
-      background: rgba(20, 17, 13, .78);
+      background: rgba(20,17,13,.78);
       backdrop-filter: blur(10px);
       border-radius: var(--r);
       box-shadow: var(--shadow2);
       padding: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 12px;
       min-width: 0;
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
+    .brand{
+      display:flex;
+      align-items:center;
       gap: 10px;
       min-width: 0;
     }
-
-    .logo {
+    .logo{
       width: 38px;
       height: 38px;
       border-radius: 14px;
-      display: grid;
-      place-items: center;
-      user-select: none;
+      display:grid;
+      place-items:center;
+      user-select:none;
       font-weight: 900;
       letter-spacing: .4px;
       color: var(--cream);
-      border: 1px solid rgba(243, 239, 230, .16);
+      border: 1px solid rgba(243,239,230,.16);
       background:
-        radial-gradient(18px 18px at 30% 25%, rgba(243, 239, 230, .22), transparent 55%),
-        linear-gradient(135deg, rgba(122, 17, 20, .75), rgba(122, 17, 20, .20));
-      box-shadow: 0 10px 22px rgba(122, 17, 20, .18);
+        radial-gradient(18px 18px at 30% 25%, rgba(243,239,230,.22), transparent 55%),
+        linear-gradient(135deg, rgba(122,17,20,.75), rgba(122,17,20,.20));
+      box-shadow: 0 10px 22px rgba(122,17,20,.18);
     }
-
-    .brandText {
-      display: flex;
-      flex-direction: column;
+    .brandText{
+      display:flex;
+      flex-direction:column;
       line-height: 1.06;
       min-width: 0;
       gap: 6px;
     }
-
-    .brandText strong {
+    .brandText strong{
       font-size: 15.5px;
       white-space: nowrap;
       overflow: hidden;
@@ -132,336 +126,271 @@
     }
 
     /* NEW: category badge that tells the truth */
-    .catRow {
-      display: flex;
-      align-items: center;
+    .catRow{
+      display:flex;
+      align-items:center;
       gap: 8px;
       min-width: 0;
     }
-
-    .catBadge {
-      display: inline-flex;
-      align-items: center;
+    .catBadge{
+      display:inline-flex;
+      align-items:center;
       gap: 8px;
       padding: 5px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(243, 239, 230, .14);
+      border: 1px solid rgba(243,239,230,.14);
       font-size: 12px;
-      color: rgba(243, 239, 230, .92);
-      background: rgba(15, 13, 10, .35);
+      color: rgba(243,239,230,.92);
+      background: rgba(15,13,10,.35);
       white-space: nowrap;
-      user-select: none;
+      user-select:none;
       flex: 0 0 auto;
     }
-
-    .catBadge .miniDot {
+    .catBadge .miniDot{
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, .18);
+      box-shadow: 0 0 0 3px rgba(0,0,0,.18);
       flex: 0 0 auto;
     }
+    .catBadge.biz .miniDot{ background: var(--accent2); box-shadow: 0 0 0 3px rgba(122,17,20,.16); }
+    .catBadge.school .miniDot{ background: var(--school2); box-shadow: 0 0 0 3px rgba(37,99,235,.16); }
 
-    .catBadge.biz .miniDot {
-      background: var(--accent2);
-      box-shadow: 0 0 0 3px rgba(122, 17, 20, .16);
-    }
-
-    .catBadge.school .miniDot {
-      background: var(--school2);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, .16);
-    }
-
-    #topSub {
+    #topSub{
       font-size: 12px;
-      color: rgba(243, 239, 230, .68);
+      color: rgba(243,239,230,.68);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       min-width: 0;
     }
 
-    .statusRow {
-      display: flex;
-      align-items: center;
+    .statusRow{
+      display:flex;
+      align-items:center;
       gap: 10px;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content:flex-end;
     }
 
-    .badge {
-      display: flex;
-      align-items: center;
+    .badge{
+      display:flex;
+      align-items:center;
       gap: 8px;
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: rgba(20, 17, 13, .55);
-      color: rgba(243, 239, 230, .80);
+      background: rgba(20,17,13,.55);
+      color: rgba(243,239,230,.80);
       font-size: 12px;
-      user-select: none;
+      user-select:none;
       white-space: nowrap;
       max-width: 100%;
-      cursor: default;
     }
-
-    .badge.clickable {
-      cursor: pointer;
-    }
-
-    .badge .label {
-      color: rgba(243, 239, 230, .62);
+    .badge.clickable{ cursor:pointer; }
+    .badge .label{
+      color: rgba(243,239,230,.62);
       font-weight: 650;
     }
-
-    .dot {
+    .dot{
       width: 9px;
       height: 9px;
       border-radius: 50%;
       background: var(--amber);
-      box-shadow: 0 0 0 4px rgba(180, 83, 9, .14);
+      box-shadow: 0 0 0 4px rgba(180,83,9,.14);
       flex: 0 0 auto;
     }
+    .dot.ok{ background: var(--green); box-shadow: 0 0 0 4px rgba(21,128,61,.14); }
+    .dot.bad{ background: var(--red); box-shadow: 0 0 0 4px rgba(185,28,28,.16); }
 
-    .dot.ok {
-      background: var(--green);
-      box-shadow: 0 0 0 4px rgba(21, 128, 61, .14);
-    }
-
-    .dot.bad {
-      background: var(--red);
-      box-shadow: 0 0 0 4px rgba(185, 28, 28, .16);
-    }
-
-    .ghostBtn {
+    .ghostBtn{
       border: 1px solid var(--border);
-      background: rgba(20, 17, 13, .45);
-      color: rgba(243, 239, 230, .88);
+      background: rgba(20,17,13,.45);
+      color: rgba(243,239,230,.88);
       padding: 10px 12px;
       border-radius: 999px;
       cursor: pointer;
       font-weight: 740;
       font-size: 13px;
       transition: transform .06s ease, border-color .12s ease, background .12s ease;
-      user-select: none;
+      user-select:none;
+    }
+    .ghostBtn:active{ transform: translateY(1px); }
+    .ghostBtn:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(20,17,13,.62);
     }
 
-    .ghostBtn:active {
-      transform: translateY(1px);
-    }
-
-    .ghostBtn:hover {
-      border-color: rgba(243, 239, 230, .22);
-      background: rgba(20, 17, 13, .62);
-    }
-
-    .panel {
+    .panel{
       border-radius: var(--r);
       border: 1px solid var(--border);
-      background: rgba(20, 17, 13, .78);
+      background: rgba(20,17,13,.78);
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow2);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
       min-height: 0;
       min-width: 0;
     }
-
-    .panelHeader {
+    .panelHeader{
       padding: 12px;
-      border-bottom: 1px solid rgba(243, 239, 230, .14);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      border-bottom: 1px solid rgba(243,239,230,.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 10px;
     }
-
-    .panelHeader strong {
+    .panelHeader strong{
       font-size: 13px;
       letter-spacing: .2px;
-      color: rgba(243, 239, 230, .92);
+      color: rgba(243,239,230,.92);
     }
-
-    .panelHeader small {
-      display: block;
+    .panelHeader small{
+      display:block;
       font-size: 12px;
-      color: rgba(243, 239, 230, .62);
-      margin-top: 4px;
+      color: rgba(243,239,230,.62);
+      margin-top:4px;
     }
-
-    .panelBody {
+    .panelBody{
       padding: 10px;
-      overflow: auto;
+      overflow:auto;
       min-height: 0;
     }
 
-    .segRow {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
+    .segRow{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
     }
-
-    .seg {
-      flex: 1;
+    .seg{
+      flex:1;
       padding: 10px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(15, 13, 10, .35);
-      color: rgba(243, 239, 230, .80);
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
+      color: rgba(243,239,230,.80);
       font-weight: 820;
       font-size: 12px;
-      cursor: pointer;
-      user-select: none;
-      text-align: center;
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
       transition: border-color .12s ease, background .12s ease;
       white-space: nowrap;
     }
-
-    .seg.active {
-      border-color: rgba(122, 17, 20, .45);
-      background: rgba(122, 17, 20, .18);
-      color: rgba(243, 239, 230, .92);
-      box-shadow: 0 0 0 4px rgba(122, 17, 20, .10) inset;
+    .seg.active{
+      border-color: rgba(122,17,20,.45);
+      background: rgba(122,17,20,.18);
+      color: rgba(243,239,230,.92);
+      box-shadow: 0 0 0 4px rgba(122,17,20,.10) inset;
     }
-
     /* NEW: school tab active treatment */
-    .seg.schoolActive {
-      border-color: rgba(37, 99, 235, .45);
-      background: rgba(37, 99, 235, .16);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, .10) inset;
+    .seg.schoolActive{
+      border-color: rgba(37,99,235,.45);
+      background: rgba(37,99,235,.16);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10) inset;
     }
 
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .item {
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(15, 13, 10, .35);
+    .list{ display:flex; flex-direction:column; gap: 8px; margin-top:10px; }
+    .item{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
       border-radius: 14px;
       padding: 10px;
-      cursor: pointer;
+      cursor:pointer;
       transition: border-color .12s ease, background .12s ease, transform .06s ease;
     }
-
-    .item:hover {
-      border-color: rgba(243, 239, 230, .22);
-      background: rgba(15, 13, 10, .48);
+    .item:hover{
+      border-color: rgba(243,239,230,.22);
+      background: rgba(15,13,10,.48);
     }
-
-    .item:active {
-      transform: translateY(1px);
-    }
-
-    .itemTop {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .item:active{ transform: translateY(1px); }
+    .itemTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 10px;
     }
-
-    .itemTitle {
+    .itemTitle{
       font-weight: 850;
       font-size: 13px;
-      color: rgba(243, 239, 230, .92);
-      overflow: hidden;
+      color: rgba(243,239,230,.92);
+      overflow:hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      min-width: 0;
+      min-width:0;
     }
-
-    .pillMini {
+    .pillMini{
       font-size: 11px;
       padding: 4px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(243, 239, 230, .14);
-      color: rgba(243, 239, 230, .70);
-      background: rgba(15, 13, 10, .35);
+      border: 1px solid rgba(243,239,230,.14);
+      color: rgba(243,239,230,.70);
+      background: rgba(15,13,10,.35);
       flex: 0 0 auto;
-      user-select: none;
+      user-select:none;
     }
-
-    .itemMeta {
+    .itemMeta{
       font-size: 12px;
-      color: rgba(243, 239, 230, .62);
+      color: rgba(243,239,230,.62);
       margin-top: 6px;
       line-height: 1.25;
     }
-
-    .rowBtns {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
+    .rowBtns{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
       flex-wrap: wrap;
     }
 
-    .chat {
+    .chat{
       border-radius: var(--r);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
       min-height: 0;
       min-width: 0;
     }
-
     /* NEW: chat background differs by category (subtle) */
-    .chat.bizBg {
+    .chat.bizBg{
       background:
-        radial-gradient(900px 600px at 30% 0%, rgba(122, 17, 20, .10), transparent 55%),
-        linear-gradient(180deg, rgba(243, 239, 230, .08), rgba(243, 239, 230, .04));
+        radial-gradient(900px 600px at 30% 0%, rgba(122,17,20,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
+    }
+    .chat.schoolBg{
+      background:
+        radial-gradient(900px 600px at 30% 0%, rgba(37,99,235,.10), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.08), rgba(243,239,230,.04));
     }
 
-    .chat.schoolBg {
-      background:
-        radial-gradient(900px 600px at 30% 0%, rgba(37, 99, 235, .10), transparent 55%),
-        linear-gradient(180deg, rgba(243, 239, 230, .08), rgba(243, 239, 230, .04));
-    }
-
-    .feed {
-      flex: 1;
-      overflow: auto;
+    .feed{
+      flex:1;
+      overflow:auto;
       padding: 14px 12px;
       background:
-        radial-gradient(900px 600px at 25% 20%, rgba(243, 239, 230, .12), transparent 55%),
-        linear-gradient(180deg, rgba(243, 239, 230, .10), rgba(243, 239, 230, .06));
+        radial-gradient(900px 600px at 25% 20%, rgba(243,239,230,.12), transparent 55%),
+        linear-gradient(180deg, rgba(243,239,230,.10), rgba(243,239,230,.06));
       min-height: 0;
     }
-
-    .row {
-      display: flex;
-      margin: 10px 0;
-      gap: 10px;
-    }
-
-    .row.you {
-      justify-content: flex-end;
-    }
-
-    .row.bot {
-      justify-content: flex-start;
-    }
-
-    .bubbleWrap {
-      display: flex;
-      flex-direction: column;
+    .row{ display:flex; margin: 10px 0; gap: 10px; }
+    .row.you{ justify-content:flex-end; }
+    .row.bot{ justify-content:flex-start; }
+    .bubbleWrap{
+      display:flex;
+      flex-direction:column;
       gap: 6px;
       max-width: min(92ch, 96%);
       min-width: 0;
     }
-
-    .bubble {
+    .bubble{
       padding: 12px 12px;
       border-radius: var(--r2);
-      border: 1px solid rgba(21, 18, 13, .14);
-      background: rgba(243, 239, 230, .92);
+      border: 1px solid rgba(21,18,13,.14);
+      background: rgba(243,239,230,.92);
       color: var(--ink);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, .10);
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
       white-space: pre-wrap;
       word-wrap: break-word;
       line-height: 1.42;
@@ -469,359 +398,274 @@
       position: relative;
       min-width: 0;
     }
-
-    .you .bubble {
-      border-color: rgba(122, 17, 20, .25);
+    .you .bubble{
+      border-color: rgba(122,17,20,.25);
       box-shadow:
-        0 10px 24px rgba(122, 17, 20, .10),
-        0 0 0 1px rgba(122, 17, 20, .08) inset;
+        0 10px 24px rgba(122,17,20,.10),
+        0 0 0 1px rgba(122,17,20,.08) inset;
       padding-left: 14px;
     }
-
-    .you .bubble::before {
-      content: "";
-      position: absolute;
+    .you .bubble:before{
+      content:"";
+      position:absolute;
       left: 0;
       top: 10px;
       bottom: 10px;
       width: 3px;
       border-radius: 999px;
-      background: linear-gradient(180deg, rgba(122, 17, 20, .85), rgba(122, 17, 20, .20));
-      opacity: .9;
+      background: linear-gradient(180deg, rgba(122,17,20,.85), rgba(122,17,20,.20));
+      opacity:.9;
     }
 
-    .meta {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
       font-size: 11px;
-      color: rgba(21, 18, 13, .62);
+      color: rgba(21,18,13,.62);
       padding: 0 2px;
-      align-items: center;
+      align-items:center;
     }
-
-    .confidence {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      user-select: none;
-    }
-
-    .confDot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+    .confidence{ display:flex; align-items:center; gap: 6px; user-select:none; }
+    .confDot{
+      width: 8px; height: 8px; border-radius: 50%;
       background: #9ca3af;
-      box-shadow: 0 0 0 3px rgba(156, 163, 175, .18);
+      box-shadow: 0 0 0 3px rgba(156,163,175,.18);
     }
+    .confDot.g{ background: var(--green); box-shadow: 0 0 0 3px rgba(21,128,61,.14); }
+    .confDot.y{ background: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.14); }
+    .confDot.r{ background: var(--red); box-shadow: 0 0 0 3px rgba(185,28,28,.14); }
 
-    .confDot.g {
-      background: var(--green);
-      box-shadow: 0 0 0 3px rgba(21, 128, 61, .14);
-    }
-
-    .confDot.y {
-      background: var(--amber);
-      box-shadow: 0 0 0 3px rgba(180, 83, 9, .14);
-    }
-
-    .confDot.r {
-      background: var(--red);
-      box-shadow: 0 0 0 3px rgba(185, 28, 28, .14);
-    }
-
-    .composer {
+    .composer{
       padding: 12px;
-      border-top: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(20, 17, 13, .52);
-      display: flex;
-      flex-direction: column;
+      border-top: 1px solid rgba(243,239,230,.14);
+      background: rgba(20,17,13,.52);
+      display:flex;
+      flex-direction:column;
       gap: 10px;
     }
-
-    .composerRow {
-      display: flex;
+    .composerRow{
+      display:flex;
       gap: 10px;
-      align-items: flex-end;
+      align-items:flex-end;
     }
-
-    textarea {
-      flex: 1;
-      resize: none;
+    textarea{
+      flex:1;
+      resize:none;
       min-height: 48px;
       max-height: 180px;
       padding: 12px 12px;
       border-radius: 16px;
-      border: 1px solid rgba(243, 239, 230, .16);
-      background: rgba(11, 10, 8, .55);
-      color: rgba(243, 239, 230, .92);
+      border: 1px solid rgba(243,239,230,.16);
+      background: rgba(11,10,8,.55);
+      color: rgba(243,239,230,.92);
       font-size: 14.6px;
-      outline: none;
+      outline:none;
     }
-
-    textarea::placeholder {
-      color: rgba(243, 239, 230, .55);
-    }
-
-    textarea:focus {
-      border-color: rgba(122, 17, 20, .40);
-      box-shadow: 0 0 0 5px rgba(122, 17, 20, .16);
+    textarea::placeholder{ color: rgba(243,239,230,.55); }
+    textarea:focus{
+      border-color: rgba(122,17,20,.40);
+      box-shadow: 0 0 0 5px rgba(122,17,20,.16);
     }
 
     /* NEW: context warning (non-blocking) */
-    .warn {
-      display: none;
-      border: 1px solid rgba(180, 83, 9, .35);
-      background: rgba(180, 83, 9, .10);
-      color: rgba(243, 239, 230, .92);
+    .warn{
+      display:none;
+      border: 1px solid rgba(180,83,9,.35);
+      background: rgba(180,83,9,.10);
+      color: rgba(243,239,230,.92);
       border-radius: 14px;
       padding: 10px 12px;
       font-size: 12.5px;
       line-height: 1.35;
     }
+    .warn strong{ color: rgba(243,239,230,.95); }
 
-    .warn strong {
-      color: rgba(243, 239, 230, .95);
-    }
-
-    .send {
+    .send{
       min-width: 96px;
       padding: 12px 14px;
       border-radius: 16px;
-      border: 1px solid rgba(122, 17, 20, .45);
-      background: linear-gradient(180deg, rgba(122, 17, 20, .32), rgba(122, 17, 20, .18));
-      color: rgba(243, 239, 230, .95);
+      border: 1px solid rgba(122,17,20,.45);
+      background: linear-gradient(180deg, rgba(122,17,20,.32), rgba(122,17,20,.18));
+      color: rgba(243,239,230,.95);
       font-weight: 850;
       cursor: pointer;
-      box-shadow: 0 10px 26px rgba(122, 17, 20, .16);
+      box-shadow: 0 10px 26px rgba(122,17,20,.16);
       transition: transform .06s ease, filter .12s ease;
     }
-
-    .send:hover {
-      filter: brightness(1.06);
-    }
-
-    .send:active {
-      transform: translateY(1px);
-    }
-
-    .send:disabled {
+    .send:hover{ filter: brightness(1.06); }
+    .send:active{ transform: translateY(1px); }
+    .send:disabled{
       opacity: .55;
       cursor: not-allowed;
       box-shadow: none;
     }
 
-    .section {
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(15, 13, 10, .35);
+    .section{
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.35);
       border-radius: 14px;
       padding: 10px;
     }
+    .section + .section{ margin-top: 10px; }
 
-    .section + .section {
-      margin-top: 10px;
-    }
-
-    .sectionTitle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 10px;
       margin-bottom: 8px;
     }
-
-    .sectionTitle strong {
+    .sectionTitle strong{
       font-size: 12.5px;
-      color: rgba(243, 239, 230, .90);
+      color: rgba(243,239,230,.90);
       letter-spacing: .2px;
     }
-
-    .sectionTitle span {
+    .sectionTitle span{
       font-size: 12px;
-      color: rgba(243, 239, 230, .62);
+      color: rgba(243,239,230,.62);
     }
 
-    .kv {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .kvRow {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+    .kv{ display:flex; flex-direction:column; gap: 8px; }
+    .kvRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
       gap: 10px;
       padding-top: 6px;
-      border-top: 1px dashed rgba(243, 239, 230, .12);
+      border-top: 1px dashed rgba(243,239,230,.12);
     }
-
-    .kvRow:first-child {
-      border-top: none;
-      padding-top: 0;
-    }
-
-    .kvKey {
+    .kvRow:first-child{ border-top:none; padding-top:0; }
+    .kvKey{
       font-size: 12px;
-      color: rgba(243, 239, 230, .78);
+      color: rgba(243,239,230,.78);
       line-height: 1.25;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
     }
-
-    .kvVal {
+    .kvVal{
       font-size: 12px;
-      color: rgba(243, 239, 230, .92);
+      color: rgba(243,239,230,.92);
       font-weight: 780;
-      text-align: right;
+      text-align:right;
       line-height: 1.25;
       white-space: nowrap;
     }
-
-    .kvSub {
+    .kvSub{
       font-size: 11px;
-      color: rgba(243, 239, 230, .62);
+      color: rgba(243,239,230,.62);
       margin-top: 2px;
     }
 
-    .fileChip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .fileChip{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 10px;
       padding: 8px 10px;
       border-radius: 12px;
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(15, 13, 10, .30);
-      color: rgba(243, 239, 230, .80);
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(15,13,10,.30);
+      color: rgba(243,239,230,.80);
       font-size: 12px;
     }
+    .fileChip small{ color: rgba(243,239,230,.60); }
 
-    .fileChip small {
-      color: rgba(243, 239, 230, .60);
-    }
-
-    .miniBtn {
+    .miniBtn{
       border-radius: 999px;
       padding: 7px 10px;
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(20, 17, 13, .45);
-      color: rgba(243, 239, 230, .88);
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(20,17,13,.45);
+      color: rgba(243,239,230,.88);
       font-weight: 820;
-      cursor: pointer;
-      user-select: none;
+      cursor:pointer;
+      user-select:none;
       font-size: 12px;
       transition: transform .06s ease, border-color .12s ease, background .12s ease;
       white-space: nowrap;
     }
-
-    .miniBtn:hover {
-      border-color: rgba(243, 239, 230, .22);
-      background: rgba(20, 17, 13, .62);
+    .miniBtn:hover{ border-color: rgba(243,239,230,.22); background: rgba(20,17,13,.62); }
+    .miniBtn:active{ transform: translateY(1px); }
+    .miniBtn.danger{
+      border-color: rgba(185,28,28,.35);
+      background: rgba(185,28,28,.12);
     }
 
-    .miniBtn:active {
-      transform: translateY(1px);
-    }
-
-    .miniBtn.danger {
-      border-color: rgba(185, 28, 28, .35);
-      background: rgba(185, 28, 28, .12);
-    }
-
-    .fatal {
+    .fatal{
       position: fixed;
       inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
+      display:none;
+      align-items:center;
+      justify-content:center;
       padding: 16px;
-      background: rgba(0, 0, 0, .78);
+      background: rgba(0,0,0,.78);
       z-index: 9999;
     }
-
-    .fatalCard {
+    .fatalCard{
       width: min(860px, 100%);
       border-radius: 20px;
-      border: 1px solid rgba(243, 239, 230, .18);
-      background: rgba(20, 17, 13, .92);
-      box-shadow: 0 22px 80px rgba(0, 0, 0, .55);
+      border: 1px solid rgba(243,239,230,.18);
+      background: rgba(20,17,13,.92);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
       padding: 14px;
-      color: rgba(243, 239, 230, .90);
+      color: rgba(243,239,230,.90);
     }
-
-    .fatalCard strong {
-      font-size: 13px;
-    }
-
-    .fatalCard pre {
+    .fatalCard strong{ font-size: 13px; }
+    .fatalCard pre{
       margin: 10px 0 0;
       padding: 10px;
       border-radius: 14px;
-      border: 1px solid rgba(243, 239, 230, .14);
-      background: rgba(11, 10, 8, .55);
-      overflow: auto;
+      border: 1px solid rgba(243,239,230,.14);
+      background: rgba(11,10,8,.55);
+      overflow:auto;
       max-height: 45vh;
-      color: rgba(243, 239, 230, .86);
+      color: rgba(243,239,230,.86);
       font-size: 12px;
       line-height: 1.35;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .drawerBackdrop {
+    .drawerBackdrop{
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, .58);
-      display: none;
+      background: rgba(0,0,0,.58);
+      display:none;
       z-index: 9000;
     }
-
-    .drawer {
+    .drawer{
       position: fixed;
       top: 0;
       bottom: 0;
       width: min(92vw, 420px);
-      background: rgba(20, 17, 13, .92);
-      border-right: 1px solid rgba(243, 239, 230, .14);
-      box-shadow: 0 22px 80px rgba(0, 0, 0, .55);
+      background: rgba(20,17,13,.92);
+      border-right: 1px solid rgba(243,239,230,.14);
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
       transform: translateX(-110%);
       transition: transform .18s ease;
       z-index: 9100;
       padding: 12px;
-      overflow: auto;
+      overflow:auto;
     }
-
-    .drawer.right {
+    .drawer.right{
       right: 0;
       left: auto;
       border-right: none;
-      border-left: 1px solid rgba(243, 239, 230, .14);
+      border-left: 1px solid rgba(243,239,230,.14);
       transform: translateX(110%);
     }
+    .drawer.open{ transform: translateX(0); }
+    .drawerBackdrop.open{ display:block; }
 
-    .drawer.open {
-      transform: translateX(0);
+    @media (max-width: 1080px){
+      .app{ grid-template-columns: 300px 1fr; }
+      #workspacePanel{ display:none; }
     }
-
-    .drawerBackdrop.open {
-      display: block;
-    }
-
-    @media (max-width: 1080px) {
-      .app {
-        grid-template-columns: 300px 1fr;
-      }
-      #workspacePanel { display: none; }
-    }
-
-    @media (max-width: 760px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-      #leftPanel { display: none; }
-      #workspacePanel { display: none; }
+    @media (max-width: 760px){
+      .app{ grid-template-columns: 1fr; }
+      #leftPanel{ display:none; }
+      #workspacePanel{ display:none; }
     }
   </style>
 </head>
@@ -829,205 +673,211 @@
 <body>
   <div class="wrap">
     <div class="app">
+
       <!-- TOP -->
       <header>
-        <a class="brand" href="#" aria-label="WilliamBot Brand">
+        <div class="brand">
           <div class="logo">W</div>
           <div class="brandText">
             <div class="catRow">
               <strong>WilliamBot</strong>
-              <span class="catBadge biz" id="catBadge" aria-label="Category: Business">
+              <span class="catBadge biz" id="catBadge">
                 <span class="miniDot"></span>
                 <span id="catText">Business</span>
               </span>
             </div>
             <span id="topSub">Session: —</span>
           </div>
-        </a>
-        <nav class="statusRow">
-          <button class="badge clickable" id="profileBadge" title="Profile is stored per session" aria-label="Profile: Study" onclick="toggleProfile()">
+        </div>
+
+        <div class="statusRow">
+          <div class="badge clickable" id="profileBadge" title="Profile is stored per session">
             <span class="label">Profile</span>
             <span id="profileText">Study</span>
-          </button>
-          <button class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)" aria-label="Notion Sync: Not connected" onclick="toggleNotionSync()">
-            <span id="notionDot" class="dot bad" aria-hidden="true"></span>
+          </div>
+
+          <div class="badge clickable" id="notionBadge" title="Notion sync placeholder (wire later)">
+            <span id="notionDot" class="dot bad"></span>
             <span class="label">Notion</span>
             <span id="notionText">Not connected</span>
-          </button>
-          <div class="badge" title="Local backend connection" aria-label="Engine Connection: UI only">
-            <span id="engineDot" class="dot bad" aria-hidden="true"></span>
+          </div>
+
+          <div class="badge" title="Local backend connection">
+            <span id="engineDot" class="dot bad"></span>
             <span class="label">Engine</span>
             <span id="engineText">UI only</span>
           </div>
-          <button class="ghostBtn" id="openSessions" onclick="openDrawer('sessions')" aria-label="Open Sessions">Sessions</button>
-          <button class="ghostBtn" id="openWorkspace" onclick="openDrawer('workspace')" aria-label="Open Workspace">Workspace</button>
-        </nav>
+
+          <button class="ghostBtn" id="openSessions">Sessions</button>
+          <button class="ghostBtn" id="openWorkspace">Workspace</button>
+        </div>
       </header>
 
       <!-- LEFT: SESSIONS (desktop/tablet) -->
-      <aside class="panel" id="leftPanel" aria-labelledby="sessions-header">
-        <header class="panelHeader">
+      <aside class="panel" id="leftPanel">
+        <div class="panelHeader">
           <div>
-            <strong id="sessions-header">Sessions</strong>
+            <strong>Sessions</strong>
             <small><span id="sessionCount">0</span> total • <span id="activeLabel">Active: —</span></small>
+
             <div class="segRow" role="tablist" aria-label="Session groups">
-              <button class="seg active" id="tabBiz" role="tab" aria-selected="true" onclick="switchGroup('business')">Business</button>
-              <button class="seg" id="tabSchool" role="tab" aria-selected="false" onclick="switchGroup('school')">School</button>
+              <button class="seg active" id="tabBiz" role="tab" aria-selected="true">Business</button>
+              <button class="seg" id="tabSchool" role="tab" aria-selected="false">School</button>
             </div>
           </div>
-          <div>
-            <button class="miniBtn" id="newSessionBtn" title="Create a new session" onclick="createSession()">New</button>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="miniBtn" id="newSessionBtn" title="Create a new session">New</button>
           </div>
-        </header>
+        </div>
+
         <div class="panelBody">
           <div class="list" id="sessionList"></div>
         </div>
       </aside>
 
       <!-- CENTER: CHAT -->
-      <main class="chat bizBg" id="chatShell" aria-labelledby="chat-header">
-        <header class="panelHeader">
-          <strong id="chat-header">Chat</strong>
-        </header>
+      <main class="chat bizBg" id="chatShell">
         <div class="feed" id="feed" aria-live="polite"></div>
-        <aside class="composer" aria-labelledby="composer-header">
-          <header class="panelHeader">
-            <strong id="composer-header">Composer</strong>
-          </header>
+
+        <div class="composer">
           <div class="warn" id="contextWarn"></div>
-          <form class="composerRow" onsubmit="event.preventDefault(); sendMessage()">
-            <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)" aria-label="Input message"></textarea>
-            <button class="send" id="sendBtn" disabled aria-label="Send message">Send</button>
-          </form>
-        </aside>
+          <div class="composerRow">
+            <textarea id="input" placeholder="Ask, calculate, study… (Enter to send, Shift+Enter new line)"></textarea>
+            <button class="send" id="sendBtn" disabled>Send</button>
+          </div>
+        </div>
       </main>
 
       <!-- RIGHT: WORKSPACE (desktop only; mobile uses drawer) -->
-      <aside class="panel" id="workspacePanel" aria-labelledby="workspace-header">
-        <header class="panelHeader">
+      <aside class="panel" id="workspacePanel">
+        <div class="panelHeader">
           <div>
-            <strong id="workspace-header">Workspace</strong>
+            <strong>Workspace</strong>
             <small id="wsSubtitle">Session-bound state</small>
           </div>
-          <span id="wsHint" style="font-size: 12px; color: rgba(243, 239, 230, .62);">—</span>
-        </header>
+          <span id="wsHint" style="font-size:12px; color: rgba(243,239,230,.62);">—</span>
+        </div>
         <div class="panelBody" id="workspaceBody"></div>
       </aside>
+
     </div>
   </div>
 
   <!-- Mobile drawers -->
-  <div class="drawerBackdrop" id="drawerBackdrop" onclick="closeDrawer('all')"></div>
-  <div class="drawer" id="sessionsDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mobile-sessions-header">
-    <header class="panelHeader">
-      <strong id="mobile-sessions-header">Sessions</strong>
-      <button class="miniBtn" id="closeSessionsDrawer" onclick="closeDrawer('sessions')" aria-label="Close Sessions">Close</button>
-    </header>
-    <div class="segRow" style="margin-top: 12px;">
-      <button class="seg active" id="drawerTabBiz" onclick="switchGroup('business')">Business</button>
-      <button class="seg" id="drawerTabSchool" onclick="switchGroup('school')">School</button>
+  <div class="drawerBackdrop" id="drawerBackdrop"></div>
+
+  <div class="drawer" id="sessionsDrawer" aria-hidden="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <strong>Sessions</strong>
+      <button class="miniBtn" id="closeSessionsDrawer">Close</button>
     </div>
-    <div class="rowBtns" style="margin-top: 12px;">
-      <button class="miniBtn" id="drawerNewSession" onclick="createSession()" aria-label="New Session">New session</button>
+
+    <div class="segRow" style="margin-top:12px;">
+      <button class="seg active" id="drawerTabBiz">Business</button>
+      <button class="seg" id="drawerTabSchool">School</button>
     </div>
-    <div class="list" id="drawerSessionList" style="margin-top: 12px;"></div>
+
+    <div class="rowBtns" style="margin-top:10px;">
+      <button class="miniBtn" id="drawerNewSession">New session</button>
+    </div>
+
+    <div class="list" id="drawerSessionList" style="margin-top:12px;"></div>
   </div>
-  <div class="drawer right" id="workspaceDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mobile-workspace-header">
-    <header class="panelHeader">
-      <strong id="mobile-workspace-header">Workspace</strong>
-      <button class="miniBtn" id="closeWorkspaceDrawer" onclick="closeDrawer('workspace')" aria-label="Close Workspace">Close</button>
-    </header>
-    <div id="drawerWorkspaceBody" style="margin-top: 12px;"></div>
+
+  <div class="drawer right" id="workspaceDrawer" aria-hidden="true">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <strong>Workspace</strong>
+      <button class="miniBtn" id="closeWorkspaceDrawer">Close</button>
+    </div>
+    <div id="drawerWorkspaceBody" style="margin-top:12px;"></div>
   </div>
 
   <!-- Fatal overlay -->
-  <div class="fatal" id="fatal" role="alertdialog" aria-modal="true" aria-labelledby="fatal-header" aria-describedby="fatal-description">
+  <div class="fatal" id="fatal">
     <div class="fatalCard">
-      <strong id="fatal-header">WilliamBot UI crashed (no silent white screen).</strong>
-      <p id="fatal-description" style="margin-top: 6px; color: rgba(243, 239, 230, .75); font-size: 12px;">
+      <strong>WilliamBot UI crashed (no silent white screen).</strong>
+      <div style="margin-top:6px; color: rgba(243,239,230,.75); font-size:12px;">
         Copy the error, refresh, and you’re back.
-      </p>
+      </div>
       <pre id="fatalText"></pre>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-        <button class="miniBtn" id="fatalCopy" onclick="copyError()" aria-label="Copy error">Copy error</button>
-        <button class="miniBtn" id="fatalClose" onclick="closeFatal()" aria-label="Close overlay">Close</button>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+        <button class="miniBtn" id="fatalCopy">Copy error</button>
+        <button class="miniBtn" id="fatalClose">Close</button>
       </div>
     </div>
   </div>
 
   <script>
-    (function() {
+    (function(){
       "use strict";
 
       // -------------------- Safety: show errors instead of blank/white --------------------
       const fatalEl = document.getElementById("fatal");
       const fatalText = document.getElementById("fatalText");
+      const fatalCopy = document.getElementById("fatalCopy");
+      const fatalClose = document.getElementById("fatalClose");
 
-      function showFatal(err) {
-        try {
+      function showFatal(err){
+        try{
           const msg = (err && err.stack) ? err.stack : String(err);
           fatalText.textContent = msg;
           fatalEl.style.display = "flex";
         } catch {}
       }
-
       window.addEventListener("error", (e) => showFatal(e.error || e.message || e), true);
       window.addEventListener("unhandledrejection", (e) => showFatal(e.reason || e), true);
 
-      function copyError() {
-        try {
-          navigator.clipboard.writeText(fatalText.textContent || "");
-        } catch {}
-      }
-
-      function closeFatal() {
-        fatalEl.style.display = "none";
-      }
+      fatalCopy.addEventListener("click", async () => {
+        try{ await navigator.clipboard.writeText(fatalText.textContent || ""); } catch {}
+      });
+      fatalClose.addEventListener("click", () => { fatalEl.style.display = "none"; });
 
       // -------------------- DOM helpers --------------------
       const $ = (id) => document.getElementById(id);
       const escapeHtml = (s) =>
-        String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+        String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
-      function stamp() {
+      function stamp(){
         const d = new Date();
-        return d.toLocaleString([], { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        return d.toLocaleString([], {month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
       }
-
-      function nowTime() {
+      function nowTime(){
         const d = new Date();
-        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
       }
-
-      function uid() {
+      function uid(){
         return "s_" + Math.random().toString(36).slice(2, 8) + "_" + Date.now().toString(36).slice(-4);
       }
-
-      function setDot(el, state) {
-        el.classList.remove("ok", "bad");
-        if (state === "ok") el.classList.add("ok");
-        if (state === "bad") el.classList.add("bad");
+      function setDot(el, state){
+        el.classList.remove("ok","bad");
+        if(state === "ok") el.classList.add("ok");
+        if(state === "bad") el.classList.add("bad");
       }
-
-      function safeParse(json, fallback) {
+      function safeParse(json, fallback){
         try { return JSON.parse(json); } catch { return fallback; }
       }
 
       // -------------------- Storage --------------------
+      // Keep your existing sessions/history keys for continuity; add v6 keys for the fixes.
       const STORE = {
-        sessions: "wb_sessions_v6",
-        historyPrefix: "wb_history_v6_",
-        activeGroup: "wb_active_group_v6",
+        sessions: "wb_sessions_v5",
+        historyPrefix: "wb_history_v5_",
+
+        activeGroup: "wb_active_group_v6",                   // "business" | "school"
         activeBiz: "wb_active_session_business_v6",
         activeSchool: "wb_active_session_school_v6",
-        legacyActiveSession: "wb_active_session_v5",
-        profilePrefix: "wb_profile_v6_"
-      };
 
+        // Back-compat (older single active session key)
+        legacyActiveSession: "wb_active_session_v5",
+
+        profilePrefix: "wb_profile_v6_"                      // per-session profile
+      };
       const historyKey = (sid) => STORE.historyPrefix + sid;
       const profileKey = (sid) => STORE.profilePrefix + sid;
 
-      function defaultSessions() {
+      // -------------------- Default sessions --------------------
+      function defaultSessions(){
         return [
           {
             id: "biz_main",
@@ -1059,92 +909,97 @@
         ];
       }
 
-      function loadSessions() {
+      function loadSessions(){
         const raw = localStorage.getItem(STORE.sessions);
         const parsed = safeParse(raw, null);
-        if (Array.isArray(parsed) && parsed.length) return parsed;
+        if(Array.isArray(parsed) && parsed.length) return parsed;
+
         const s = defaultSessions();
         localStorage.setItem(STORE.sessions, JSON.stringify(s));
         return s;
       }
-
-      function saveSessions(sessions) {
+      function saveSessions(sessions){
         localStorage.setItem(STORE.sessions, JSON.stringify(sessions));
       }
 
-      function loadHistory(sid) {
+      function loadHistory(sid){
         const raw = localStorage.getItem(historyKey(sid));
         const parsed = safeParse(raw, []);
         return Array.isArray(parsed) ? parsed : [];
       }
-
-      function saveHistory(sid, hist) {
+      function saveHistory(sid, hist){
         localStorage.setItem(historyKey(sid), JSON.stringify(hist.slice(-500)));
       }
 
-      function getActiveGroup() {
+      // -------------------- Group + Active session (per group) --------------------
+      function getActiveGroup(){
         return localStorage.getItem(STORE.activeGroup) || "business";
       }
-
-      function setActiveGroup(g) {
+      function setActiveGroup(g){
         localStorage.setItem(STORE.activeGroup, g);
       }
 
-      function getActiveSessionIdForGroup(group) {
+      function getActiveSessionIdForGroup(group){
         const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
         return localStorage.getItem(key) || "";
       }
-
-      function setActiveSessionIdForGroup(group, id) {
+      function setActiveSessionIdForGroup(group, id){
         const key = (group === "business") ? STORE.activeBiz : STORE.activeSchool;
         localStorage.setItem(key, id);
       }
 
-      function sessionsByGroup(group) {
+      function sessionsByGroup(group){
         return sessions.filter(s => s.group === group);
       }
-
-      function firstSessionId(group) {
+      function firstSessionId(group){
         const list = sessionsByGroup(group);
         return list.length ? list[0].id : "";
       }
 
-      function getActiveSessionId() {
+      // This app now defines "active session" as "active session for active group"
+      function getActiveSessionId(){
         const g = getActiveGroup();
         return getActiveSessionIdForGroup(g) || "";
       }
 
-      function migrateLegacyActiveIfNeeded() {
+      // Back-compat migration: if user has legacy active session, map it to its group once.
+      function migrateLegacyActiveIfNeeded(){
         const legacy = localStorage.getItem(STORE.legacyActiveSession);
-        if (!legacy) return;
+        if(!legacy) return;
+
         const found = sessions.find(s => s.id === legacy);
-        if (found) {
+        if(found){
           setActiveSessionIdForGroup(found.group, found.id);
           setActiveGroup(found.group);
         }
-        try { localStorage.removeItem(STORE.legacyActiveSession); } catch {}
+
+        // one-way migration (keep legacy key? remove to prevent future ambiguity)
+        try{ localStorage.removeItem(STORE.legacyActiveSession); } catch {}
       }
 
+      // -------------------- Profiles (PER SESSION) --------------------
       const PROFILE_BUS = ["Financial", "Ops", "Strategy", "Formulation", "Compliance"];
       const PROFILE_SCHOOL = ["Study", "Writing", "Math", "Research"];
 
-      function profileListForSession(session) {
+      function profileListForSession(session){
         return (session.group === "business") ? PROFILE_BUS : PROFILE_SCHOOL;
       }
 
-      function getProfileForSession(session) {
+      function getProfileForSession(session){
         const stored = localStorage.getItem(profileKey(session.id));
         const list = profileListForSession(session);
-        if (stored && list.includes(stored)) return stored;
+        if(stored && list.includes(stored)) return stored;
+
+        // default per category
         return (session.group === "business") ? "Financial" : "Study";
       }
 
-      function setProfileForSession(session, profile) {
+      function setProfileForSession(session, profile){
         localStorage.setItem(profileKey(session.id), profile);
         $("profileText").textContent = profile;
       }
 
-      function cycleProfileForSession(session) {
+      function cycleProfileForSession(session){
         const list = profileListForSession(session);
         const cur = getProfileForSession(session);
         const idx = Math.max(0, list.indexOf(cur));
@@ -1161,6 +1016,7 @@
       const activeLabel = $("activeLabel");
 
       const sessionList = $("sessionList");
+
       const tabBiz = $("tabBiz");
       const tabSchool = $("tabSchool");
       const drawerTabBiz = $("drawerTabBiz");
@@ -1188,118 +1044,144 @@
       // -------------------- State --------------------
       let sessions = loadSessions();
       saveSessions(sessions);
+
       let history = [];
 
-      function currentSession() {
+      function currentSession(){
         const sid = getActiveSessionId();
         return sessions.find(s => s.id === sid) || null;
       }
 
-      function setCategoryUI(group) {
+      function setCategoryUI(group){
+        // header badge
         catBadge.classList.toggle("biz", group === "business");
         catBadge.classList.toggle("school", group === "school");
         catText.textContent = (group === "business") ? "Business" : "School";
+
+        // chat background
         chatShell.classList.toggle("bizBg", group === "business");
         chatShell.classList.toggle("schoolBg", group === "school");
       }
 
-      function setTopSubText() {
+      function setTopSubText(){
         const s = currentSession();
         topSub.textContent = "Session: " + (s ? s.title : "—");
       }
 
       // -------------------- Session rendering --------------------
-      function setTabsUI(group) {
+      function setTabsUI(group){
+        // desktop
         tabBiz.classList.toggle("active", group === "business");
         tabSchool.classList.toggle("active", group === "school");
         tabBiz.setAttribute("aria-selected", group === "business" ? "true" : "false");
         tabSchool.setAttribute("aria-selected", group === "school" ? "true" : "false");
+
+        // ensure school tab uses school styling when active
         tabBiz.classList.remove("schoolActive");
         tabSchool.classList.remove("schoolActive");
-        if (group === "school") tabSchool.classList.add("schoolActive");
+        if(group === "school") tabSchool.classList.add("schoolActive");
 
+        // drawer
         drawerTabBiz.classList.toggle("active", group === "business");
         drawerTabSchool.classList.toggle("active", group === "school");
         drawerTabBiz.classList.remove("schoolActive");
         drawerTabSchool.classList.remove("schoolActive");
-        if (group === "school") drawerTabSchool.classList.add("schoolActive");
+        if(group === "school") drawerTabSchool.classList.add("schoolActive");
       }
 
-      function sessionPillText(s) {
+      function sessionPillText(s){
         const active = currentSession() && s.id === currentSession().id;
-        if (active) return "Active";
+        if(active) return "Active";
         return (s.group === "school") ? "Class" : "Business";
       }
 
-      function renderSessionListInto(el, group) {
+      function renderSessionListInto(el, group){
         el.innerHTML = "";
         const filtered = sessionsByGroup(group);
-        if (filtered.length === 0) {
+
+        if(filtered.length === 0){
           const empty = document.createElement("div");
-          empty.style.color = "rgba(243, 239, 230, .62)";
+          empty.style.color = "rgba(243,239,230,.62)";
           empty.style.fontSize = "12px";
           empty.textContent = "No sessions yet.";
           el.appendChild(empty);
           return;
         }
-        for (const s of filtered) {
+
+        for(const s of filtered){
           const div = document.createElement("div");
           div.className = "item";
-          div.setAttribute("aria-label", `${s.title} - ${sessionPillText(s)}`);
           div.innerHTML = `
             <div class="itemTop">
-              <div class="itemTitle"">${escapeHtml(s.title)}</div>
+              <div class="itemTitle">${escapeHtml(s.title)}</div>
               <span class="pillMini">${escapeHtml(sessionPillText(s))}</span>
             </div>
             <div class="itemMeta">
               ${escapeHtml(s.note || "")}<br/>
-              <span style="color: rgba(243, 239, 230, .58)">Updated: ${escapeHtml(s.updated || "—")}</span>
+              <span style="color: rgba(243,239,230,.58)">Updated: ${escapeHtml(s.updated || "—")}</span>
             </div>
+
             <div class="rowBtns">
-              <button class="miniBtn" data-act="activate" data-id="${escapeHtml(s.id)}" onclick="activateSessionFromList('${s.id}')">Open</button>
-              <button class="miniBtn" data-act="rename" data-id="${escapeHtml(s.id)}" onclick="renameSessionFromList('${s.id}')">Rename</button>
-              <button class="miniBtn danger" data-act="delete" data-id="${escapeHtml(s.id)}" onclick="deleteSessionFromList('${s.id}')">Delete</button>
+              <button class="miniBtn" data-act="activate" data-id="${escapeHtml(s.id)}">Open</button>
+              <button class="miniBtn" data-act="rename" data-id="${escapeHtml(s.id)}">Rename</button>
+              <button class="miniBtn danger" data-act="delete" data-id="${escapeHtml(s.id)}">Delete</button>
             </div>
           `;
           el.appendChild(div);
         }
       }
 
-      function renderSessions() {
+      function renderSessions(){
         const group = getActiveGroup();
         setTabsUI(group);
         setCategoryUI(group);
+
         sessionCount.textContent = String(sessions.length);
+
         const cs = currentSession();
         activeLabel.textContent = cs ? cs.title : "—";
+
         renderSessionListInto(sessionList, group);
         renderSessionListInto(drawerSessionList, group);
+
         setTopSubText();
-        if (cs) $("profileText").textContent = getProfileForSession(cs);
+
+        // Profile label always matches active session
+        if(cs) $("profileText").textContent = getProfileForSession(cs);
       }
 
-      // -------------------- Activation + Group switching --------------------
-      function activateSession(id, opts) {
+      // -------------------- Activation + Group switching (fixes DeepSeek leak #1/#2) --------------------
+      function activateSession(id, opts){
         opts = opts || {};
         const s = sessions.find(x => x.id === id);
-        if (!s) return;
+        if(!s) return;
+
+        // Set group + per-group active session
         setActiveGroup(s.group);
         setActiveSessionIdForGroup(s.group, s.id);
+
+        // Update profile label from per-session storage
         $("profileText").textContent = getProfileForSession(s);
+
         loadThread();
         hydrateWorkspace();
         renderSessions();
-        if (!opts.keepDrawersOpen) closeDrawer("sessions");
+
+        if(!opts.keepDrawersOpen) closeDrawer("sessions");
       }
 
-      function activateSessionForGroup(group) {
+      function activateSessionForGroup(group){
+        // Choose last used in that group, else first available
         const last = getActiveSessionIdForGroup(group);
         const exists = last && sessions.some(s => s.id === last && s.group === group);
         const pick = exists ? last : firstSessionId(group);
+
         setActiveGroup(group);
-        if (pick) {
+
+        if(pick){
           activateSession(pick, { keepDrawersOpen: true });
         } else {
+          // no sessions in that group: explicit empty state
           loadThreadEmpty(group);
           hydrateWorkspaceEmpty(group);
           renderSessions();
@@ -1307,56 +1189,74 @@
       }
 
       // -------------------- CRUD sessions --------------------
-      function createSession() {
-        const group = getActiveGroup();
+      function createSession(group){
+        const isBiz = group === "business";
         const newId = uid();
-        const title = group === "business" ? "Business — New Session" : "UMGC — New Class Session";
-        const note = group === "business" ? "Pricing • ops • planning" : "Study plan • assignments • notes";
+
+        const title = isBiz ? "Business — New Session" : "UMGC — New Class Session";
+        const note  = isBiz ? "Pricing • ops • planning" : "Study plan • assignments • notes";
+
         const sess = { id: newId, group, title, note, updated: stamp(), files: [] };
+
         sessions = [sess, ...sessions];
         saveSessions(sessions);
+
+        // seed intro thread + default profile
         saveHistory(newId, [introForSession(sess)]);
-        localStorage.setItem(profileKey(newId), group === "business" ? "Financial" : "Study");
+        localStorage.setItem(profileKey(newId), isBiz ? "Financial" : "Study");
+
         activateSession(newId);
       }
 
-      function renameSession(id) {
+      function renameSession(id){
         const s = sessions.find(x => x.id === id);
-        if (!s) return;
+        if(!s) return;
+
         const next = prompt("Rename session:", s.title);
-        if (!next) return;
+        if(!next) return;
+
         s.title = next.trim().slice(0, 90) || s.title;
         s.updated = stamp();
         saveSessions(sessions);
+
         renderSessions();
         hydrateWorkspace();
       }
 
-      function deleteSession(id) {
+      function deleteSession(id){
         const s = sessions.find(x => x.id === id);
-        if (!s) return;
-        const protectedIds = new Set(["biz_main", "math107", "hist125"]);
-        if (protectedIds.has(id)) {
+        if(!s) return;
+
+        const protectedIds = new Set(["biz_main","math107","hist125"]);
+        if(protectedIds.has(id)){
           alert("That session is protected (default). Create new ones and delete those instead.");
           return;
         }
+
         const ok = confirm("Delete this session? This removes its chat history from this browser.");
-        if (!ok) return;
+        if(!ok) return;
+
         const group = s.group;
         sessions = sessions.filter(x => x.id !== id);
         saveSessions(sessions);
-        try { localStorage.removeItem(historyKey(id)); } catch {}
-        try { localStorage.removeItem(profileKey(id)); } catch {}
+
+        try{ localStorage.removeItem(historyKey(id)); } catch {}
+        try{ localStorage.removeItem(profileKey(id)); } catch {}
+
+        // If deleted active for that group, choose another in same group
         const activeInGroup = getActiveSessionIdForGroup(group);
-        if (activeInGroup === id) {
+        if(activeInGroup === id){
           const fallback = firstSessionId(group);
-          if (fallback) {
+          if(fallback) {
             setActiveSessionIdForGroup(group, fallback);
-            if (getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen: true });
+            if(getActiveGroup() === group) activateSession(fallback, { keepDrawersOpen:true });
           } else {
-            loadThreadEmpty(group);
-            hydrateWorkspaceEmpty(group);
-            renderSessions();
+            // group now empty
+            if(getActiveGroup() === group){
+              loadThreadEmpty(group);
+              hydrateWorkspaceEmpty(group);
+              renderSessions();
+            }
           }
         } else {
           renderSessions();
@@ -1364,10 +1264,9 @@
       }
 
       // -------------------- Chat --------------------
-      function renderMessage(m) {
+      function renderMessage(m){
         const row = document.createElement("div");
         row.className = "row " + (m.role === "you" ? "you" : "bot");
-        row.setAttribute("aria-label", `${m.role === 'you' ? 'You' : 'WilliamBot'}: ${m.content} - Confidence: ${m.confidence || 'Medium'} - Time: ${m.ts || nowTime()}`);
 
         const wrap = document.createElement("div");
         wrap.className = "bubbleWrap";
@@ -1384,11 +1283,9 @@
 
         const conf = document.createElement("span");
         conf.className = "confidence";
-        conf.setAttribute("aria-label", `Confidence: ${m.confidence || 'Medium'}`);
 
         const dot = document.createElement("span");
         dot.className = "confDot " + (m.confidence || "y");
-        dot.setAttribute("aria-hidden", "true");
 
         const label = document.createElement("span");
         label.textContent = (m.confidence === "g") ? "High" : (m.confidence === "r") ? "Low" : "Medium";
@@ -1396,7 +1293,6 @@
         const time = document.createElement("span");
         time.style.opacity = ".65";
         time.textContent = "• " + (m.ts || nowTime());
-        time.setAttribute("aria-label", `Sent at: ${m.ts || nowTime()}`);
 
         conf.appendChild(dot);
         conf.appendChild(label);
@@ -1413,121 +1309,188 @@
         feed.scrollTop = feed.scrollHeight;
       }
 
-      function introForSession(session) {
-        if (session.group === "business") {
+      function introForSession(session){
+        if(session.group === "business"){
           return {
-            role: "bot",
-            confidence: "y",
+            role:"bot",
+            confidence:"y",
             ts: nowTime(),
-            content: `Business session loaded.  What this will do when backend connects: • COGS-aware pricing & margin math • Channel fees (Amazon/Shopify) + shipping + overhead allocation • Decision ledger so pricing changes are traceable • RAG for your product specs, invoices, policies  Try prompts: - "Build pricing guardrails for luxury hair care" - "What inputs do you need to lock MSRP?" - "Create a decision ledger template"`
+            content:
+`Business session loaded.
+
+What this will do when backend connects:
+• COGS-aware pricing & margin math
+• Channel fees (Amazon/Shopify) + shipping + overhead allocation
+• Decision ledger so pricing changes are traceable
+• RAG for your product specs, invoices, policies
+
+Try prompts:
+- "Build pricing guardrails for luxury hair care"
+- "What inputs do you need to lock MSRP?"
+- "Create a decision ledger template"`
           };
         }
         return {
-          role: "bot",
-          confidence: "y",
+          role:"bot",
+          confidence:"y",
           ts: nowTime(),
-          content: `Class session loaded.  What this will do when backend connects: • Read syllabus PDF and extract deadlines + grading • Build a weekly plan and checklists • Explain concepts and help you structure drafts  Try prompts: - "Summarize grading breakdown" - "Extract deadlines into a checklist" - "Explain this topic like I'm new"`
+          content:
+`Class session loaded.
+
+What this will do when backend connects:
+• Read syllabus PDF and extract deadlines + grading
+• Build a weekly plan and checklists
+• Explain concepts and help you structure drafts
+
+Try prompts:
+- "Summarize grading breakdown"
+- "Extract deadlines into a checklist"
+- "Explain this topic like I'm new"`
         };
       }
 
-      function loadThread() {
+      function loadThread(){
         const cs = currentSession();
         feed.innerHTML = "";
         contextWarn.style.display = "none";
         contextWarn.textContent = "";
-        if (!cs) {
+
+        if(!cs){
           loadThreadEmpty(getActiveGroup());
           return;
         }
+
         history = loadHistory(cs.id);
-        if (history.length === 0) {
+        if(history.length === 0){
           const intro = introForSession(cs);
           history.push(intro);
           saveHistory(cs.id, history);
         }
-        for (const m of history) renderMessage(m);
+
+        for(const m of history) renderMessage(m);
       }
 
-      function loadThreadEmpty(group) {
+      function loadThreadEmpty(group){
         feed.innerHTML = "";
         contextWarn.style.display = "none";
         contextWarn.textContent = "";
+
         const msg = {
-          role: "bot",
-          confidence: "y",
+          role:"bot",
+          confidence:"y",
           ts: nowTime(),
-          content: group === "business" ? "No Business sessions exist yet. Tap **New** to create one." : "No School sessions exist yet. Tap **New session** to create one."
+          content:
+(group === "business")
+? "No Business sessions exist yet. Tap **New** to create one."
+: "No School sessions exist yet. Tap **New session** to create one."
         };
         renderMessage(msg);
         history = [];
       }
 
-      function addToHistory(m) {
+      function addToHistory(m){
         const cs = currentSession();
-        if (!cs) return;
+        if(!cs) return;
         history.push(m);
         saveHistory(cs.id, history);
       }
 
-      function syncSendButton() {
+      function syncSendButton(){
         sendBtn.disabled = input.value.trim().length === 0 || !currentSession();
       }
 
-      const SCHOOL_HINTS = ["syllabus", "assignment", "homework", "quiz", "discussion post", "apa", "citation", "umgc", "grade", "module", "week"];
-      const BIZ_HINTS = ["cogs", "margin", "msrp", "sku", "shopify", "amazon", "fba", "fbm", "overhead", "fees", "pricing", "profit", "inventory", "supplier"];
+      // -------------------- Context safeguards (DeepSeek #7) --------------------
+      const SCHOOL_HINTS = ["syllabus","assignment","homework","quiz","discussion post","apa","citation","umgc","grade","module","week"];
+      const BIZ_HINTS = ["cogs","margin","msrp","sku","shopify","amazon","fba","fbm","overhead","fees","pricing","profit","inventory","supplier"];
 
-      function maybeWarnAboutContext(text) {
+      function maybeWarnAboutContext(text){
         const cs = currentSession();
-        if (!cs) return;
+        if(!cs) return;
+
         const t = String(text || "").toLowerCase();
+
         const looksSchool = SCHOOL_HINTS.some(k => t.includes(k));
         const looksBiz = BIZ_HINTS.some(k => t.includes(k));
-        if (cs.group === "business" && looksSchool && !looksBiz) {
+
+        // Business session but text looks school
+        if(cs.group === "business" && looksSchool && !looksBiz){
           contextWarn.innerHTML = `<strong>Context check:</strong> This looks like School content, but you’re in a Business session. If that’s a mistake, switch to the School tab.`;
           contextWarn.style.display = "block";
           return;
         }
-        if (cs.group === "school" && looksBiz && !looksSchool) {
+
+        // School session but text looks business
+        if(cs.group === "school" && looksBiz && !looksSchool){
           contextWarn.innerHTML = `<strong>Context check:</strong> This looks like Business content, but you’re in a School session. If that’s a mistake, switch to the Business tab.`;
           contextWarn.style.display = "block";
           return;
         }
+
         contextWarn.style.display = "none";
         contextWarn.textContent = "";
       }
 
-      function sendMessage() {
+      function sendMessage(){
         const cs = currentSession();
-        if (!cs) return;
+        if(!cs) return;
+
         const text = input.value.trim();
-        if (!text) return;
+        if(!text) return;
+
         maybeWarnAboutContext(text);
+
         input.value = "";
         syncSendButton();
-        const youMsg = { role: "you", confidence: "g", ts: nowTime(), content: text };
+
+        const youMsg = { role:"you", confidence:"g", ts: nowTime(), content: text };
         renderMessage(youMsg);
         addToHistory(youMsg);
+
         cs.updated = stamp();
         saveSessions(sessions);
         renderSessions();
 
         let reply;
-        if (cs.group === "business") {
-          reply = `UI-only mode (backend not connected).  When backend is live, I will: • compute margins step-by-step • use your real COGS/fees/shipping • store decisions in a ledger  Tell me which one you want next: 1) MSRP guardrails 2) Margin calculator inputs 3) Decision ledger format`;
+        if(cs.group === "business"){
+          reply =
+`UI-only mode (backend not connected).
+
+When backend is live, I will:
+• compute margins step-by-step
+• use your real COGS/fees/shipping
+• store decisions in a ledger
+
+Tell me which one you want next:
+1) MSRP guardrails
+2) Margin calculator inputs
+3) Decision ledger format`;
         } else {
-          reply = `UI-only mode (backend not connected).  When backend is live, I will: • parse the syllabus PDF • extract deadlines + grading • build a weekly plan  Tell me what you want next: 1) Weekly plan 2) Deadlines checklist 3) Concept help`;
+          reply =
+`UI-only mode (backend not connected).
+
+When backend is live, I will:
+• parse the syllabus PDF
+• extract deadlines + grading
+• build a weekly plan
+
+Tell me what you want next:
+1) Weekly plan
+2) Deadlines checklist
+3) Concept help`;
         }
-        const botMsg = { role: "bot", confidence: "y", ts: nowTime(), content: reply };
+
+        const botMsg = { role:"bot", confidence:"y", ts: nowTime(), content: reply };
         renderMessage(botMsg);
         addToHistory(botMsg);
       }
 
       // -------------------- Workspace --------------------
-      function categoryFiles(group) {
+      function categoryFiles(group){
+        // Flatten: [{sessionTitle, sessionId, name, desc}]
         const out = [];
-        for (const s of sessionsByGroup(group)) {
+        for(const s of sessionsByGroup(group)){
           const files = Array.isArray(s.files) ? s.files : [];
-          for (const f of files) {
+          for(const f of files){
             out.push({
               sessionTitle: s.title,
               sessionId: s.id,
@@ -1539,51 +1502,53 @@
         return out;
       }
 
-      function workspaceTemplate(session) {
+      function workspaceTemplate(session){
         const isBiz = session.group === "business";
         const group = session.group;
+
         wsHint.textContent = session.id.toUpperCase();
         wsSubtitle.textContent = (isBiz ? "Business state" : "Class state") + " • " + stamp();
+
         const files = session.files || [];
         const fileRows = files.map(f => `
-          <div class="fileChip" aria-label="${escapeHtml(f.name)} - ${escapeHtml(f.desc)}">
+          <div class="fileChip">
             <div>
               <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
               <small>${escapeHtml(f.desc || "")}</small>
             </div>
-            <button class="miniBtn" data-ws="open" aria-label="${escapeHtml(f.name)} - Open file">Open</button>
+            <button class="miniBtn" data-ws="open">Open</button>
           </div>
         `).join("");
 
         const allFiles = categoryFiles(group);
         const allFileRows = allFiles.length ? allFiles.map(f => `
-          <div class="fileChip" aria-label="${escapeHtml(f.name)} - ${escapeHtml(f.sessionTitle)} - ${escapeHtml(f.desc)}">
+          <div class="fileChip">
             <div>
               <div style="font-weight:850; color: rgba(243,239,230,.92);">${escapeHtml(f.name)}</div>
               <small>${escapeHtml(f.sessionTitle)} • ${escapeHtml(f.desc)}</small>
             </div>
-            <button class="miniBtn" data-ws="open" aria-label="${escapeHtml(f.name)} - Open file">Open</button>
+            <button class="miniBtn" data-ws="open">Open</button>
           </div>
         `).join("") : `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files in this category yet.</div>`;
 
         const assumptions = isBiz
           ? [
-            { k: "Target gross margin", v: "≥ 70%", sub: "Luxury guardrail", c: "g" },
-            { k: "Channels", v: "Amazon + Shopify", sub: "Different fees, same COGS base", c: "g" },
-            { k: "Fee risk", v: "Verify category", sub: "Amazon referral/fulfillment vary", c: "y" },
-            { k: "COGS freshness", v: "Notion not connected", sub: "Avoid locking MSRP w/out data", c: "r" }
-          ]
+              { k:"Target gross margin", v:"≥ 70%", sub:"Luxury guardrail", c:"g" },
+              { k:"Channels", v:"Amazon + Shopify", sub:"Different fees, same COGS base", c:"g" },
+              { k:"Fee risk", v:"Verify category", sub:"Amazon referral/fulfillment vary", c:"y" },
+              { k:"COGS freshness", v:"Notion not connected", sub:"Avoid locking MSRP w/out data", c:"r" }
+            ]
           : [
-            { k: "Syllabus", v: "Mounted (PDF)", sub: "Use for deadlines + grading policy", c: "g" },
-            { k: "Weekly plan", v: "Build cadence", sub: "Make it automatic later", c: "y" },
-            { k: "Notes", v: "Structured", sub: "Definitions • examples • self-test", c: "g" }
-          ];
+              { k:"Syllabus", v:"Mounted (PDF)", sub:"Use for deadlines + grading policy", c:"g" },
+              { k:"Weekly plan", v:"Build cadence", sub:"Make it automatic later", c:"y" },
+              { k:"Notes", v:"Structured", sub:"Definitions • examples • self-test", c:"g" }
+            ];
 
         const assRows = assumptions.map(a => `
           <div class="kvRow">
             <div>
               <div class="kvKey">
-                <span class="confDot ${a.c}" style="transform: translateY(2px);" aria-hidden="true"></span>
+                <span class="confDot ${a.c}" style="transform: translateY(2px);"></span>
                 <div>
                   <div>${escapeHtml(a.k)}</div>
                   <div class="kvSub">${escapeHtml(a.sub || "")}</div>
@@ -1596,15 +1561,15 @@
 
         const actions = isBiz ? `
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="miniBtn" data-ws="guardrails" aria-label="Pricing Guardrails">Pricing guardrails</button>
-            <button class="miniBtn" data-ws="inputs" aria-label="MSRP Inputs List">MSRP inputs list</button>
-            <button class="miniBtn" data-ws="ledger" aria-label="Decision Ledger">Decision ledger</button>
+            <button class="miniBtn" data-ws="guardrails">Pricing guardrails</button>
+            <button class="miniBtn" data-ws="inputs">MSRP inputs list</button>
+            <button class="miniBtn" data-ws="ledger">Decision ledger</button>
           </div>
         ` : `
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="miniBtn" data-ws="plan" aria-label="Weekly Plan">Weekly plan</button>
-            <button class="miniBtn" data-ws="deadlines" aria-label="Extract Deadlines">Extract deadlines</button>
-            <button class="miniBtn" data-ws="notes" aria-label="Study Notes">Study notes</button>
+            <button class="miniBtn" data-ws="plan">Weekly plan</button>
+            <button class="miniBtn" data-ws="deadlines">Extract deadlines</button>
+            <button class="miniBtn" data-ws="notes">Study notes</button>
           </div>
         `;
 
@@ -1619,8 +1584,8 @@
               <br/>UI today; backend will index files later.
             </div>
             <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="miniBtn" data-ws="ragAdd" aria-label="Add Document">Add document</button>
-              <button class="miniBtn" data-ws="ragReindex" aria-label="Re-index Documents">Re-index</button>
+              <button class="miniBtn" data-ws="ragAdd">Add document</button>
+              <button class="miniBtn" data-ws="ragReindex">Re-index</button>
             </div>
           </div>
         `;
@@ -1637,20 +1602,27 @@
             </div>
             <div style="margin-top:10px;">${actions}</div>
           </div>
+
           <div class="section">
             <div class="sectionTitle">
               <strong>Mounted files (this session)</strong>
               <span>${files.length} items</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">${fileRows || `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files yet.</div>`}</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${fileRows || `<div style="color: rgba(243,239,230,.62); font-size:12px;">No files yet.</div>`}
+            </div>
           </div>
+
           <div class="section">
             <div class="sectionTitle">
               <strong>All files (${escapeHtml(group)})</strong>
               <span>${allFiles.length} total</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">${allFileRows}</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${allFileRows}
+            </div>
           </div>
+
           <div class="section">
             <div class="sectionTitle">
               <strong>Working assumptions</strong>
@@ -1658,51 +1630,100 @@
             </div>
             <div class="kv">${assRows}</div>
           </div>
+
           ${rag}
         `;
       }
 
-      function hydrateWorkspace() {
+      function hydrateWorkspace(){
         const cs = currentSession();
-        if (!cs) {
+        if(!cs){
           hydrateWorkspaceEmpty(getActiveGroup());
           return;
         }
+
         const html = workspaceTemplate(cs);
         workspaceBody.innerHTML = html;
         drawerWorkspaceBody.innerHTML = html;
+
         const handler = (e) => {
           const btn = e.target.closest("[data-ws]");
-          if (!btn) return;
+          if(!btn) return;
           const act = btn.getAttribute("data-ws");
+
           const s = currentSession();
-          if (!s) return;
-          const canned = (() => {
-            if (s.group === "business") {
-              if (act === "guardrails") return `Pricing guardrails (UI preview): • Don’t lock MSRP until: COGS + packaging + shipping + fees are verified. • Keep gross margin floor ≥ 70% (luxury guardrail). • Separate prices by channel (Amazon fees vs Shopify). • Log every price change in a decision ledger (why + inputs + risk).`;
-              if (act === "inputs") return `MSRP inputs list (UI preview): 1) Unit ingredient cost (COGS) 2) Packaging unit cost (jar/bottle + label + shrink + box) 3) Avg shipping + worst-case shipping 4) Channel fees (Amazon referral/FBA; Shopify payment fees) 5) Returns + damage reserve 6) Overhead allocation per unit (fixed costs / volume assumption) 7) Target margin floor + promo buffer`;
-              if (act === "ledger") return `Decision ledger template (UI preview): • Date/time • SKU + channel • Old price → new price • Inputs used (COGS, fees, ship, overhead) • Margin impact (before/after) • Reason (what changed) • Risks + mitigations • Sources (links/files)`;
+          if(!s) return;
+
+          const canned = (function(){
+            if(s.group === "business"){
+              if(act === "guardrails") return
+`Pricing guardrails (UI preview):
+• Don’t lock MSRP until: COGS + packaging + shipping + fees are verified.
+• Keep gross margin floor ≥ 70% (luxury guardrail).
+• Separate prices by channel (Amazon fees vs Shopify).
+• Log every price change in a decision ledger (why + inputs + risk).`;
+              if(act === "inputs") return
+`MSRP inputs list (UI preview):
+1) Unit ingredient cost (COGS)
+2) Packaging unit cost (jar/bottle + label + shrink + box)
+3) Avg shipping + worst-case shipping
+4) Channel fees (Amazon referral/FBA; Shopify payment fees)
+5) Returns + damage reserve
+6) Overhead allocation per unit (fixed costs / volume assumption)
+7) Target margin floor + promo buffer`;
+              if(act === "ledger") return
+`Decision ledger template (UI preview):
+• Date/time
+• SKU + channel
+• Old price → new price
+• Inputs used (COGS, fees, ship, overhead)
+• Margin impact (before/after)
+• Reason (what changed)
+• Risks + mitigations
+• Sources (links/files)`;
             } else {
-              if (act === "plan") return `Weekly plan (UI preview): • Mon: read/watch + outline • Tue: practice/problems/notes • Wed: draft discussion/assignment • Thu: revise + self-test • Fri: final polish + submit Backend later will auto-pull deadlines from syllabus.`;
-              if (act === "deadlines") return `Deadlines extraction (backend hook): Backend will parse the syllabus PDF and generate: • assignment list • due dates • grading weights • reminders`;
-              if (act === "notes") return `Study notes (backend hook): Backend will generate structured notes: • key terms • examples • common mistakes • quick quiz questions`;
+              if(act === "plan") return
+`Weekly plan (UI preview):
+• Mon: read/watch + outline
+• Tue: practice/problems/notes
+• Wed: draft discussion/assignment
+• Thu: revise + self-test
+• Fri: final polish + submit
+Backend later will auto-pull deadlines from syllabus.`;
+              if(act === "deadlines") return
+`Deadlines extraction (backend hook):
+Backend will parse the syllabus PDF and generate:
+• assignment list
+• due dates
+• grading weights
+• reminders`;
+              if(act === "notes") return
+`Study notes (backend hook):
+Backend will generate structured notes:
+• key terms
+• examples
+• common mistakes
+• quick quiz questions`;
             }
-            if (act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
-            if (act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
-            if (act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
+            if(act === "ragAdd") return "RAG add-doc: backend will index PDFs/Docs into your local knowledge store.";
+            if(act === "ragReindex") return "Re-index: backend will rebuild embeddings + refresh the vector store.";
+            if(act === "open") return "UI-only: file open will be wired when backend can serve PDFs and extracted text.";
             return "UI-only action.";
           })();
-          const msg = { role: "bot", confidence: "y", ts: nowTime(), content: canned };
+
+          const msg = { role:"bot", confidence:"y", ts: nowTime(), content: canned };
           renderMessage(msg);
           addToHistory(msg);
         };
+
         workspaceBody.onclick = handler;
         drawerWorkspaceBody.onclick = handler;
       }
 
-      function hydrateWorkspaceEmpty(group) {
+      function hydrateWorkspaceEmpty(group){
         wsHint.textContent = "—";
         wsSubtitle.textContent = (group === "business" ? "Business state" : "Class state") + " • " + stamp();
+
         const html = `
           <div class="section">
             <div class="sectionTitle">
@@ -1719,130 +1740,159 @@
       }
 
       // -------------------- Drawers --------------------
-      function openDrawer(which) {
+      function openDrawer(which){
         backdrop.classList.add("open");
-        if (which === "sessions") {
+        if(which === "sessions"){
           sessionsDrawer.classList.add("open");
-          sessionsDrawer.removeAttribute("aria-hidden");
-          sessionsDrawer.focus();
+          sessionsDrawer.setAttribute("aria-hidden","false");
         } else {
           workspaceDrawer.classList.add("open");
-          workspaceDrawer.removeAttribute("aria-hidden");
-          workspaceDrawer.focus();
+          workspaceDrawer.setAttribute("aria-hidden","false");
         }
       }
-
-      function closeDrawer(which) {
-        if (which === "sessions") {
+      function closeDrawer(which){
+        if(which === "sessions"){
           sessionsDrawer.classList.remove("open");
-          sessionsDrawer.setAttribute("aria-hidden", "true");
-        } else if (which === "workspace") {
+          sessionsDrawer.setAttribute("aria-hidden","true");
+        } else if(which === "workspace"){
           workspaceDrawer.classList.remove("open");
-          workspaceDrawer.setAttribute("aria-hidden", "true");
+          workspaceDrawer.setAttribute("aria-hidden","true");
         } else {
           sessionsDrawer.classList.remove("open");
           workspaceDrawer.classList.remove("open");
-          sessionsDrawer.setAttribute("aria-hidden", "true");
-          workspaceDrawer.setAttribute("aria-hidden", "true");
+          sessionsDrawer.setAttribute("aria-hidden","true");
+          workspaceDrawer.setAttribute("aria-hidden","true");
         }
+
         const anyOpen = sessionsDrawer.classList.contains("open") || workspaceDrawer.classList.contains("open");
-        if (!anyOpen) backdrop.classList.remove("open");
+        if(!anyOpen) backdrop.classList.remove("open");
       }
 
       // -------------------- Events --------------------
-      input.addEventListener("input", () => {
-        syncSendButton();
-        maybeWarnAboutContext(input.value);
-      });
+      function wireEvents(){
+        input.addEventListener("input", () => {
+          syncSendButton();
+          maybeWarnAboutContext(input.value);
+        });
 
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
+        input.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+
+        sendBtn.addEventListener("click", sendMessage);
+
+        // Tabs now SWITCH GROUP AND ACTIVATE A SESSION (fixes DeepSeek #1/#2)
+        const switchTo = (g) => {
+          closeDrawer("all");          // reduce weirdness on mobile
+          activateSessionForGroup(g);
+        };
+
+        tabBiz.addEventListener("click", () => switchTo("business"));
+        tabSchool.addEventListener("click", () => switchTo("school"));
+        drawerTabBiz.addEventListener("click", () => switchTo("business"));
+        drawerTabSchool.addEventListener("click", () => switchTo("school"));
+
+        // New session
+        $("newSessionBtn").addEventListener("click", () => createSession(getActiveGroup()));
+        $("drawerNewSession").addEventListener("click", () => createSession(getActiveGroup()));
+
+        // Session list actions
+        function sessionActionHandler(e){
+          const btn = e.target.closest("[data-act]");
+          if(!btn) return;
+          const act = btn.getAttribute("data-act");
+          const id = btn.getAttribute("data-id");
+          if(!id) return;
+
+          if(act === "activate") activateSession(id);
+          if(act === "rename") renameSession(id);
+          if(act === "delete") deleteSession(id);
         }
-      });
+        sessionList.addEventListener("click", sessionActionHandler);
+        drawerSessionList.addEventListener("click", sessionActionHandler);
 
-      sendBtn.addEventListener("click", sendMessage);
+        // Profile cycle (PER SESSION)
+        $("profileBadge").addEventListener("click", () => {
+          const cs = currentSession();
+          if(!cs) return;
+          cycleProfileForSession(cs);
+          hydrateWorkspace();
+        });
 
-      function switchGroup(group) {
-        closeDrawer("all");
-        activateSessionForGroup(group);
-      }
+        // Notion badge demo (just UI)
+        $("notionBadge").addEventListener("click", () => {
+          const cur = $("notionText").textContent || "";
+          if(cur.includes("Not connected")){
+            setDot(notionDot,"bad"); $("notionText").textContent = "Out of sync (12h)";
+          } else if(cur.includes("Out of sync")){
+            setDot(notionDot,"ok"); $("notionText").textContent = "Synced 3 min ago";
+          } else {
+            setDot(notionDot,"bad"); $("notionText").textContent = "Not connected";
+          }
+        });
 
-      tabBiz.addEventListener("click", () => switchGroup("business"));
-      tabSchool.addEventListener("click", () => switchGroup("school"));
-      drawerTabBiz.addEventListener("click", () => switchGroup("business"));
-      drawerTabSchool.addEventListener("click", () => switchGroup("school"));
+        // Drawers open/close
+        $("openSessions").addEventListener("click", () => openDrawer("sessions"));
+        $("openWorkspace").addEventListener("click", () => openDrawer("workspace"));
 
-      function activateSessionFromList(id) {
-        activateSession(id);
-      }
+        $("closeSessionsDrawer").addEventListener("click", () => closeDrawer("sessions"));
+        $("closeWorkspaceDrawer").addEventListener("click", () => closeDrawer("workspace"));
 
-      function renameSessionFromList(id) {
-        renameSession(id);
-      }
-
-      function deleteSessionFromList(id) {
-        deleteSession(id);
-      }
-
-      // -------------------- Profile cycle --------------------
-      function toggleProfile() {
-        const cs = currentSession();
-        if (!cs) return;
-        cycleProfileForSession(cs);
-        hydrateWorkspace();
-      }
-
-      // -------------------- Notion badge --------------------
-      function toggleNotionSync() {
-        const cur = notionDot.getAttribute("class");
-        if (cur.includes("bad")) {
-          setDot(notionDot, "ok");
-          $("notionText").textContent = "Synced 3 min ago";
-        } else {
-          setDot(notionDot, "bad");
-          $("notionText").textContent = "Not connected";
-        }
+        backdrop.addEventListener("click", () => closeDrawer("all"));
+        window.addEventListener("keydown", (e) => {
+          if(e.key === "Escape") closeDrawer("all");
+        });
       }
 
       // -------------------- Init --------------------
       let didInit = false;
-
-      function init() {
-        if (didInit) return;
+      function init(){
+        if(didInit) return;
         didInit = true;
 
+        // baseline badges
         setDot(notionDot, "bad");
         $("notionText").textContent = "Not connected";
         setDot(engineDot, "bad");
         $("engineText").textContent = "UI only";
 
+        // migrate legacy active session into per-group model
         migrateLegacyActiveIfNeeded();
+
+        // Ensure active group exists
         const g = getActiveGroup();
         setActiveGroup((g === "school" || g === "business") ? g : "business");
 
-        for (const group of ["business", "school"]) {
+        // Ensure per-group active sessions are valid
+        for(const group of ["business","school"]){
           const cur = getActiveSessionIdForGroup(group);
           const ok = cur && sessions.some(s => s.id === cur && s.group === group);
-          if (!ok) {
+          if(!ok){
             const pick = firstSessionId(group);
-            if (pick) setActiveSessionIdForGroup(group, pick);
+            if(pick) setActiveSessionIdForGroup(group, pick);
           }
         }
 
+        // Activate current group session (this is the real fix)
         activateSessionForGroup(getActiveGroup());
+
+        // Wire events once
         wireEvents();
+
+        // Button state
         syncSendButton();
       }
 
-      try {
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", init, { once: true });
+      try{
+        if(document.readyState === "loading"){
+          document.addEventListener("DOMContentLoaded", init, { once:true });
         } else {
           init();
         }
-      } catch (e) {
+      } catch (e){
         showFatal(e);
       }
     })();
