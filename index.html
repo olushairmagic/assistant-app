@@ -15,6 +15,11 @@
 
   --biz:#7a1114;
   --biz2:#a0141a;
+  --school:#1e40af;
+  --school2:#2563eb;
+  --personal:#0f766e;
+  --personal2:#14b8a6;
+
   --lane: var(--biz);
   --lane2: var(--biz2);
 
@@ -24,33 +29,26 @@
   --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
 }
 
-/* ---------- Reset / viewport ---------- */
 *{box-sizing:border-box}
-html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-  background:var(--bg);
-}
+html,body{height:100%;margin:0}
 body{
   font-family:var(--font);
+  background:
+    radial-gradient(900px 600px at 18% 10%, color-mix(in srgb, var(--lane2) 22%, transparent), transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
   color:var(--fg);
   overflow:hidden;
 }
 
-/* ---------- App container (iOS-safe) ---------- */
 .app{
-  height:100dvh;
-  min-height:100vh;
+  height:100%;
   display:flex;
   flex-direction:column;
   gap:10px;
-  padding:
-    env(safe-area-inset-top) 12px
-    calc(env(safe-area-inset-bottom) + 12px) 12px;
+  padding:env(safe-area-inset-top) 12px calc(env(safe-area-inset-bottom) + 12px);
 }
 
-/* ---------- Top bar ---------- */
+/* Top bar */
 .topbar{
   height:56px;
   border:1px solid var(--border);
@@ -61,53 +59,60 @@ body{
   justify-content:space-between;
   padding:0 12px;
 }
+
 .brand{
   display:flex;
   align-items:center;
   gap:10px;
 }
+
 .logo{
-  width:36px;height:36px;
-  border-radius:12px;
+  width:36px;height:36px;border-radius:12px;
   display:grid;place-items:center;
   font-weight:900;
   background:linear-gradient(135deg,var(--lane),var(--lane2));
 }
-.session strong{font-size:14px}
-.session span{font-size:12px;opacity:.7}
 
-/* ---------- Card ---------- */
+.session{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+.session strong{
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.session span{
+  font-size:12px;
+  opacity:.7;
+}
+
+/* Main card */
 .card{
   flex:1;
-  min-height:0; /* CRITICAL for iOS */
   border:1px solid var(--border);
   border-radius:var(--r);
   box-shadow:var(--shadow);
-  display:flex;
-  flex-direction:column;
   overflow:hidden;
-}
-
-/* ---------- Screens ---------- */
-.screen{
-  display:none;
-  flex:1;
-  min-height:0;
-}
-.screen.active{
   display:flex;
   flex-direction:column;
 }
 
-/* ---------- Chat ---------- */
+/* Chat feed */
 .feed{
   flex:1;
-  min-height:0;
   overflow:auto;
-  -webkit-overflow-scrolling:touch;
   padding:14px;
 }
-.row{margin:10px 0;display:flex}
+
+.row{
+  margin:10px 0;
+  display:flex;
+}
 .row.you{justify-content:flex-end}
 .bubble{
   max-width:90%;
@@ -116,15 +121,22 @@ body{
   line-height:1.4;
   white-space:pre-wrap;
 }
-.you .bubble{background:var(--fg);color:var(--ink)}
-.bot .bubble{background:rgba(243,239,230,.12)}
+.you .bubble{
+  background:var(--fg);
+  color:var(--ink);
+}
+.bot .bubble{
+  background:rgba(243,239,230,.12);
+}
 
+/* Composer */
 .composer{
   border-top:1px solid var(--border);
   padding:10px;
   display:flex;
   gap:10px;
 }
+
 textarea{
   flex:1;
   resize:none;
@@ -134,35 +146,59 @@ textarea{
   background:rgba(11,10,8,.6);
   color:var(--fg);
   padding:12px;
-  font-size:16px; /* prevents iOS zoom */
-  line-height:1.35;
+  font-size:15px;
 }
-.send{
+
+button{
   border:none;
   border-radius:14px;
   padding:0 16px;
   font-weight:800;
+  cursor:pointer;
+}
+
+.send{
   background:linear-gradient(180deg,var(--lane2),var(--lane));
   color:#fff;
 }
 
-/* ---------- Bottom nav ---------- */
+/* Bottom nav */
 .nav{
-  height:calc(60px + env(safe-area-inset-bottom));
-  padding-bottom:env(safe-area-inset-bottom);
+  height:60px;
   border:1px solid var(--border);
   border-radius:var(--r);
   display:flex;
   justify-content:space-around;
   align-items:center;
 }
+
 .nav button{
   background:none;
   color:var(--fg);
   opacity:.6;
-  font-weight:800;
 }
+
 .nav button.active{opacity:1}
+
+/* Screens */
+.screen{display:none;flex:1}
+.screen.active{display:flex;flex-direction:column}
+
+/* Sessions */
+.list{padding:12px}
+.item{
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.item.active{
+  border-color:var(--lane2);
+}
+
+/* Workspace */
+.workspace{padding:12px;font-size:14px;opacity:.85}
 </style>
 </head>
 
@@ -173,58 +209,72 @@ textarea{
     <div class="brand">
       <div class="logo">W</div>
       <div class="session">
-        <strong>Business</strong>
-        <span>Main session</span>
+        <strong id="laneLabel">Business</strong>
+        <span id="sessionLabel">Main session</span>
       </div>
     </div>
-    <button>Lane</button>
+    <button id="switchLane">Lane</button>
   </div>
 
   <div class="card">
-    <div class="screen active" id="chat">
+    <div class="screen active" id="chatScreen">
       <div class="feed" id="feed"></div>
       <div class="composer">
         <textarea id="input" placeholder="Message WilliamBot…"></textarea>
         <button class="send" id="send">Send</button>
       </div>
     </div>
+
+    <div class="screen" id="sessionsScreen">
+      <div class="list" id="sessionList"></div>
+    </div>
+
+    <div class="screen" id="workspaceScreen">
+      <div class="workspace">
+        Pins and saved outputs will live here.
+      </div>
+    </div>
   </div>
 
   <div class="nav">
-    <button class="active">Chat</button>
-    <button>Sessions</button>
-    <button>Workspace</button>
+    <button class="active" data-screen="chatScreen">Chat</button>
+    <button data-screen="sessionsScreen">Sessions</button>
+    <button data-screen="workspaceScreen">Workspace</button>
   </div>
 
 </div>
 
 <script>
-/* Fix mobile viewport resize */
-function setVH(){
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
-}
-window.addEventListener('resize', setVH);
-setVH();
+const feed = document.getElementById("feed");
+const input = document.getElementById("input");
 
-const feed=document.getElementById("feed");
-document.getElementById("send").onclick=()=>{
-  const i=document.getElementById("input");
-  if(!i.value.trim())return;
-  add("you",i.value);
-  i.value="";
-  setTimeout(()=>add("bot","UI-only mode.\n\nMobile layout is now stable."),300);
+document.getElementById("send").onclick = () => {
+  const text = input.value.trim();
+  if(!text) return;
+  add("you", text);
+  input.value = "";
+  setTimeout(()=>add("bot","UI-only mode.\n\nThis is where real inference will stream later."),300);
 };
+
 function add(role,text){
-  const r=document.createElement("div");
-  r.className="row "+role;
+  const row=document.createElement("div");
+  row.className="row "+role;
   const b=document.createElement("div");
   b.className="bubble";
   b.textContent=text;
-  r.appendChild(b);
-  feed.appendChild(r);
+  row.appendChild(b);
+  feed.appendChild(row);
   feed.scrollTop=feed.scrollHeight;
 }
-</script>
 
+document.querySelectorAll(".nav button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(b.dataset.screen).classList.add("active");
+  };
+});
+</script>
 </body>
 </html>
